@@ -1,3 +1,7 @@
+/*
+ * Driver program for the unit tests
+ */
+
 #include <gtest/gtest.h>
 
 int main(int argc, char **argv) {
