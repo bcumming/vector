@@ -7,6 +7,9 @@
 # executable names used in this project
 *.exe
 
+# backup files
+*.back
+
 # vim temporary files
 *.swp
 *.swn

@@ -7,13 +7,16 @@ INCLUDE_ARGS=-I$(GTEST_INCLUDE) -I../vector
 
 ARGS=-O2
 
-TESTS=storage_unittest.o
+TESTS=storage_unittest.o range_unittest.o
 
 
 all : driver.exe
 
 storage_unittest.o: storage_unittest.cpp
 	g++ storage_unittest.cpp -c -o storage_unittest.o $(ARGS) $(INCLUDE_ARGS)
+
+range_unittest.o: range_unittest.cpp
+	g++ range_unittest.cpp -c -o range_unittest.o $(ARGS) $(INCLUDE_ARGS)
 
 driver.exe: driver.cpp $(TESTS)
 	g++ driver.cpp -o driver.exe $(ARGS) $(TESTS) $(INCLUDE_ARGS) $(LINK_ARGS)
