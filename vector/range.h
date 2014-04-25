@@ -82,6 +82,20 @@ public:
         return *(pointer_+i);
     }
 
+    // resets to NULL pointer and length 0
+    // use when memory has been freed
+    void reset() {
+        pointer_ = 0;
+        size_ = 0;
+    }
+
+    // set new pointer and range size
+    // might be used for realloc
+    void set(const_pointer ptr, size_type sz) {
+        pointer_ = ptr;
+        size_ = sz;
+    }
+
     // return the pointer
     const_pointer
     data() const {
