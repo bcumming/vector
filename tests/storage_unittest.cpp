@@ -49,6 +49,8 @@ TEST(storage, static_values) {
     EXPECT_EQ(4*16,s=StorageDoubleAoSoA::number_of_values);
 }
 
+// test that the fill function, which sets all values in the underlying
+// storage to a constant value.
 TEST(storage, fill) {
     typedef memory::Storage<float,  1, 1> S11;
     typedef memory::Storage<float,  1, 4> S14;
@@ -84,3 +86,69 @@ TEST(storage, fill) {
         }
     }
 }
+
+// test that the equality operator works
+TEST(storage, equals) {
+    typedef memory::Storage<float,  4, 2> S42;
+    typedef memory::Storage<int,  3, 7> S37;
+
+    {
+        S42 sfrom;
+        for(int i=0; i<sfrom.size; i++){
+            for(int j=0; j<sfrom.width; j++){
+                sfrom(i,j) = float(i+j);
+            }
+        }
+
+        S42 sto = sfrom;
+        for(int i=0; i<sto.size; i++){
+            for(int j=0; j<sto.width; j++){
+                EXPECT_EQ(float(i+j), sfrom(i,j));
+            }
+        }
+    }
+
+    {
+        S37 sfrom;
+        for(int i=0; i<sfrom.size; i++){
+            for(int j=0; j<sfrom.width; j++){
+                sfrom(i,j) = int(i+j);
+            }
+        }
+
+        S37 sto = sfrom;
+        for(int i=0; i<sto.size; i++){
+            for(int j=0; j<sto.width; j++){
+                EXPECT_EQ(int(i+j), sfrom(i,j));
+            }
+        }
+    }
+}
+
+// test that the equality operator works
+TEST(storage, constructors) {
+    typedef memory::Storage<double, 4, 2> Sdouble;
+    typedef memory::Storage<float,  4, 2> Sfloat;
+
+    Sdouble from(3.1);
+    Sdouble to_same(from);
+    Sfloat  to_other(from);
+}
+
+// test that slice operator works
+TEST(storage, slice) {
+    typedef memory::Storage<double, 4, 3> AoSoA;
+    typedef memory::Storage<double,  4, 1> AoS;
+
+    AoSoA from;
+    for(int i=0; i<from.size; i++){
+        for(int j=0; j<from.width; j++){
+            from(i,j) = float(j);
+        }
+    }
+
+    AoS to = from(2);
+    for(int i=0; i<AoSoA::size; i++)
+        EXPECT_EQ(double(2), to[i]);
+}
+
