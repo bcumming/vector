@@ -1,4 +1,4 @@
-CXX=clang++
+CXX=clang++ -std=c++11
 GTEST_PATH=/project/csstaff/bcumming/bbp/gtest
 GTEST_LIB=$(GTEST_PATH)/santis
 GTEST_INCLUDE=$(GTEST_PATH)/include

@@ -161,6 +161,16 @@ private:
     ReferenceRange();
 };
 
+// helpers for differentiating range types
+template <typename T>
+struct is_base_range {
+    static const bool value = false;
+};
+
+template <typename T>
+struct is_base_range<Range<T> >{
+    static const bool value = true;
+};
 
 // helpers for generating reference range
 
