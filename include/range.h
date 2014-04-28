@@ -2,10 +2,6 @@
 
 #include <cstddef>
 
-int foo() {
-    return 17;
-}
-
 namespace memory {
 
 // forward declarations for helper functions
@@ -158,6 +154,13 @@ public:
     typedef typename base::size_type size_type;
 
     ReferenceRange(const_pointer ptr, size_type sz) : base(ptr, sz) {};
+
+    ReferenceRange& operator=(const ReferenceRange& other) {
+        assert(other.size() == this->size());
+        assert(other.data()!=nullptr);
+        std::copy(other.begin(), other.end(), this->begin());
+        return *this;
+    }
 
 private:
     // disallow creating a NULL range

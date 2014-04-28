@@ -3,6 +3,13 @@
 #include <hostcoordinator.h>
 #include <storage.h>
 
+template <typename R>
+void print_range(const R& rng) {
+    for(auto v: rng)
+        std::cout << v << " ";
+    std::cout << std::endl;
+}
+
 TEST(hostcoordinator, initialization) {
     using namespace memory;
 
@@ -28,8 +35,6 @@ TEST(hostcoordinator, baserange_alloc_free) {
     typedef decltype(rng) rng_t;
 
     intcoord_t coord;
-
-    foo();
 
     // test that range is a base range
     EXPECT_TRUE(is_base_range<rng_t>::value);
@@ -78,3 +83,35 @@ TEST(hostcoordinator, refrange_alloc_free) {
     EXPECT_EQ(rng_t::size_type(0), rng.size());
 }
 
+TEST(hostcoordinator, copy) {
+    using namespace memory;
+
+    const int N = 20;
+
+    typedef host_coordinator<int> intcoord_t;
+    intcoord_t coordinator;
+
+    auto rng = coordinator.allocate(N);
+    int i=0;
+    for(auto &v: rng)
+        v = i++;
+
+    // this test produces a warning due to threading. 
+    //ASSERT_DEATH(rng(0,N/2+1) = rng(N/2,end), "");
+    rng(0,N/2) = rng(N/2,end);
+    for(auto i=0; i<N/2; i++)
+        EXPECT_EQ(rng[i], rng[i+N/2]);
+    //print_range(rng);
+
+    // create a new range of the same length, and initialize to new values
+    auto rng2 = coordinator.allocate(N);
+    i=0;
+    for(auto &v: rng2)
+        v = (i+=2);
+
+    // take a reference range to the original range
+    auto rrng = rng(all);
+
+    rrng(all) = rng2(all);
+    print_range(rng);
+}
