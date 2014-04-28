@@ -2,6 +2,10 @@
 
 #include <cstddef>
 
+int foo() {
+    return 17;
+}
+
 namespace memory {
 
 // forward declarations for helper functions

@@ -4,6 +4,9 @@
 *.o
 *.obj
 
+# youcompleteme
+.ycm_extra_conf.pyc
+
 # executable names used in this project
 *.exe
 
