@@ -127,7 +127,7 @@ public:
 
     // -----------------------
     bool is_empty() const {
-        return size_>0;
+        return size_==0;
     }
 
     // -----------------------
