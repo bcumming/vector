@@ -51,10 +51,8 @@ public:
     template<typename R1, typename R2>
     void copy(const R1 &from, R2 &to) {
         // free memory associated with R2
-        // if R2 is a reference range, this will do nothing
-        this->free(to);
-
-        this->allocate(to, from.size());
+        assert(from.size()==to.size());
+        assert(!from.overlaps(to));
 
         std::copy(from.begin(), from.end(), to.begin());
     }

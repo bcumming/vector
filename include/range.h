@@ -135,6 +135,15 @@ public:
         return size_;
     }
 
+    // -----------------------
+    // test whether memory overlaps that referenced by other
+    template <typename R>
+    // assert that both have same value_type
+    // assert that either Range or ReferenceRange
+    bool overlaps(const R& other) const {
+        return( !((this->begin()>=other.end()) || (other.begin()>=this->end())) );
+    }
+
 private:
 
     pointer pointer_;
@@ -155,10 +164,13 @@ public:
 
     ReferenceRange(const_pointer ptr, size_type sz) : base(ptr, sz) {};
 
-    ReferenceRange& operator=(const ReferenceRange& other) {
-        assert(other.size() == this->size());
-        assert(other.data()!=nullptr);
-        std::copy(other.begin(), other.end(), this->begin());
+    ReferenceRange& operator=(const Range<T>& other) {
+        set(other.data(), other.size());
+        return *this;
+    }
+
+    ReferenceRange& operator=(const ReferenceRange<T>& other) {
+        set(other.data(), other.size());
         return *this;
     }
 
@@ -178,18 +190,6 @@ template <typename T>
 struct is_base_range<Range<T> >{
     static const bool value = true;
 };
-
-// helpers for generating reference range
-
-/*
-template <typename T>
-ReferenceRange<T>
-make_reference_range( typename Range<>::const_pointer ptr,
-                      typename Range<T>::size_type sz)
-{
-    return ReferenceRange<T>(ptr, sz);
-}
-*/
 
 } // namespace memory
 

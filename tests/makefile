@@ -1,15 +1,18 @@
 CXX=clang++
-#CXX=clang -std=c++11
-GTEST_PATH=/project/csstaff/bcumming/bbp/gtest
-GTEST_LIB=$(GTEST_PATH)/santis
-GTEST_INCLUDE=$(GTEST_PATH)/include
 
-GCCROOT=/opt/gcc/4.8.2/snos
+##### SANTIS #####
+#GTEST_PATH=/project/csstaff/bcumming/bbp/gtest
+#GTEST_LIB=$(GTEST_PATH)/santis
+#INCLUDE_ARGS=-I$(GTEST_INCLUDE) -I../include -I$(GCCROOT)/include/g++/ -I$(GCCROOT)/include/g++/x86_64-suse-linux/
+#GCCROOT=/opt/gcc/4.8.2/snos
+
+##### MAC #####
+GTEST_PATH=/Users/bcumming/install/googletest
+GTEST_LIB=$(GTEST_PATH)/lib
+GTEST_INCLUDE=$(GTEST_PATH)/include
+INCLUDE_ARGS=-I$(GTEST_INCLUDE) -I../include
 
 LINK_ARGS=-L$(GTEST_LIB) -lgtest -pthread
-#INCLUDE_ARGS=-I$(GTEST_INCLUDE) -I../include
-#INLCUDE_ARGS+=-I$(GCCROOT)/include/g++/ -I$(GCCROOT)/include/g++/x86_64-suse-linux/
-INCLUDE_ARGS=-I$(GTEST_INCLUDE) -I../include -I$(GCCROOT)/include/g++/ -I$(GCCROOT)/include/g++/x86_64-suse-linux/
 
 ARGS=-O2 -std=c++11
 

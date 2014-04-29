@@ -96,9 +96,10 @@ TEST(hostcoordinator, copy) {
     for(auto &v: rng)
         v = i++;
 
-    // this test produces a warning due to threading. 
-    //ASSERT_DEATH(rng(0,N/2+1) = rng(N/2,end), "");
-    rng(0,N/2) = rng(N/2,end);
+    // todo : fix this lvalue issue
+    //coordinator.copy(rng(N/2,end), rng(0,N/2));
+    auto aa = rng(0,N/2);
+    coordinator.copy(rng(N/2,end), aa);
     for(auto i=0; i<N/2; i++)
         EXPECT_EQ(rng[i], rng[i+N/2]);
     //print_range(rng);
@@ -112,6 +113,29 @@ TEST(hostcoordinator, copy) {
     // take a reference range to the original range
     auto rrng = rng(all);
 
-    rrng(all) = rng2(all);
-    print_range(rng);
+    coordinator.copy(rng2, rrng);
+    for(auto i=0; i<N; i++)
+        EXPECT_EQ(rng2[i], rrng[i]);
+}
+
+TEST(hostcoordinator, overlap) {
+    using namespace memory;
+
+    const int N = 20;
+
+    typedef host_coordinator<int> intcoord_t;
+    intcoord_t coordinator;
+
+    auto rng = coordinator.allocate(N);
+    auto rng_other = coordinator.allocate(N);
+    EXPECT_FALSE(rng.overlaps(rng_other));
+    EXPECT_FALSE(rng(0,10).overlaps(rng(10,end)));
+    EXPECT_FALSE(rng(10,end).overlaps(rng(0,10)));
+
+    EXPECT_TRUE(rng.overlaps(rng));
+    EXPECT_TRUE(rng(all).overlaps(rng));
+    EXPECT_TRUE(rng.overlaps(rng(all)));
+    EXPECT_TRUE(rng(all).overlaps(rng(all)));
+    EXPECT_TRUE(rng(0,11).overlaps(rng(10,end)));
+    EXPECT_TRUE(rng(10,end).overlaps(rng(0,11)));
 }
