@@ -6,6 +6,7 @@
 
 # youcompleteme
 .ycm_extra_conf.pyc
+compile_commands.json
 
 # executable names used in this project
 *.exe
