@@ -2,9 +2,10 @@
  * Driver program for the unit tests
  */
 
-#include <gtest/gtest.h>
+#include "gtest.h"
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
+

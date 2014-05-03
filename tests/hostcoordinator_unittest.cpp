@@ -1,8 +1,9 @@
-#include <gtest/gtest.h>
+#include "gtest.h"
 
 #include <hostcoordinator.h>
 #include <storage.h>
 
+// helper function for outputting a range
 template <typename R>
 void print_range(const R& rng) {
     for(auto v: rng)
@@ -10,21 +11,21 @@ void print_range(const R& rng) {
     std::cout << std::endl;
 }
 
-TEST(hostcoordinator, initialization) {
+// verify that type members set correctly
+TEST(hostcoordinator, type_members) {
     using namespace memory;
 
     typedef memory::Storage<float,  16, 4> StorageFloatAoSoA;
 
     typedef host_coordinator<int> intcoord_t;
     typedef host_coordinator<StorageFloatAoSoA> storagecoord_t;
-    //typedef typename host_coordinator<int>::value_type vt;
 
     // verify that the correct type is used for internal storage
     ::testing::StaticAssertTypeEq<int,   intcoord_t::value_type>();
     ::testing::StaticAssertTypeEq<StorageFloatAoSoA, storagecoord_t::value_type>();
 }
 
-// test allocation of ranges
+// test allocation of base ranges using host_coordinator
 TEST(hostcoordinator, baserange_alloc_free) {
     using namespace memory;
 
@@ -52,7 +53,7 @@ TEST(hostcoordinator, baserange_alloc_free) {
     EXPECT_EQ(rng_t::size_type(0), rng.size());
 }
 
-// test allocation of ranges
+// test allocation of reference ranges
 TEST(hostcoordinator, refrange_alloc_free) {
     using namespace memory;
 
@@ -83,6 +84,7 @@ TEST(hostcoordinator, refrange_alloc_free) {
     EXPECT_EQ(rng_t::size_type(0), rng.size());
 }
 
+// test copying data between ranges using host_coordinator
 TEST(hostcoordinator, copy) {
     using namespace memory;
 
@@ -118,6 +120,7 @@ TEST(hostcoordinator, copy) {
         EXPECT_EQ(rng2[i], rrng[i]);
 }
 
+// test that host_coordinator can correctly detect overlap between ranges
 TEST(hostcoordinator, overlap) {
     using namespace memory;
 
