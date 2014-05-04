@@ -4,6 +4,9 @@
 *.o
 *.obj
 
+# netbeans
+nbproject
+
 # youcompleteme
 .ycm_extra_conf.pyc
 compile_commands.json

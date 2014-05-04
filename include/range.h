@@ -1,22 +1,18 @@
 #pragma once
 
 #include <cstddef>
+#include <type_traits>
 
 namespace memory {
 
 // forward declarations for helper functions
-template <typename T> class Range;
-template <typename T> class ReferenceRange;
-
-//template <typename T>
-//ReferenceRange make_reference_range (typename Range<T>::const_pointer ptr,
-//                                     typename Range<T>::size_type sz);
+template <typename T> class range;
 
 // tag for final element in a range
 struct end_type {};
 
 // tag for complete range
-struct all_type {};
+struct all_type { };
 
 namespace{
     end_type end;
@@ -24,7 +20,7 @@ namespace{
 }
 
 template <typename T>
-class Range {
+class range {
 public:
     typedef T value_type;
     typedef typename std::size_t size_type;
@@ -35,33 +31,34 @@ public:
     typedef value_type& reference;
     typedef const reference const_reference;
 
-    Range(const_pointer ptr, size_type sz) : pointer_(ptr), size_(sz) {}
+    range(const_pointer ptr, size_type sz) : pointer_(ptr), size_(sz) {}
+    range() : pointer_(nullptr), size_(0) {}
 
     // generate a reference range using an index pair
     // for example, range(2,5) will return a range of length 3
     // that indexes [2,3,4]
-    ReferenceRange<T>
+    range<T>
     operator() (const size_type& left, const size_type& right) const {
         #ifdef DEBUG
         assert(left<=right);
         assert(right<=size_);
         #endif
-        return ReferenceRange<T>(pointer_+left, right-left);
+        return range<T>(pointer_+left, right-left);
     }
 
     // generate a reference range using the end marker
-    ReferenceRange<T>
+    range<T>
     operator() (const size_type& left, end_type) const {
         #ifdef DEBUG
         assert(left<=size_);
         #endif
-        return ReferenceRange<T>(pointer_+left, size_-left);
+        return range<T>(pointer_+left, size_-left);
     }
 
     // generate a reference range using all
-    ReferenceRange<T>
+    range<T>
     operator() (all_type) const {
-        return ReferenceRange<T>(pointer_, size_);
+        return range<T>(pointer_, size_);
     }
 
     // return direct access to data. This should be provided by specializations
@@ -150,46 +147,12 @@ private:
     size_type size_;
 };
 
+// helpers for identifying ranges
 template <typename T>
-class ReferenceRange : public Range<T> {
-public:
-    typedef Range<T> base;
-    typedef typename base::value_type value_type;
-
-    typedef typename base::pointer pointer;
-    typedef typename base::const_pointer const_pointer;
-    typedef typename base::reference reference;
-    typedef typename base::const_reference const_reference;
-    typedef typename base::size_type size_type;
-
-    ReferenceRange(const_pointer ptr, size_type sz) : base(ptr, sz) {};
-
-    ReferenceRange& operator=(const Range<T>& other) {
-        set(other.data(), other.size());
-        return *this;
-    }
-
-    ReferenceRange& operator=(const ReferenceRange<T>& other) {
-        set(other.data(), other.size());
-        return *this;
-    }
-
-private:
-    // disallow creating a NULL range
-    // this might be relaxed
-    ReferenceRange();
-};
-
-// helpers for differentiating range types
-template <typename T>
-struct is_base_range {
-    static const bool value = false;
-};
+struct is_range : std::false_type {};
 
 template <typename T>
-struct is_base_range<Range<T> >{
-    static const bool value = true;
-};
+struct is_range<range<T>> : std::true_type {};
 
 } // namespace memory
 

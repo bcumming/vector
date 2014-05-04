@@ -17,11 +17,16 @@ public:
     typedef value_type& reference;
     typedef const value_type& const_reference;
 
-    typedef Range<value_type> range_type;
-    typedef ReferenceRange<value_type> reference_range_type;
+    typedef range<value_type> range_type;
 
     typedef typename types::size_type size_type;
     typedef typename types::difference_type difference_type;
+
+    // metafunction for rebinding host_coordinator with another type
+    template <typename Tother>
+    struct rebind {
+        typedef host_coordinator<Tother, Allocator> other;
+    };
 
     range_type allocate(size_type n) {
         //todo make this work with alignment
@@ -56,10 +61,6 @@ public:
 
         std::copy(from.begin(), from.end(), to.begin());
     }
-
-    // do nothing for reference ranges, because a reference range does not own the
-    // memory it refers to
-    void free(reference_range_type& rng) {}
 private:
 };
 

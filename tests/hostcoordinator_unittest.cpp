@@ -25,6 +25,17 @@ TEST(hostcoordinator, type_members) {
     ::testing::StaticAssertTypeEq<StorageFloatAoSoA, storagecoord_t::value_type>();
 }
 
+// verify that rebinding works
+TEST(hostcoordinator, rebind) {
+    using namespace memory;
+
+    typedef host_coordinator<int> intcoord_t;
+    typedef typename intcoord_t::rebind<double>::other doublecoord_t;
+
+    // verify that the correct type is used for internal storage
+    ::testing::StaticAssertTypeEq<double,doublecoord_t::value_type>();
+}
+
 // test allocation of base ranges using host_coordinator
 TEST(hostcoordinator, baserange_alloc_free) {
     using namespace memory;
@@ -38,7 +49,7 @@ TEST(hostcoordinator, baserange_alloc_free) {
     intcoord_t coord;
 
     // test that range is a base range
-    EXPECT_TRUE(is_base_range<rng_t>::value);
+    EXPECT_TRUE(is_range<rng_t>::value);
 
     // test that range has correct storage type
     ::testing::StaticAssertTypeEq<int, rng_t::value_type >();
@@ -66,16 +77,15 @@ TEST(hostcoordinator, refrange_alloc_free) {
     auto rrng = rng(all);
     typedef decltype(rrng) rrng_t;
 
-    // test that range is a base range
-    EXPECT_FALSE(is_base_range<rrng_t>::value);
-
     // test that range has correct storage type
     ::testing::StaticAssertTypeEq<float, rrng_t::value_type >();
 
     // verify that the range has non-NULL pointer
-    EXPECT_NE(rrng_t::pointer(0), rrng.data()) << "host_coordinator returned a NULL pointer when alloating a nonzero range";
+    EXPECT_NE(rrng_t::pointer(0), rrng.data())
+        << "host_coordinator returned a NULL pointer when allocating a nonzero range";
 
-    EXPECT_EQ(rng.data(), rrng.data()) << "base(all) does not have the same pointer adress as base";
+    EXPECT_EQ(rng.data(), rrng.data())
+        << "base(all) does not have the same pointer address as base";
 
     // verify that freeing works
     coordinator.free(rng);
