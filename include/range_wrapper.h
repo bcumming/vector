@@ -53,7 +53,7 @@ namespace memory{
         typedef value_type* pointer;
         typedef const pointer const_pointer;
         typedef value_type& reference;
-        typedef const reference const_reference;
+        typedef value_type const& const_reference;
 
         // default constructor
         range_by_value() : range_type(nullptr, 0) {}
@@ -120,7 +120,7 @@ namespace memory{
         typedef value_type* pointer;
         typedef const pointer const_pointer;
         typedef value_type& reference;
-        typedef const reference const_reference;
+        typedef value_type const& const_reference;
 
         // construct as a reference to another range
         template <
