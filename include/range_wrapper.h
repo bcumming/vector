@@ -39,13 +39,18 @@ namespace memory{
                                      std::false_type>::type
     {};
 
+    // range by value
+    // this wrapper owns the memory in the range
+    // and is responisbile for allocating and freeing memory
     template <typename T, typename Coord>
     class range_by_value
         : public range<T> {
     public:
-        typedef range<T> range_type;
-        typedef typename Coord::template rebind<T>::other coordinator_type;
         typedef T value_type;
+        typedef range<value_type> range_type;
+        typedef typename Coord::template rebind<value_type>::other coordinator_type;
+
+        typedef range_by_reference<value_type, Coord> reference_wrapper;
 
         typedef typename range_type::size_type size_type;
         typedef typename range_type::difference_type difference_type;
@@ -69,9 +74,10 @@ namespace memory{
         {}
 
         // construct as a copy of another range
-        //template <class RangeType>
-        //explicit range_by_value(const typename std::enable_if<is_range_wrapper<RangeType>::value, RangeType>::type& other)
-        template <class RangeType, class EI= typename std::enable_if<is_range_wrapper<RangeType>::value, void>::type >
+        template <
+            class RangeType,
+            typename std::enable_if<is_range_wrapper<RangeType>::value, void>::type = 0
+        >
         explicit range_by_value(const RangeType& other)
             : range_type(coordinator_type().allocate(other.size()))
         {
@@ -82,6 +88,15 @@ namespace memory{
             : range_type(coordinator_type().allocate(other.size()))
         {
             coordinator_.copy(other.as_range(), *this);
+        }
+
+        // construct a copy from a range
+        // TODO: this could be dangerous, because we assume that the pointer in rng is safe to 
+        // copy from using our coordinator
+        explicit range_by_value(range_type const& rng)
+            :   range_type(coordinator_type().allocate(rng.size()))
+        {
+            coordinator_.copy(rng, *this);
         }
 
         range_type& as_range() {
@@ -96,14 +111,25 @@ namespace memory{
             return *this;
         }
 
-        // we want to free the memory in a "by value" range
+        // have to free the memory in a "by value" range
         ~range_by_value() {
-            //coordinator_.free(this->data()); 
+            coordinator_.free(*this);
         }
-        
+
+        reference_wrapper operator()(all_type) {
+            return reference_wrapper(range_type::operator()(all));
+        }
+
+        template <typename Ts, typename Te>
+        reference_wrapper operator()(Ts s, Te e) {
+            return reference_wrapper(range_type::operator()(s, e));
+        }
+
     private:
         //range_type range_;
         coordinator_type coordinator_;
+
+        //friend class reference_wrapper;
     };
 
     template <typename T, typename Coord>
@@ -114,6 +140,8 @@ namespace memory{
         typedef typename Coord::template rebind<T>::other coordinator_type;
         typedef T value_type;
 
+        typedef range_by_value<T, Coord> value_wrapper;
+
         typedef typename range_type::size_type size_type;
         typedef typename range_type::difference_type difference_type;
 
@@ -122,13 +150,28 @@ namespace memory{
         typedef value_type& reference;
         typedef value_type const& const_reference;
 
-        // construct as a reference to another range
+        // construct as a reference to a range_wrapper
+        /*
         template <
             class RangeType,
-            class EI= typename std::enable_if<is_range_wrapper<RangeType>::value, void>::type
+            typename std::enable_if<is_range_wrapper<RangeType>::value>::type = 0
         >
         explicit range_by_reference(const RangeType& other)
             :   range_type(other.data(), other.size())
+        {}
+        */
+
+        // construct as a reference to a range_wrapper
+        explicit range_by_reference(value_wrapper const& rng)
+            :   range_type(rng.data(), rng.size())
+        {}
+
+        // construct as a reference to a range
+        //      this should come with a warning: no checks can be performed to assert that the range
+        //      points to valid memory (passing a GPU range to a host wrapper would have disasterous side effects)
+        //explicit range_by_reference(range_type const& rng)
+        explicit range_by_reference(range_type const& rng)
+            :   range_type(rng)
         {}
 
         range_type& as_range() {
@@ -147,17 +190,38 @@ namespace memory{
 
         // do nothing for destructor: we don't own the memory in range
         ~range_by_reference() {}
-        
+
     private:
         // disallow constructors that imply allocation of memory
         range_by_reference() {};
         range_by_reference(const size_t &n) {};
 
         coordinator_type coordinator_;
+
+        //friend class value_wrapper;
     };
 
+    // metafunction for returning reference range type for an arbitrary range
+    //  NULL case: fall through to here if invalid range wrapper is used
+    template <typename T, typename specialize=void>
+    struct get_reference_range{};
+
+    template <typename T>
+    struct get_reference_range<T, typename std::enable_if< is_range_wrapper<T>::value>::type > {
+        typedef typename T::coordinator_type Coord;
+        typedef typename T::value_type Value;
+        typedef range_by_reference<Value, Coord> type;
+    };
+
+    /*
+    // helper for wrapping a refernce wrapper around a range
+    template <class Range, class Coord>
+    range_by_value<Range, Coord>
+    make_reference_range(Range const &rng){
+        typedef range_by_value<Range, Coord> ref_type;
+        return cast<ref_type>(rng);
+    }
+    */
+
 } // namespace memory
-
-
-
 

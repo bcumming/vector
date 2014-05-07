@@ -4,6 +4,14 @@
 #include <hostcoordinator.h>
 #include <storage.h>
 
+// helper function for outputting a range
+template <typename R>
+void print_range(const R& rng) {
+    for(auto v: rng)
+        std::cout << v << " ";
+    std::cout << std::endl;
+}
+
 // verify that metafunctions for checking range wrappers work
 TEST(range_wrappers, is_range_wrapper) {
     using namespace memory;
@@ -52,19 +60,20 @@ TEST(range_wrapper,new_range_by_value) {
 
     // create range by value of length 10
     // this should allocate memory of length 10*sizeof(T)
-    rbv r1(10);
-    EXPECT_EQ(r1.size(), 10);
+    rbv v1(10);
+    EXPECT_EQ(v1.size(), 10);
 
     // create a copy
-    rbv r2(r1);
-    EXPECT_EQ(r2.size(), r1.size());
-    EXPECT_NE(r2.data(), r1.data());
+    rbv v2(v1);
+    EXPECT_EQ(v2.size(), v1.size());
+    EXPECT_NE(v2.data(), v1.data());
 
-    rbr ref1(r1);
-    EXPECT_EQ(ref1.size(), r1.size());
-    EXPECT_EQ(ref1.data(), r1.data());
-    rbv r3(ref1);
-    EXPECT_EQ(r3.size(), r1.size());
+    rbr r1(v1);
+    EXPECT_EQ(r1.size(), v1.size());
+    EXPECT_EQ(r1.data(), v1.data());
+    rbv v3(r1);
+    EXPECT_EQ(v3.size(), r1.size());
+    EXPECT_NE(v3.data(), r1.data());
 }
 
 TEST(range_wrapper,new_range_by_ref) {
@@ -75,12 +84,37 @@ TEST(range_wrapper,new_range_by_ref) {
 
     // create range by value of length 10
     // this should allocate memory of length 10*sizeof(T)
-    rbv r1(10);
-    rbr ref1(r1);
+    rbv v1(10);
+    rbr r1(v1);
 
-    EXPECT_EQ(ref1.size(), r1.size());
-    EXPECT_EQ(ref1.data(), r1.data());
-    rbv r2(ref1);
-    EXPECT_EQ(r2.size(), r1.size());
-    EXPECT_NE(r2.data(), r1.data());
+    EXPECT_EQ(r1.size(), v1.size());
+    EXPECT_EQ(r1.data(), v1.data());
+    rbv v2(r1);
+    EXPECT_EQ(v2.size(), v1.size());
+    EXPECT_NE(v2.data(), v1.data());
+}
+
+TEST(range_wrapper,sub_ranges) {
+    using namespace memory;
+
+    typedef range_by_value<double, host_coordinator<double> > rbv;
+    typedef range_by_reference<double, host_coordinator<double> > rbr;
+
+    // check that reference range from a subrange works
+    rbv v1(10);
+    auto a = v1(all);
+    //rbr r1(v1(all));
+    for(int i=0; i<10; i++)
+        v1[i] = double(i);
+
+/*
+    EXPECT_EQ(r1.size(), 5);
+    EXPECT_EQ(v1.data()+5, r1.data());
+    print_range(v1);
+    print_range(r1);
+
+    rbv v2(v1);
+    EXPECT_NE(v1.data(), v2.data());
+    print_range(v2);
+*/
 }
