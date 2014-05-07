@@ -75,22 +75,22 @@ namespace memory{
         explicit range_by_value(const RangeType& other)
             : range_type(coordinator_type().allocate(other.size()))
         {
-            coordinator_.copy(other.range(), *this);
+            coordinator_.copy(other.as_range(), *this);
         }
 
         explicit range_by_value(const range_by_value& other)
             : range_type(coordinator_type().allocate(other.size()))
         {
-            coordinator_.copy(other.range(), *this);
+            coordinator_.copy(other.as_range(), *this);
         }
 
-        range_type& range() {
+        range_type& as_range() {
             // return reference to this, because a range wrapper is derived from
             // range_type
             return *this;
         }
 
-        const range_type& range() const {
+        const range_type& as_range() const {
             // return reference to this, because a range wrapper is derived from
             // range_type
             return *this;
@@ -131,12 +131,12 @@ namespace memory{
             :   range_type(other.data(), other.size())
         {}
 
-        range_type& range() {
+        range_type& as_range() {
             // return reference to this, because a range wrapper is derived from range_type
             return *this;
         }
 
-        const range_type& range() const {
+        const range_type& as_range() const {
             // return reference to this, because a range wrapper is derived from range_type
             return *this;
         }
