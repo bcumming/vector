@@ -6,23 +6,33 @@
 
 namespace memory {
 
-// IDEAS
-template <typename S, typename Coord>
-class Vector{
+ /* THE PLAN
+    1. make vectors that work with arbitrary types (float, int, double, storage, etc.)
+  * 2. specialization for cyme 
+  */
+// container type
+template <RangeWrapper>
+class vector : public RangeWrapper {
 public:
-    typedef typename storage_type::value_type value_type; // todo : should this be storage_type
+    typedef RangeWrapper range_type;
+
+    typedef typename RangeWrapper::value_type value_type;
     typedef S storage_type;
-    typedef typename Coord::rebind<typename storage_type::value_type> coordinator;
 
-    typedef *storage_type pointer;
-    typedef const *storage_type const_pointer;
-    typedef &storage_type reference;
-    typedef const &storage_type const_reference;
+    typedef *value_type pointer;
+    typedef const *value_type const_pointer;
+    typedef &value_type reference;
+    typedef const &value_type const_reference;
 
-    typedef typename types::size_type size_type;
-    typedef typename types::difference_type difference_type;
+    typedef typename range_type::size_type size_type;
+    typedef typename range_type::difference_type difference_type;
 
-    Vector(int n) {
-    }
-}
+    vector(int n) : range_type(n) {}
+};
+
+// specialized vector for cyme storage
+template <typename T, typename Coordinator, int N, int W>
+class cyme_vector : public range_by_value<range<storage<T,N,W>>, Coordinator<T>> {
+};
+
 } // namespace memory

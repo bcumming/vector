@@ -48,20 +48,14 @@ public:
         rng.reset();
     }
 
-    // add guards to check that ranges are for value_type
-    // there are two special cases
-    //  1. R2 is a reference, in which case you do not free, and R2 must have the same length as R1.
-    //  2. R2 is a base range, in which case free+realloc if R1.size() != R2.size(), before copying
-    //      these special cases should be handled using specialization, with boost guards to ensure that R1 is valid
-    template<typename R1, typename R2>
-    void copy(const R1 &from, R2 &to) {
+    // copy memory from one range into another
+    void copy(const range_type &from, range_type &to) {
         // free memory associated with R2
         assert(from.size()==to.size());
         assert(!from.overlaps(to));
 
         std::copy(from.begin(), from.end(), to.begin());
     }
-private:
 };
 
 } //namespace memory
