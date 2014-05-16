@@ -99,15 +99,13 @@ namespace memory{
             coordinator_.copy(rng, *this);
         }
 
+        // return reference to this, because a range wrapper is derived from
+        // range_type
         range_type& as_range() {
-            // return reference to this, because a range wrapper is derived from
-            // range_type
             return *this;
         }
 
         const range_type& as_range() const {
-            // return reference to this, because a range wrapper is derived from
-            // range_type
             return *this;
         }
 
@@ -117,12 +115,14 @@ namespace memory{
         }
 
         reference_wrapper operator()(all_type) {
-            return reference_wrapper(range_type::operator()(all));
+            //return reference_wrapper(range_type::operator()(all));
+            return reference_wrapper::make_range_by_reference( range_type::operator()(all) );
         }
 
         template <typename Ts, typename Te>
         reference_wrapper operator()(Ts s, Te e) {
-            return reference_wrapper(range_type::operator()(s, e));
+            //return reference_wrapper(range_type::operator()(s, e));
+            return reference_wrapper::make_range_by_reference( range_type::operator()(s, e) );
         }
 
     private:
@@ -151,7 +151,6 @@ namespace memory{
         typedef value_type const& const_reference;
 
         // construct as a reference to a range_wrapper
-        /*
         template <
             class RangeType,
             typename std::enable_if<is_range_wrapper<RangeType>::value>::type = 0
@@ -159,20 +158,16 @@ namespace memory{
         explicit range_by_reference(const RangeType& other)
             :   range_type(other.data(), other.size())
         {}
-        */
 
         // construct as a reference to a range_wrapper
         explicit range_by_reference(value_wrapper const& rng)
             :   range_type(rng.data(), rng.size())
         {}
 
-        // construct as a reference to a range
-        //      this should come with a warning: no checks can be performed to assert that the range
-        //      points to valid memory (passing a GPU range to a host wrapper would have disasterous side effects)
-        //explicit range_by_reference(range_type const& rng)
-        explicit range_by_reference(range_type const& rng)
-            :   range_type(rng)
-        {}
+
+        static range_by_reference make_range_by_reference(range_type const& rng) {
+            return range_by_reference(rng);
+        }
 
         range_type& as_range() {
             // return reference to this, because a range wrapper is derived from range_type
@@ -192,6 +187,14 @@ namespace memory{
         ~range_by_reference() {}
 
     private:
+        // construct as a reference to a range
+        //      this should come with a warning: no checks can be performed to assert that the range
+        //      points to valid memory (passing a GPU range to a host wrapper would have disasterous side effects)
+        //explicit range_by_reference(range_type const& rng)
+        explicit range_by_reference(range_type const& rng)
+            :   range_type(rng)
+        {}
+
         // disallow constructors that imply allocation of memory
         range_by_reference() {};
         range_by_reference(const size_t &n) {};

@@ -102,19 +102,25 @@ TEST(range_wrapper,sub_ranges) {
 
     // check that reference range from a subrange works
     rbv v1(10);
-    auto a = v1(all);
-    //rbr r1(v1(all));
     for(int i=0; i<10; i++)
         v1[i] = double(i);
 
-/*
+    // create a reference wrapper to the second half of v1
+    auto r1 = v1(5,end);
     EXPECT_EQ(r1.size(), 5);
     EXPECT_EQ(v1.data()+5, r1.data());
-    print_range(v1);
-    print_range(r1);
 
-    rbv v2(v1);
-    EXPECT_NE(v1.data(), v2.data());
+    // create a value wrapper (copy) of the reference range
+    // should contain a copy of the second half of v1
+    rbv v2(r1);
+    EXPECT_NE(r1.data(), v2.data());
+    EXPECT_EQ(r1.size(), v2.size());
+    auto it1 = v1.begin()+5;
+    auto it2 = v2.begin()+5;
+    while(it2!=v2.end()) {
+        EXPECT_EQ(*it1, *it2);
+        ++it2;
+        ++it1;
+    }
     print_range(v2);
-*/
 }
