@@ -5,9 +5,11 @@
 
 #include "definitions.h"
 #include "range.h"
+#include "allocator.h"
 
 namespace memory {
-template <typename T, class Allocator=std::allocator<T> >
+//template <typename T, class Allocator=std::allocator<T> >
+template <typename T, class Allocator=aligned_allocator<T> >
 class host_coordinator {
 public:
     typedef T value_type;

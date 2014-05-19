@@ -1,6 +1,6 @@
 #include "gtest.h"
 
-#include <hostcoordinator.h>
+#include <host_coordinator.h>
 #include <storage.h>
 
 // helper function for outputting a range
@@ -12,7 +12,7 @@ void print_range(const R& rng) {
 }
 
 // verify that type members set correctly
-TEST(hostcoordinator, type_members) {
+TEST(host_coordinator, type_members) {
     using namespace memory;
 
     typedef memory::Storage<float,  16, 4> StorageFloatAoSoA;
@@ -26,7 +26,7 @@ TEST(hostcoordinator, type_members) {
 }
 
 // verify that rebinding works
-TEST(hostcoordinator, rebind) {
+TEST(host_coordinator, rebind) {
     using namespace memory;
 
     typedef host_coordinator<int> intcoord_t;
@@ -37,7 +37,7 @@ TEST(hostcoordinator, rebind) {
 }
 
 // test allocation of base ranges using host_coordinator
-TEST(hostcoordinator, baserange_alloc_free) {
+TEST(host_coordinator, baserange_alloc_free) {
     using namespace memory;
 
     typedef host_coordinator<int> intcoord_t;
@@ -65,7 +65,7 @@ TEST(hostcoordinator, baserange_alloc_free) {
 }
 
 // test allocation of reference ranges
-TEST(hostcoordinator, refrange_alloc_free) {
+TEST(host_coordinator, refrange_alloc_free) {
     using namespace memory;
 
     typedef host_coordinator<float> floatcoord_t;
@@ -95,7 +95,7 @@ TEST(hostcoordinator, refrange_alloc_free) {
 }
 
 // test copying data between ranges using host_coordinator
-TEST(hostcoordinator, copy) {
+TEST(host_coordinator, copy) {
     using namespace memory;
 
     const int N = 20;
@@ -131,7 +131,7 @@ TEST(hostcoordinator, copy) {
 }
 
 // test that host_coordinator can correctly detect overlap between ranges
-TEST(hostcoordinator, overlap) {
+TEST(host_coordinator, overlap) {
     using namespace memory;
 
     const int N = 20;

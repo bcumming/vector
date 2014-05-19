@@ -1,7 +1,7 @@
 #include "gtest.h"
 
 #include <range_wrapper.h>
-#include <hostcoordinator.h>
+#include <host_coordinator.h>
 #include <storage.h>
 
 // helper function for outputting a range
@@ -122,5 +122,5 @@ TEST(range_wrapper,sub_ranges) {
         ++it2;
         ++it1;
     }
-    print_range(v2);
+    //print_range(v2);
 }

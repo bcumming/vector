@@ -38,15 +38,22 @@ public:
 
     // if reference type this will simply take a reference, otherwise copy out
     vector(reference_range const &rng) : range_wrapper_type(rng) {
+        #ifdef DEBUG_MESSAGE
         std::cout << "vector(reference_range)" << std::endl;
+        #endif
     }
 
     // if reference type this will simply take a reference, otherwise copy out
     vector(range_wrapper_type const &rng) : range_wrapper_type(rng) {
+        #ifdef DEBUG_MESSAGE
         std::cout << "vector(range_wrapper_type)" << std::endl;
+        #endif
     }
 
     reference_range operator()(int from, int to) {
+        #ifdef DEBUG_MESSAGE
+        std::cout << "vector(from, to)" << std::endl;
+        #endif
         return range_wrapper_type(from, to);
     }
 };

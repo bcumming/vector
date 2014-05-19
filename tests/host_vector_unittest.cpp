@@ -1,7 +1,7 @@
 #include "gtest.h"
 
 #include <vector.h>
-#include <hostcoordinator.h>
+#include <host_coordinator.h>
 
 
 // test that constructors work
