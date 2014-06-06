@@ -34,8 +34,7 @@ namespace memory {
         // function that allocates memory with alignment specified as a template parameter
         template <typename T, size_t alignment=minimum_possible_alignment<T>::value >
         T* aligned_malloc(size_t size) {
-            // double check that alignment is a multiple of sizeof(void*), as this is a prerequisite
-            // for posix_memalign()
+            // double check that alignment is a multiple of sizeof(void*), a prerequisite for posix_memalign()
             static_assert( !(alignment%sizeof(void*)),
                     "alignment is not a multiple of sizeof(void*)");
             static_assert( is_power_of_two<alignment>::value,
@@ -60,8 +59,6 @@ public:
     typedef std::size_t size_type;
     typedef std::ptrdiff_t difference_type;
 
-    static const size_t alignment=alignment_;
-
 public:
     //    convert an allocator<T> to allocator<U>
     template<typename U>
@@ -82,7 +79,6 @@ public:
 
     //    memory allocation
     inline pointer allocate(size_type cnt, typename std::allocator<void>::const_pointer = 0) {
-        //return reinterpret_cast<pointer>(::operator new(cnt * sizeof (T)));
         return impl::aligned_malloc<T, alignment_>(cnt);
     }
 

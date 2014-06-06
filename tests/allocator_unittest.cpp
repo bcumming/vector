@@ -65,3 +65,9 @@ TEST(allocator, minimum_possible_alignment) {
     EXPECT_EQ(tmp,512);
 }
 
+/*
+TEST(allocator, minimum_possible_alignment) {
+    using namespace memory::impl;
+    size_t tmp;
+}
+*/

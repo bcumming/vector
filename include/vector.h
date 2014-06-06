@@ -1,25 +1,28 @@
 #pragma once
 
-#pragma <iostream>
-
+#include <iostream>
 
 #include "definitions.h"
 #include "range_wrapper.h"
+#include "host_coordinator.h"
+
 
 namespace memory {
 
  /* THE PLAN
-    1. make vectors that work with arbitrary types (float, int, double, storage, etc.)
-  * 2. specialization for cyme 
+    1. this derived type serves as a "partially specialized template" workaround
+       the same thing could be acheived more elegantly using c++11 features
+  * 2. this vector type can then be used to create specific vector types specialized for memory spaces
   */
 // container type
-template <typename RangeWrapper>
-class vector : public RangeWrapper {
+template <typename T, typename Coord>
+class vector : public range_by_value<T, Coord> {
 public:
-    typedef RangeWrapper range_wrapper_type;
-    typedef typename get_reference_range<RangeWrapper>::type reference_range;
+    typedef range_by_value<T, Coord> range_wrapper_type;
+    typedef typename get_reference_range<range_wrapper_type>::type reference_range;
 
-    typedef typename RangeWrapper::value_type value_type;
+    typedef typename range_wrapper_type::value_type value_type;
+    typedef typename range_wrapper_type::coordinator_type coordinator_type;
 
     typedef value_type* pointer;
     typedef value_type const* const_pointer;
@@ -29,40 +32,35 @@ public:
     typedef typename range_wrapper_type::size_type size_type;
     typedef typename range_wrapper_type::difference_type difference_type;
 
-    vector(int n) : range_wrapper_type(n) {
-        std::cout << "vector(int)" << std::endl;
-    }
+    // default constructor : no memory will be allocated
     vector() : range_wrapper_type() {
+        #ifdef MEMORY_DEBUG
         std::cout << "vector()" << std::endl;
+        #endif
+    }
+
+    vector(int n) : range_wrapper_type(n) {
+        #ifdef MEMORY_DEBUG
+        std::cout << "vector(" << n << ")" << std::endl;
+        #endif
     }
 
     // if reference type this will simply take a reference, otherwise copy out
     vector(reference_range const &rng) : range_wrapper_type(rng) {
-        #ifdef DEBUG_MESSAGE
+        #ifdef MEMORY_DEBUG
         std::cout << "vector(reference_range)" << std::endl;
         #endif
     }
 
     // if reference type this will simply take a reference, otherwise copy out
     vector(range_wrapper_type const &rng) : range_wrapper_type(rng) {
-        #ifdef DEBUG_MESSAGE
-        std::cout << "vector(range_wrapper_type)" << std::endl;
+        #ifdef MEMORY_DEBUG
+        std::cout << "vector(value_range)" << std::endl;
         #endif
-    }
-
-    reference_range operator()(int from, int to) {
-        #ifdef DEBUG_MESSAGE
-        std::cout << "vector(from, to)" << std::endl;
-        #endif
-        return range_wrapper_type(from, to);
     }
 };
 
-/*
-// specialized vector for cyme storage
-template <typename T, typename Coordinator, int N, int W>
-class cyme_vector : public range_by_value<range<storage<T,N,W>>, Coordinator<T>> {
-};
-*/
+// specialization for host vectors
+template <typename T> using host_vector = vector<T, host_coordinator<T>>;
 
 } // namespace memory

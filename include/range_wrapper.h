@@ -115,21 +115,20 @@ namespace memory{
         }
 
         reference_wrapper operator()(all_type) {
-            //return reference_wrapper(range_type::operator()(all));
             return reference_wrapper::make_range_by_reference( range_type::operator()(all) );
         }
 
         template <typename Ts, typename Te>
         reference_wrapper operator()(Ts s, Te e) {
-            //return reference_wrapper(range_type::operator()(s, e));
             return reference_wrapper::make_range_by_reference( range_type::operator()(s, e) );
         }
 
-    private:
-        //range_type range_;
-        coordinator_type coordinator_;
+        const coordinator_type& coordinator() const {
+            return coordinator_;
+        }
 
-        //friend class reference_wrapper;
+    private:
+        coordinator_type coordinator_;
     };
 
     template <typename T, typename Coord>
