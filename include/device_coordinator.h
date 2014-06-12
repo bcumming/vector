@@ -1,18 +1,12 @@
 #pragma once
 
-#include <memory>
-#include <algorithm>
-
-#include "definitions.h"
-#include "range.h"
-#include "allocator.h"
-
 namespace memory {
 
-    template <typename T, class Allocator=aligned_allocator<T> >
-    class host_coordinator {
+    template <typename T, class Allocator_=cuda_allocator<T> >
+    class device_coordinator {
     public:
         typedef T value_type;
+        typedef typename Allocator_::template rebind<value_type>::other Allocator;
 
         typedef value_type* pointer;
         typedef const value_type* const_pointer;
@@ -27,12 +21,11 @@ namespace memory {
         // metafunction for rebinding host_coordinator with another type
         template <typename Tother>
         struct rebind {
-            typedef host_coordinator<Tother, Allocator> other;
+            typedef device_coordinator<Tother, Allocator> other;
         };
 
         range_type allocate(size_type n) {
-            // todo make this work with alignment
-            typename Allocator::template rebind<value_type>::other allocator;
+            Allocator allocator;
 
             // only allocate memory if nonzero memory allocation has been requested
             pointer ptr = n>0 ? allocator.allocate(n) : 0;
@@ -41,8 +34,7 @@ namespace memory {
         }
 
         void free(range_type& rng) {
-            // todo make this work with alignment
-            typename Allocator::template rebind<value_type>::other allocator;
+            Allocator allocator;
 
             if(rng.data())
                 allocator.deallocate(rng.data(), rng.size());
@@ -60,4 +52,5 @@ namespace memory {
         }
     };
 
-} //namespace memory
+} // namespace memory
+

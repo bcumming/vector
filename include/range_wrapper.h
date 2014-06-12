@@ -13,24 +13,24 @@
 
 namespace memory{
     // forward declarations
-    template<typename T, typename C>
+    template<typename T, typename Coord>
     struct range_by_value;
 
-    template<typename T, typename C>
+    template<typename T, typename Coord>
     struct range_by_reference;
 
     // metafunctions for checking range types
     template <typename T>
     struct is_range_by_value : std::false_type {};
 
-    template <typename T, typename C>
-    struct is_range_by_value<range_by_value<T, C> > : std::true_type {};
+    template <typename T, typename Coord>
+    struct is_range_by_value<range_by_value<T, Coord> > : std::true_type {};
 
     template <typename T>
     struct is_range_by_reference : std::false_type{};
 
-    template <typename T, typename C>
-    struct is_range_by_reference<range_by_reference<T, C> > : std::true_type {};
+    template <typename T, typename Coord>
+    struct is_range_by_reference<range_by_reference<T, Coord> > : std::true_type {};
 
     template <typename T>
     struct is_range_wrapper
