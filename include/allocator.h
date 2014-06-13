@@ -80,6 +80,9 @@ namespace impl {
 
                 // check that there were no CUDA errors
                 if(status != cudaSuccess) {
+                    #ifndef NDEBUG
+                    std::cerr << "ERROR :: pinned_policy :: unable to register host memory with with cudaHostRegister" << std::endl;
+                    #endif
                     // free the memory before returning nullptr
                     free(ptr);
                     return nullptr;
@@ -105,6 +108,9 @@ namespace impl {
                 cudaError_t status = cudaMalloc(&ptr, size);
 
                 if(status != cudaSuccess) {
+                    #ifndef NDEBUG
+                    std::cerr << "ERROR :: unable to allocate memory with cudaMalloc" << std::endl;
+                    #endif
                     return nullptr; // return null on failure
                 }
 

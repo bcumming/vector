@@ -34,28 +34,28 @@ public:
 
     // default constructor : no memory will be allocated
     vector() : super() {
-        #ifdef MEMORY_DEBUG
-        std::cout << "vector()" << std::endl;
+        #ifndef NDEBUG
+        std::cerr << "vector()" << std::endl;
         #endif
     }
 
     vector(int n) : super(n) {
-        #ifdef MEMORY_DEBUG
-        std::cout << "vector(" << n << ")" << std::endl;
+        #ifndef NDEBUG
+        std::cerr << "vector(" << n << ")" << std::endl;
         #endif
     }
 
     // if reference type this will simply take a reference, otherwise copy out
     vector(reference_range const &rng) : super(rng) {
-        #ifdef MEMORY_DEBUG
-        std::cout << "vector(reference_range)" << std::endl;
+        #ifndef NDEBUG
+        std::cerr << "vector(reference_range)" << std::endl;
         #endif
     }
 
     // if reference type this will simply take a reference, otherwise copy out
     vector(super const &rng) : super(rng) {
-        #ifdef MEMORY_DEBUG
-        std::cout << "vector(value_range)" << std::endl;
+        #ifndef NDEBUG
+        std::cerr << "vector(value_range)" << std::endl;
         #endif
     }
 };
@@ -73,7 +73,8 @@ template <typename T>
 using pinned_vector = vector<T, host_coordinator<T, pinned_allocator<T>>>;
 
 // specialization for device memory
-//template <typename T> using device_vector = vector<T, device_coordinator<T>>;
+template <typename T>
+using device_vector = vector<T, host_coordinator<T, cuda_allocator<T>>>;
 #endif
 
 } // namespace memory

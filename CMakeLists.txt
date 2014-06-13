@@ -13,6 +13,8 @@ if( CUDA_BACKEND )
     set(CUDA_NVCC_FLAGS "-arch=sm_35" CACHE STRING "nvcc flags" FORCE)
     add_definitions(-DWITH_CUDA)
     include_directories(${CUDA_INCLUDE_DIRS})
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    SET(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} $ENV{CRAY_CUDATOOLKIT_POST_LINK_OPT}")
 endif()
 
 add_subdirectory(./tests)

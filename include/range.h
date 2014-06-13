@@ -3,10 +3,35 @@
 #include <cstddef>
 #include <type_traits>
 
+#include <definitions.h>
+
 namespace memory {
 
 // forward declarations for helper functions
 template <typename T> class range;
+
+// helper function for pretty printing a range
+namespace util {
+    template <typename T>
+    struct type_printer<range<T>>{
+        static std::string print() {
+            std::stringstream str;
+            str << "range<" << type_printer<T>::print() << ">";
+            return str.str();
+        }
+    };
+
+    template <typename T>
+    struct pretty_printer<range<T>>{
+        static std::string print(const range<T>& val) {
+            std::stringstream str;
+            str << "range<" << type_printer<T>::print() << ">"
+                << "(size="     << val.size()
+                << ", pointer=" << val.data() << ")";
+            return str.str();
+        }
+    };
+}
 
 // tag for final element in a range
 struct end_type {};
@@ -31,7 +56,10 @@ public:
     typedef value_type& reference;
     typedef value_type const & const_reference;
 
-    range(const_pointer ptr, size_type sz) : pointer_(ptr), size_(sz) {}
+    range(const_pointer ptr, size_type sz) : pointer_(ptr), size_(sz) {
+        std::cerr << "CONSTRUCTER " << util::pretty_printer<range>::print(*this) << std::endl;
+    }
+
     range() : pointer_(nullptr), size_(0) {}
 
     // generate a reference range using an index pair
@@ -39,9 +67,12 @@ public:
     // that indexes [2,3,4]
     range<T>
     operator() (const size_type& left, const size_type& right) const {
-        #ifdef DEBUG
+        #ifndef NDEBUG
         assert(left<=right);
         assert(right<=size_);
+        std::cerr << "operator()(" << left << "," << right << ") "
+                  << util::pretty_printer<range>::print(*this)
+                  << std::endl;
         #endif
         return range<T>(pointer_+left, right-left);
     }
@@ -49,8 +80,11 @@ public:
     // generate a reference range using the end marker
     range<T>
     operator() (const size_type& left, end_type) const {
-        #ifdef DEBUG
+        #ifndef NDEBUG
         assert(left<=size_);
+        std::cerr << "operator()(" << left << ", end) "
+                  << util::pretty_printer<range>::print(*this)
+                  << std::endl;
         #endif
         return range<T>(pointer_+left, size_-left);
     }
@@ -58,6 +92,11 @@ public:
     // generate a reference range using all
     range<T>
     operator() (all_type) const {
+        #ifndef NDEBUG
+        std::cerr << "operator()(all) "
+                  << util::pretty_printer<range>::print(*this)
+                  << std::endl;
+        #endif
         return range<T>(pointer_, size_);
     }
 
@@ -65,7 +104,7 @@ public:
     // for a given architecture, or handled at a higher level
     const_reference
     operator[](size_type i) const {
-        #ifdef DEBUG
+        #ifndef NDEBUG
         assert(i<size_);
         #endif
         return *(pointer_+i);
@@ -73,7 +112,7 @@ public:
 
     reference
     operator[](size_type i) {
-        #ifdef DEBUG
+        #ifndef NDEBUG
         assert(i<size_);
         #endif
         return *(pointer_+i);

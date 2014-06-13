@@ -35,14 +35,26 @@ namespace memory {
             typename Allocator::template rebind<value_type>::other allocator;
 
             // only allocate memory if nonzero memory allocation has been requested
-            pointer ptr = n>0 ? allocator.allocate(n) : 0;
-
+            pointer ptr = n>0 ? allocator.allocate(n) : nullptr;
+            #ifndef NDEBUG
+            if(ptr==nullptr && n>0)
+                std::cerr << "ERROR :: host_coordinator::allocate "
+                          << n << " bytes returned null pointer"
+                          << std::endl;
+            #endif
             return range_type(ptr, n);
         }
 
         void free(range_type& rng) {
             // todo make this work with alignment
             typename Allocator::template rebind<value_type>::other allocator;
+
+            #ifndef NDEBUG
+            if(rng.data()==nullptr)
+                std::cerr << "WARNING :: host_coordinator::free "
+                          << "requested to free null pointer"
+                          << std::endl;
+            #endif
 
             if(rng.data())
                 allocator.deallocate(rng.data(), rng.size());
