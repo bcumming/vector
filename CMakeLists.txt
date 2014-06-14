@@ -6,7 +6,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS "YES")
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
 # CUDA
-set( CUDA_BACKEND "ON" CACHE BOOL "Compile CUDA version" )
+set( CUDA_BACKEND "OFF" CACHE BOOL "Compile CUDA version" )
 if( CUDA_BACKEND )
     find_package( CUDA 5.5 )
     set(CUDA_SEPARABLE_COMPILATION ON CACHE BOOL "" FORCE)

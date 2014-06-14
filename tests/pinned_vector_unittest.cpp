@@ -12,7 +12,6 @@ void print(VEC const& v) {
     std::cout << std::endl;
 }
 
-#ifdef WITH_CUDA
 // test that constructors work
 TEST(pinned_vector, constructor) {
     using namespace memory;
@@ -74,5 +73,3 @@ TEST(pinned_vector, iterators_and_ranges) {
         EXPECT_EQ(float(4*100), sum);
     }
 }
-
-#endif
