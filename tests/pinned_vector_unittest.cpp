@@ -18,7 +18,7 @@ TEST(pinned_vector, constructor) {
     using namespace memory;
 
     // default constructor
-    pinned_vector<float> v2;
+    pinned_vector<float> v;
 
     // length constructor
     pinned_vector<float> v1(100);
@@ -40,8 +40,6 @@ TEST(pinned_vector, constructor) {
 
     for(int i=90; i<100; i++)
         EXPECT_EQ(float(-1), v1[i]);
-
-    std::cerr << "-- CLEANP --\n";
 }
 
 // test that constructors work

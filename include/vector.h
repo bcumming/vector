@@ -35,28 +35,18 @@ public:
     // default constructor : no memory will be allocated
     vector() : super() {
         #ifndef NDEBUG
-        std::cerr << "vector()" << std::endl;
         #endif
     }
 
     vector(int n) : super(n) {
-        #ifndef NDEBUG
-        std::cerr << "vector(" << n << ")" << std::endl;
-        #endif
     }
 
     // if reference type this will simply take a reference, otherwise copy out
     vector(reference_range const &rng) : super(rng) {
-        #ifndef NDEBUG
-        std::cerr << "vector(reference_range)" << std::endl;
-        #endif
     }
 
     // if reference type this will simply take a reference, otherwise copy out
     vector(super const &rng) : super(rng) {
-        #ifndef NDEBUG
-        std::cerr << "vector(value_range)" << std::endl;
-        #endif
     }
 };
 

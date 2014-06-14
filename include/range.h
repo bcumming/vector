@@ -25,7 +25,7 @@ namespace util {
     struct pretty_printer<range<T>>{
         static std::string print(const range<T>& val) {
             std::stringstream str;
-            str << "range<" << type_printer<T>::print() << ">"
+            str << type_printer<range<T>>::print()
                 << "(size="     << val.size()
                 << ", pointer=" << val.data() << ")";
             return str.str();

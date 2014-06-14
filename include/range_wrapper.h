@@ -91,7 +91,7 @@ public:
         : range_type(coordinator_type().allocate(n))
     {
         #ifndef NDEBUG
-        std::cerr << "range_by_value(" << n << ")" << std::endl;
+        std::cerr << "CONSTRUCTOR " << util::pretty_printer<range_by_value>::print(*this) << std::endl;
         #endif
     }
 
@@ -100,7 +100,7 @@ public:
         : range_type(coordinator_type().allocate(n))
     {
         #ifndef NDEBUG
-        std::cerr << "range_by_value(" << n << ")" << std::endl;
+        std::cerr << "CONSTRUCTOR " << util::pretty_printer<range_by_value>::print(*this) << std::endl;
         #endif
     }
 
@@ -113,7 +113,7 @@ public:
         : range_type(coordinator_type().allocate(other.size()))
     {
         #ifndef NDEBUG
-        std::cerr << "range_by_value(const RangeType& other)" << std::endl;
+        std::cerr << "CONSTRUCTOR " << util::pretty_printer<range_by_value>::print(*this) << std::endl;
         #endif
 
         coordinator_.copy(other.as_range(), *this);
@@ -123,7 +123,7 @@ public:
         : range_type(coordinator_type().allocate(other.size()))
     {
         #ifndef NDEBUG
-        std::cerr << "range_by_value(const range_by_value& other)" << std::endl;
+        std::cerr << "CONSTRUCTOR " << util::pretty_printer<range_by_value>::print(*this) << std::endl;
         #endif
 
         coordinator_.copy(other.as_range(), *this);
@@ -151,10 +151,7 @@ public:
     // have to free the memory in a "by value" range
     ~range_by_value() {
         #ifndef NDEBUG
-        std::cerr << "~range_by_value("
-                  << this->data() << ", "
-                  << this->size() << ")"
-                  << std::endl;
+        std::cerr << "DESCTRUCTOR " << util::pretty_printer<range_by_value>::print(*this) << std::endl;
         #endif
 
         coordinator_.free(*this);
