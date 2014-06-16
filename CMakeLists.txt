@@ -14,7 +14,7 @@ if( CUDA_BACKEND )
     add_definitions(-DWITH_CUDA)
     include_directories(${CUDA_INCLUDE_DIRS})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    SET(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} $ENV{CRAY_CUDATOOLKIT_POST_LINK_OPT}")
+    SET(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} $ENV{CRAY_CUDATOOLKIT_POST_LINK_OPTS} -lcudart")
 endif()
 
 add_subdirectory(./tests)

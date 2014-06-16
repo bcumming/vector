@@ -57,7 +57,9 @@ public:
     typedef value_type const & const_reference;
 
     range(const_pointer ptr, size_type sz) : pointer_(ptr), size_(sz) {
+        #ifndef NDEBUG
         std::cerr << "CONSTRUCTER " << util::pretty_printer<range>::print(*this) << std::endl;
+        #endif
     }
 
     range() : pointer_(nullptr), size_(0) {}

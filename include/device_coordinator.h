@@ -66,8 +66,9 @@ namespace memory {
         }
 
         // copy memory from gpu range to host range
+        /*
         template <typename >
-        void copy(const range_type &from,  &to) {
+        void copy(const range_type &from, range_type &tto) {
             // free memory associated with R2
             assert(from.size()==to.size());
             assert(!from.overlaps(to));
@@ -88,27 +89,11 @@ namespace memory {
                           << std::endl;
             #endif
         }
+        */
 
         // fill memory
-        void fill(range_type &rng, const T& value) {
-            // free memory associated with R2
-
-            cudaError_t status = cudaMemcpy(
-                    reinterpret_cast<void*>(to.begin()),
-                    reinterpret_cast<void*>(from.begin()),
-                    from.size()*sizeof(value_type),
-                    cudaMemcpyDeviceToDevice
-            );	
-
-            #ifndef NDEBUG
-            if(status != CUDA_SUCCESS)
-                std::cerr << "ERROR : unable to perform GPU to GPU memory copy : "
-                          << from.size() << " * " << util::type_printer<T>::print()
-                          << " from " << from.begin()
-                          << " to "   << to.begin()
-                          << std::endl;
-            #endif
-        }
+        //void fill(range_type &rng, const T& value) {
+        //}
     };
 
 } // namespace memory
