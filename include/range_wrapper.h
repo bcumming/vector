@@ -64,7 +64,7 @@ struct is_range_wrapper
 
 // range by value
 // this wrapper owns the memory in the range
-// and is responisbile for allocating and freeing memory
+// and is responsible for allocating and freeing memory
 template <typename T, typename Coord>
 class range_by_value
     : public range<T> {
@@ -205,7 +205,6 @@ public:
     explicit range_by_reference(value_wrapper const& rng)
         :   range_type(rng.data(), rng.size())
     {}
-
 
     static range_by_reference make_range_by_reference(range_type const& rng) {
         return range_by_reference(rng);
