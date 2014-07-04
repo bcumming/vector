@@ -7,6 +7,8 @@
 #include <cuda_runtime.h>
 #endif
 
+#include "definitions.h"
+
 namespace memory {
 namespace impl {
     // meta function that returns true if x is a power of two (including 1==2^0)
@@ -186,6 +188,46 @@ public:
     inline bool operator==(allocator const&) { return true; }
     inline bool operator!=(allocator const& a) { return !operator==(a); }
 };
+
+// pretty printers
+namespace util {
+    template <size_t Alignment>
+    struct type_printer<impl::aligned_policy<Alignment>>{
+        static std::string print() {
+            std::stringstream str;
+            str << "aligned_policy<" << Alignment << ">";
+            return str.str();
+        }
+    };
+
+    #ifdef WITH_CUDA
+    template <size_t Alignment>
+    struct type_printer<impl::cuda::pinned_policy<Alignment>>{
+        static std::string print() {
+            std::stringstream str;
+            str << "pinned_policy<" << Alignment << ">";
+            return str.str();
+        }
+    };
+
+    template <>
+    struct type_printer<impl::cuda::device_policy>{
+        static std::string print() {
+            return std::string("device_policy");
+        }
+    };
+#endif
+
+    template <typename T, typename Policy>
+    struct type_printer<allocator<T,Policy>>{
+        static std::string print() {
+            std::stringstream str;
+            str << "allocator<" << type_printer<T>::print()
+                << ", " << type_printer<Policy>::print() << ">";
+            return str.str();
+        }
+    };
+} // namespace util
 
 // helper for generating an aligned allocator
 template <class T, size_t alignment=impl::minimum_possible_alignment<T>::value>

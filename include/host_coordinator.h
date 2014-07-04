@@ -9,9 +9,30 @@
 
 namespace memory {
 
-namespace util {
+// forward declare
+template <typename T, class Allocator>
+class host_coordinator;
 
-}
+namespace util {
+    template <typename T, typename Allocator>
+    struct type_printer<host_coordinator<T,Allocator>>{
+        static std::string print() {
+            std::stringstream str;
+            str << "host_coordinator<" << type_printer<T>::print()
+                << ", " << type_printer<Allocator>::print() << ">";
+            return str.str();
+        }
+    };
+
+    template <typename T, typename Allocator>
+    struct pretty_printer<host_coordinator<T,Allocator>>{
+        static std::string print(const host_coordinator<T,Allocator>& val) {
+            std::stringstream str;
+            str << type_printer<host_coordinator<T,Allocator>>::print();
+            return str.str();
+        }
+    };
+} // namespace util
 
 template <typename T, class Allocator=aligned_allocator<T> >
 class host_coordinator {
@@ -40,12 +61,14 @@ public:
 
         // only allocate memory if nonzero memory allocation has been requested
         pointer ptr = n>0 ? allocator.allocate(n) : nullptr;
+
         #ifndef NDEBUG
-        if(ptr==nullptr && n>0)
-            std::cerr << "ERROR :: host_coordinator::allocate "
-                      << n << " bytes returned null pointer"
-                      << std::endl;
+        std::cerr << util::type_printer<host_coordinator>::print()
+                  << "::allocate(" << n << ") "
+                  << (ptr==nullptr && n>0 ? " failure" : " success")
+                  << std::endl;
         #endif
+
         return range_type(ptr, n);
     }
 
@@ -54,10 +77,8 @@ public:
         typename Allocator::template rebind<value_type>::other allocator;
 
         #ifndef NDEBUG
-        if(rng.data()==nullptr)
-            std::cerr << "WARNING :: host_coordinator::free "
-                      << "requested to free null pointer"
-                      << std::endl;
+        std::cerr << util::type_printer<host_coordinator>::print()
+                  << "::free()" << std::endl;
         #endif
 
         if(rng.data())

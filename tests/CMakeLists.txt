@@ -9,6 +9,7 @@ set(DRIVER_SOURCES
     gtest-all.cc
 )
 set(DRIVER_CUDA_SOURCES
+    device_coordinator_unittest.cpp
     pinned_vector_unittest.cpp
 )
 
