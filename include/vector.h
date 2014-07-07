@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "definitions.h"
-#include "range_wrapper.h"
+#include "array.h"
 #include "host_coordinator.h"
 
 
@@ -16,9 +16,9 @@ namespace memory {
   */
 // container type
 template <typename T, typename Coord>
-class vector : public range_by_value<T, Coord> {
+class vector : public Array<T, Coord> {
 public:
-    typedef range_by_value<T, Coord> super;
+    typedef Array<T, Coord> super;
     typedef typename get_reference_range<super>::type reference_range;
 
     typedef typename super::value_type value_type;

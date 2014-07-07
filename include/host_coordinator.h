@@ -4,7 +4,7 @@
 #include <algorithm>
 
 #include "definitions.h"
-#include "range.h"
+#include "array.h"
 #include "allocator.h"
 
 namespace memory {
@@ -44,7 +44,7 @@ public:
     typedef value_type& reference;
     typedef const value_type& const_reference;
 
-    typedef range<value_type> range_type;
+    typedef ArrayBase<value_type> range_type;
 
     typedef typename types::size_type size_type;
     typedef typename types::difference_type difference_type;

@@ -1,6 +1,6 @@
 #include "gtest.h"
 
-#include <range_wrapper.h>
+#include <array.h>
 #include <host_coordinator.h>
 #include <storage.h>
 
@@ -16,8 +16,8 @@ void print_range(const R& rng) {
 TEST(range_wrappers, is_range_wrapper) {
     using namespace memory;
 
-    typedef range_by_value<double, host_coordinator<double> > rbv;
-    typedef range_by_reference<double, host_coordinator<double> > rbr;
+    typedef Array<double, host_coordinator<double> > rbv;
+    typedef ArrayRange<double, host_coordinator<double> > rbr;
 
     static_assert(
         is_range_by_value<rbv>::value,
@@ -55,8 +55,8 @@ TEST(range_wrappers, is_range_wrapper) {
 TEST(range_wrapper,new_range_by_value) {
     using namespace memory;
 
-    typedef range_by_value<double, host_coordinator<double> > rbv;
-    typedef range_by_reference<double, host_coordinator<double> > rbr;
+    typedef Array<double, host_coordinator<double> > rbv;
+    typedef ArrayRange<double, host_coordinator<double> > rbr;
 
     // create range by value of length 10
     // this should allocate memory of length 10*sizeof(T)
@@ -79,8 +79,8 @@ TEST(range_wrapper,new_range_by_value) {
 TEST(range_wrapper,new_range_by_ref) {
     using namespace memory;
 
-    typedef range_by_value<double, host_coordinator<double> > rbv;
-    typedef range_by_reference<double, host_coordinator<double> > rbr;
+    typedef Array<double, host_coordinator<double> > rbv;
+    typedef ArrayRange<double, host_coordinator<double> > rbr;
 
     // create range by value of length 10
     // this should allocate memory of length 10*sizeof(T)
@@ -97,8 +97,8 @@ TEST(range_wrapper,new_range_by_ref) {
 TEST(range_wrapper,sub_ranges) {
     using namespace memory;
 
-    typedef range_by_value<double, host_coordinator<double> > rbv;
-    typedef range_by_reference<double, host_coordinator<double> > rbr;
+    typedef Array<double, host_coordinator<double> > rbv;
+    typedef ArrayRange<double, host_coordinator<double> > rbr;
 
     // check that reference range from a subrange works
     rbv v1(10);

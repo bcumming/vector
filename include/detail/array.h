@@ -8,12 +8,12 @@
 namespace memory {
 
 // forward declarations for helper functions
-template <typename T> class range;
+template <typename T> class ArrayBase;
 
 // helper function for pretty printing a range
 namespace util {
     template <typename T>
-    struct type_printer<range<T>>{
+    struct type_printer<ArrayBase<T>>{
         static std::string print() {
             std::stringstream str;
             str << "range<" << type_printer<T>::print() << ">";
@@ -22,10 +22,10 @@ namespace util {
     };
 
     template <typename T>
-    struct pretty_printer<range<T>>{
-        static std::string print(const range<T>& val) {
+    struct pretty_printer<ArrayBase<T>>{
+        static std::string print(const ArrayBase<T>& val) {
             std::stringstream str;
-            str << type_printer<range<T>>::print()
+            str << type_printer<ArrayBase<T>>::print()
                 << "(size="     << val.size()
                 << ", pointer=" << val.data() << ")";
             return str.str();
@@ -45,7 +45,7 @@ namespace{
 }
 
 template <typename T>
-class range {
+class ArrayBase {
 public:
     typedef T value_type;
     typedef typename std::size_t size_type;
@@ -56,64 +56,63 @@ public:
     typedef value_type& reference;
     typedef value_type const & const_reference;
 
-    range(const_pointer ptr, size_type sz) : pointer_(ptr), size_(sz) {
+    ArrayBase(const_pointer ptr, size_type sz) : pointer_(ptr), size_(sz) {
         #ifndef NDEBUG
-        std::cerr << "CONSTRUCTER " << util::pretty_printer<range>::print(*this) << std::endl;
+        std::cerr << "CONSTRUCTER "
+                  << util::pretty_printer<ArrayBase>::print(*this)
+                  << std::endl;
         #endif
     }
 
-    range() : pointer_(nullptr), size_(0) {}
+    ArrayBase() : pointer_(nullptr), size_(0) {}
 
     // generate a reference range using an index pair
-    // for example, range(2,5) will return a range of length 3
-    // that indexes [2,3,4]
-    range<T>
+    // for example, range(2,5) will return a range of length 3 that indexes [2,3,4]
+    ArrayBase<T>
     operator() (const size_type& left, const size_type& right) const {
         #ifndef NDEBUG
         assert(left<=right);
         assert(right<=size_);
         std::cerr << "operator()(" << left << "," << right << ") "
-                  << util::pretty_printer<range>::print(*this)
+                  << util::pretty_printer<ArrayBase>::print(*this)
                   << std::endl;
         #endif
-        return range<T>(pointer_+left, right-left);
+        return ArrayBase<T>(pointer_+left, right-left);
     }
 
     // generate a reference range using the end marker
-    range<T>
+    ArrayBase<T>
     operator() (const size_type& left, end_type) const {
         #ifndef NDEBUG
         assert(left<=size_);
         std::cerr << "operator()(" << left << ", end) "
-                  << util::pretty_printer<range>::print(*this)
+                  << util::pretty_printer<ArrayBase>::print(*this)
                   << std::endl;
         #endif
-        return range<T>(pointer_+left, size_-left);
+        return ArrayBase<T>(pointer_+left, size_-left);
     }
 
     // generate a reference range using all
-    range<T>
+    ArrayBase<T>
     operator() (all_type) const {
         #ifndef NDEBUG
         std::cerr << "operator()(all) "
-                  << util::pretty_printer<range>::print(*this)
+                  << util::pretty_printer<ArrayBase>::print(*this)
                   << std::endl;
         #endif
-        return range<T>(pointer_, size_);
+        return ArrayBase<T>(pointer_, size_);
     }
 
     // return direct access to data. This should be provided by specializations
     // for a given architecture, or handled at a higher level
-    const_reference
-    operator[](size_type i) const {
+    const_reference operator[](size_type i) const {
         #ifndef NDEBUG
         assert(i<size_);
         #endif
         return *(pointer_+i);
     }
 
-    reference
-    operator[](size_type i) {
+    reference operator[](size_type i) {
         #ifndef NDEBUG
         assert(i<size_);
         #endif
@@ -135,30 +134,27 @@ public:
     }
 
     // return the pointer
-    const_pointer
-    data() const {
+    const_pointer data() const {
         return pointer_;
     }
 
-    pointer
-    data() {
+    pointer data() {
         return pointer_;
     }
 
     // begin and end iterator pairs
-    pointer
-    begin() {
-        return pointer_;
-    }
-    const_pointer
-    begin() const {
+    pointer begin() {
         return pointer_;
     }
 
-    pointer
-    end() {
+    const_pointer begin() const {
+        return pointer_;
+    }
+
+    pointer end() {
         return pointer_+size_;
     }
+
     const_pointer end() const {
         return pointer_+size_;
     }
@@ -193,7 +189,6 @@ template <typename T>
 struct is_range : std::false_type {};
 
 template <typename T>
-struct is_range<range<T>> : std::true_type {};
+struct is_range<ArrayBase<T>> : std::true_type {};
 
 } // namespace memory
-
