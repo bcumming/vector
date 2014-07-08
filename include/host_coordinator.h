@@ -7,15 +7,17 @@
 #include "array.h"
 #include "allocator.h"
 
+////////////////////////////////////////////////////////////////////////////////
 namespace memory {
 
 // forward declare
 template <typename T, class Allocator>
-class host_coordinator;
+class HostCoordinator;
 
+////////////////////////////////////////////////////////////////////////////////
 namespace util {
     template <typename T, typename Allocator>
-    struct type_printer<host_coordinator<T,Allocator>>{
+    struct type_printer<HostCoordinator<T,Allocator>>{
         static std::string print() {
             std::stringstream str;
             str << "host_coordinator<" << type_printer<T>::print()
@@ -25,17 +27,18 @@ namespace util {
     };
 
     template <typename T, typename Allocator>
-    struct pretty_printer<host_coordinator<T,Allocator>>{
-        static std::string print(const host_coordinator<T,Allocator>& val) {
+    struct pretty_printer<HostCoordinator<T,Allocator>>{
+        static std::string print(const HostCoordinator<T,Allocator>& val) {
             std::stringstream str;
-            str << type_printer<host_coordinator<T,Allocator>>::print();
+            str << type_printer<HostCoordinator<T,Allocator>>::print();
             return str.str();
         }
     };
 } // namespace util
+////////////////////////////////////////////////////////////////////////////////
 
 template <typename T, class Allocator=aligned_allocator<T> >
-class host_coordinator {
+class HostCoordinator {
 public:
     typedef T value_type;
 
@@ -52,7 +55,7 @@ public:
     // metafunction for rebinding host_coordinator with another type
     template <typename Tother>
     struct rebind {
-        typedef host_coordinator<Tother, Allocator> other;
+        typedef HostCoordinator<Tother, Allocator> other;
     };
 
     range_type allocate(size_type n) {
@@ -63,7 +66,7 @@ public:
         pointer ptr = n>0 ? allocator.allocate(n) : nullptr;
 
         #ifndef NDEBUG
-        std::cerr << util::type_printer<host_coordinator>::print()
+        std::cerr << util::type_printer<HostCoordinator>::print()
                   << "::allocate(" << n << ") "
                   << (ptr==nullptr && n>0 ? " failure" : " success")
                   << std::endl;
@@ -77,7 +80,7 @@ public:
         typename Allocator::template rebind<value_type>::other allocator;
 
         #ifndef NDEBUG
-        std::cerr << util::type_printer<host_coordinator>::print()
+        std::cerr << util::type_printer<HostCoordinator>::print()
                   << "::free()" << std::endl;
         #endif
 
@@ -98,3 +101,4 @@ public:
 };
 
 } //namespace memory
+////////////////////////////////////////////////////////////////////////////////

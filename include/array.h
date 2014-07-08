@@ -9,9 +9,11 @@
 
 #include <type_traits>
 
-#include "detail/array.h"
+#include "detail/array_base.h"
 
+////////////////////////////////////////////////////////////////////////////////
 namespace memory{
+
 // forward declarations
 template<typename T, typename Coord>
 struct Array;
@@ -240,15 +242,6 @@ struct get_reference_range<T, typename std::enable_if< is_range_wrapper<T>::valu
     typedef ArrayRange<Value, Coord> type;
 };
 
-/*
-// helper for wrapping a refernce wrapper around a range
-template <class Range, class Coord>
-range_by_value<Range, Coord>
-make_reference_range(Range const &rng){
-    typedef range_by_value<Range, Coord> ref_type;
-    return cast<ref_type>(rng);
-}
-*/
-
 } // namespace memory
+////////////////////////////////////////////////////////////////////////////////
 

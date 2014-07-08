@@ -5,13 +5,15 @@
 
 #include <definitions.h>
 
+////////////////////////////////////////////////////////////////////////////////
 namespace memory {
 
 // forward declarations for helper functions
 template <typename T> class ArrayBase;
 
-// helper function for pretty printing a range
+////////////////////////////////////////////////////////////////////////////////
 namespace util {
+    // helper function for pretty printing a range
     template <typename T>
     struct type_printer<ArrayBase<T>>{
         static std::string print() {
@@ -32,6 +34,7 @@ namespace util {
         }
     };
 }
+////////////////////////////////////////////////////////////////////////////////
 
 // tag for final element in a range
 struct end_type {};
@@ -192,3 +195,4 @@ template <typename T>
 struct is_range<ArrayBase<T>> : std::true_type {};
 
 } // namespace memory
+////////////////////////////////////////////////////////////////////////////////

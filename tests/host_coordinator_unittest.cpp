@@ -17,8 +17,8 @@ TEST(host_coordinator, type_members) {
 
     typedef memory::Storage<float,  16, 4> StorageFloatAoSoA;
 
-    typedef host_coordinator<int> intcoord_t;
-    typedef host_coordinator<StorageFloatAoSoA> storagecoord_t;
+    typedef HostCoordinator<int> intcoord_t;
+    typedef HostCoordinator<StorageFloatAoSoA> storagecoord_t;
 
     // verify that the correct type is used for internal storage
     ::testing::StaticAssertTypeEq<int,   intcoord_t::value_type>();
@@ -29,7 +29,7 @@ TEST(host_coordinator, type_members) {
 TEST(host_coordinator, rebind) {
     using namespace memory;
 
-    typedef host_coordinator<int> intcoord_t;
+    typedef HostCoordinator<int> intcoord_t;
     typedef typename intcoord_t::rebind<double>::other doublecoord_t;
 
     // verify that the correct type is used for internal storage
@@ -40,7 +40,7 @@ TEST(host_coordinator, rebind) {
 TEST(host_coordinator, baserange_alloc_free) {
     using namespace memory;
 
-    typedef host_coordinator<int> intcoord_t;
+    typedef HostCoordinator<int> intcoord_t;
     intcoord_t coordinator;
 
     auto rng = coordinator.allocate(5);
@@ -68,7 +68,7 @@ TEST(host_coordinator, baserange_alloc_free) {
 TEST(host_coordinator, refrange_alloc_free) {
     using namespace memory;
 
-    typedef host_coordinator<float> floatcoord_t;
+    typedef HostCoordinator<float> floatcoord_t;
     floatcoord_t coordinator;
 
     auto rng = coordinator.allocate(5);
@@ -100,7 +100,7 @@ TEST(host_coordinator, copy) {
 
     const int N = 20;
 
-    typedef host_coordinator<int> intcoord_t;
+    typedef HostCoordinator<int> intcoord_t;
     intcoord_t coordinator;
 
     auto rng = coordinator.allocate(N);
@@ -136,7 +136,7 @@ TEST(host_coordinator, overlap) {
 
     const int N = 20;
 
-    typedef host_coordinator<int> intcoord_t;
+    typedef HostCoordinator<int> intcoord_t;
     intcoord_t coordinator;
 
     auto rng = coordinator.allocate(N);

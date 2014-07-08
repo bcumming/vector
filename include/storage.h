@@ -7,6 +7,8 @@
 
 namespace memory {
 
+// prototpue storage class for Cyme integration
+// should be moved to tests
 template <typename T, int N, int W=1>
 class Storage {
 public :

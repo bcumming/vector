@@ -16,17 +16,17 @@ TEST(host_vector, constructor) {
     using namespace memory;
 
     // default constructor
-    host_vector<float> v2;
+    HostVector<float> v2;
 
     // length constructor
-    host_vector<float> v1(100);
+    HostVector<float> v1(100);
 
     // initialize values as monotone sequence
     for(int i=0; i<v1.size(); ++i)
         v1[i] = float(i);
 
     // initialize new host_vector from a subrange
-    host_vector<float> v3(v1(90, 100));
+    HostVector<float> v3(v1(90, 100));
 
     // reset values in range
     for(auto &v : v1(90, 100))
@@ -45,7 +45,7 @@ TEST(host_vector, iterators_and_ranges) {
     using namespace memory;
 
     // length constructor
-    host_vector<float> v1(100);
+    HostVector<float> v1(100);
 
     // check that begin()/end() iterators work
     for(auto it=v1.begin(); it<v1.end(); ++it)

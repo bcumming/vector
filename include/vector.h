@@ -16,43 +16,37 @@ namespace memory {
   */
 // container type
 template <typename T, typename Coord>
-class vector : public Array<T, Coord> {
+class Vector : public Array<T, Coord> {
 public:
-    typedef Array<T, Coord> super;
-    typedef typename get_reference_range<super>::type reference_range;
+    typedef Array<T, Coord> base;
+    typedef typename get_reference_range<base>::type reference_range;
 
-    typedef typename super::value_type value_type;
-    typedef typename super::coordinator_type coordinator_type;
+    typedef typename base::value_type value_type;
+    typedef typename base::coordinator_type coordinator_type;
 
     typedef value_type* pointer;
     typedef value_type const* const_pointer;
     typedef value_type& reference;
     typedef value_type const& const_reference;
 
-    typedef typename super::size_type size_type;
-    typedef typename super::difference_type difference_type;
+    typedef typename base::size_type size_type;
+    typedef typename base::difference_type difference_type;
 
     // default constructor : no memory will be allocated
-    vector() : super() {
-        #ifndef NDEBUG
-        #endif
-    }
+    Vector() : base() {}
 
-    vector(int n) : super(n) {
-    }
+    Vector(int n) : base(n) {}
 
     // if reference type this will simply take a reference, otherwise copy out
-    vector(reference_range const &rng) : super(rng) {
-    }
+    Vector(reference_range const &rng) : base(rng) {}
 
     // if reference type this will simply take a reference, otherwise copy out
-    vector(super const &rng) : super(rng) {
-    }
+    Vector(base const &rng) : base(rng) {}
 };
 
 // specialization for host vectors
 template <typename T>
-using host_vector = vector<T, host_coordinator<T>>;
+using HostVector = Vector<T, HostCoordinator<T>>;
 
 #ifdef WITH_CUDA
 // specialization for pinned vectors
@@ -60,11 +54,11 @@ using host_vector = vector<T, host_coordinator<T>>;
 // all of the helpers (copy, set, etc) are the same with and without page locked
 // memory
 template <typename T>
-using pinned_vector = vector<T, host_coordinator<T, pinned_allocator<T>>>;
+using pinned_vector = Vector<T, HostCoordinator<T, pinned_allocator<T>>>;
 
 // specialization for device memory
 template <typename T>
-using device_vector = vector<T, host_coordinator<T, cuda_allocator<T>>>;
+using device_vector = Vector<T, HostCoordinator<T, cuda_allocator<T>>>;
 #endif
 
 } // namespace memory

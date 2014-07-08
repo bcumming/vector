@@ -9,7 +9,9 @@
 
 #include "definitions.h"
 
+////////////////////////////////////////////////////////////////////////////////
 namespace memory {
+////////////////////////////////////////////////////////////////////////////////
 namespace impl {
     // meta function that returns true if x is a power of two (including 1==2^0)
     template <size_t x>
@@ -54,7 +56,7 @@ namespace impl {
     }
 
     template <size_t Alignment>
-    class aligned_policy {
+    class AlignedPolicy {
     public:
         void *allocate_policy(size_t size) {
             return reinterpret_cast<void *>(aligned_malloc<char, Alignment>(size));
@@ -128,9 +130,10 @@ namespace impl {
     } // namespace cuda
 #endif
 } // namespace impl
+////////////////////////////////////////////////////////////////////////////////
 
 template<typename T, typename Policy >
-class allocator : public Policy {
+class Allocator : public Policy {
     using Policy::allocate_policy;
     using Policy::free_policy;
 public:
@@ -147,15 +150,15 @@ public:
     //    convert an allocator<T> to allocator<U>
     template<typename U>
     struct rebind {
-        typedef allocator<U, Policy> other;
+        typedef Allocator<U, Policy> other;
     };
 
 public:
-    inline explicit allocator() {}
-    inline ~allocator() {}
-    inline explicit allocator(allocator const&) {}
+    inline explicit Allocator() {}
+    inline ~Allocator() {}
+    inline explicit Allocator(Allocator const&) {}
     template<typename U>
-    inline explicit allocator(allocator const&) {}
+    inline explicit Allocator(Allocator const&) {}
 
     //    address
     inline pointer address(reference r) { return &r; }
@@ -185,14 +188,14 @@ public:
         p->~T();
     }
 
-    inline bool operator==(allocator const&) { return true; }
-    inline bool operator!=(allocator const& a) { return !operator==(a); }
+    inline bool operator==(Allocator const&) { return true; }
+    inline bool operator!=(Allocator const& a) { return !operator==(a); }
 };
 
 // pretty printers
 namespace util {
     template <size_t Alignment>
-    struct type_printer<impl::aligned_policy<Alignment>>{
+    struct type_printer<impl::AlignedPolicy<Alignment>>{
         static std::string print() {
             std::stringstream str;
             str << "aligned_policy<" << Alignment << ">";
@@ -219,7 +222,7 @@ namespace util {
 #endif
 
     template <typename T, typename Policy>
-    struct type_printer<allocator<T,Policy>>{
+    struct type_printer<Allocator<T,Policy>>{
         static std::string print() {
             std::stringstream str;
             str << "allocator<" << type_printer<T>::print()
@@ -231,17 +234,17 @@ namespace util {
 
 // helper for generating an aligned allocator
 template <class T, size_t alignment=impl::minimum_possible_alignment<T>::value>
-using aligned_allocator = allocator<T, impl::aligned_policy<alignment>>;
+using aligned_allocator = Allocator<T, impl::AlignedPolicy<alignment>>;
 
 #ifdef WITH_CUDA
 // for pinned allocation we set the default alignment to correspond to the
 // alignment of a page (4096 bytes), because by default pinned memory is
 // allocated at page boundaries.
 template <class T, size_t alignment=4096>
-using pinned_allocator = allocator<T, impl::cuda::pinned_policy<alignment>>;
+using pinned_allocator = Allocator<T, impl::cuda::pinned_policy<alignment>>;
 
 template <class T, size_t alignment=impl::minimum_possible_alignment<T>::value>
-using cuda_allocator = allocator<T, impl::cuda::device_policy>;
+using cuda_allocator = Allocator<T, impl::cuda::device_policy>;
 #endif
 
 } // namespace memory

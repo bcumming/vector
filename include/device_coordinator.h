@@ -4,35 +4,38 @@
 #include "range.h"
 #include "allocator.h"
 
+////////////////////////////////////////////////////////////////////////////////
 namespace memory {
 
 // forward declare
 template <typename T, class Allocator>
-class device_coordinator;
+class DeviceCoordinator;
 
+////////////////////////////////////////////////////////////////////////////////
 namespace util {
     template <typename T, typename Allocator>
-    struct type_printer<device_coordinator<T,Allocator>>{
+    struct type_printer<DeviceCoordinator<T,Allocator>>{
         static std::string print() {
             std::stringstream str;
-            str << "device_coordinator<" << type_printer<T>::print()
+            str << "DeviceCoordinator<" << type_printer<T>::print()
                 << ", " << type_printer<Allocator>::print() << ">";
             return str.str();
         }
     };
 
     template <typename T, typename Allocator>
-    struct pretty_printer<device_coordinator<T,Allocator>>{
-        static std::string print(const device_coordinator<T,Allocator>& val) {
+    struct pretty_printer<DeviceCoordinator<T,Allocator>>{
+        static std::string print(const DeviceCoordinator<T,Allocator>& val) {
             std::stringstream str;
-            str << type_printer<device_coordinator<T,Allocator>>::print();
+            str << type_printer<DeviceCoordinator<T,Allocator>>::print();
             return str.str();
         }
     };
 } // namespace util
+////////////////////////////////////////////////////////////////////////////////
 
 template <typename T, class Allocator_=cuda_allocator<T> >
-class device_coordinator {
+class DeviceCoordinator {
 public:
     typedef T value_type;
     typedef typename Allocator_::template rebind<value_type>::other Allocator;
@@ -50,7 +53,7 @@ public:
     // metafunction for rebinding host_coordinator with another type
     template <typename Tother>
     struct rebind {
-        typedef device_coordinator<Tother, Allocator> other;
+        typedef DeviceCoordinator<Tother, Allocator> other;
     };
 
     range_type allocate(size_type n) {
@@ -60,7 +63,7 @@ public:
         pointer ptr = n>0 ? allocator.allocate(n) : 0;
 
         #ifndef NDEBUG
-        std::cerr << util::type_printer<device_coordinator>::print()
+        std::cerr << util::type_printer<DeviceCoordinator>::print()
                   << "::allocate(" << n << ") "
                   << (ptr==nullptr && n>0 ? " failure" : " success")
                   << std::endl;
@@ -76,7 +79,7 @@ public:
             allocator.deallocate(rng.data(), rng.size());
 
         #ifndef NDEBUG
-        std::cerr << util::type_printer<device_coordinator>::print()
+        std::cerr << util::type_printer<DeviceCoordinator>::print()
                   << "::free()" << std::endl;
         #endif
 
@@ -138,4 +141,5 @@ public:
 };
 
 } // namespace memory
+////////////////////////////////////////////////////////////////////////////////
 
