@@ -12,7 +12,7 @@ void print_range(const R& rng) {
 }
 
 // verify that type members set correctly
-TEST(host_coordinator, type_members) {
+TEST(HostCoordinator, type_members) {
     using namespace memory;
 
     typedef memory::Storage<float,  16, 4> StorageFloatAoSoA;
@@ -26,7 +26,7 @@ TEST(host_coordinator, type_members) {
 }
 
 // verify that rebinding works
-TEST(host_coordinator, rebind) {
+TEST(HostCoordinator, rebind) {
     using namespace memory;
 
     typedef HostCoordinator<int> intcoord_t;
@@ -36,8 +36,8 @@ TEST(host_coordinator, rebind) {
     ::testing::StaticAssertTypeEq<double,doublecoord_t::value_type>();
 }
 
-// test allocation of base ranges using host_coordinator
-TEST(host_coordinator, baserange_alloc_free) {
+// test allocation of base ranges using HostCoordinator
+TEST(HostCoordinator, baserange_alloc_free) {
     using namespace memory;
 
     typedef HostCoordinator<int> intcoord_t;
@@ -49,13 +49,13 @@ TEST(host_coordinator, baserange_alloc_free) {
     intcoord_t coord;
 
     // test that range is a base range
-    EXPECT_TRUE(is_range<rng_t>::value);
+    EXPECT_TRUE(is_array_base<rng_t>::value);
 
     // test that range has correct storage type
     ::testing::StaticAssertTypeEq<int, rng_t::value_type >();
 
     // verify that the range has non-NULL pointer
-    EXPECT_NE(rng_t::pointer(0), rng.data()) << "host_coordinator returned a NULL pointer when alloating a nonzero range";
+    EXPECT_NE(rng_t::pointer(0), rng.data()) << "HostCoordinator returned a NULL pointer when alloating a nonzero range";
 
     // verify that freeing works
     coordinator.free(rng);
@@ -65,7 +65,7 @@ TEST(host_coordinator, baserange_alloc_free) {
 }
 
 // test allocation of reference ranges
-TEST(host_coordinator, refrange_alloc_free) {
+TEST(HostCoordinator, refrange_alloc_free) {
     using namespace memory;
 
     typedef HostCoordinator<float> floatcoord_t;
@@ -82,7 +82,7 @@ TEST(host_coordinator, refrange_alloc_free) {
 
     // verify that the range has non-NULL pointer
     EXPECT_NE(rrng_t::pointer(0), rrng.data())
-        << "host_coordinator returned a NULL pointer when allocating a nonzero range";
+        << "HostCoordinator returned a NULL pointer when allocating a nonzero range";
 
     EXPECT_EQ(rng.data(), rrng.data())
         << "base(all) does not have the same pointer address as base";
@@ -94,8 +94,8 @@ TEST(host_coordinator, refrange_alloc_free) {
     EXPECT_EQ(rng_t::size_type(0), rng.size());
 }
 
-// test copying data between ranges using host_coordinator
-TEST(host_coordinator, copy) {
+// test copying data between ranges using HostCoordinator
+TEST(HostCoordinator, copy) {
     using namespace memory;
 
     const int N = 20;
@@ -130,8 +130,8 @@ TEST(host_coordinator, copy) {
         EXPECT_EQ(rng2[i], rrng[i]);
 }
 
-// test that host_coordinator can correctly detect overlap between ranges
-TEST(host_coordinator, overlap) {
+// test that HostCoordinator can correctly detect overlap between ranges
+TEST(HostCoordinator, overlap) {
     using namespace memory;
 
     const int N = 20;

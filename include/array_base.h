@@ -18,7 +18,7 @@ namespace util {
     struct type_printer<ArrayBase<T>>{
         static std::string print() {
             std::stringstream str;
-            str << "range<" << type_printer<T>::print() << ">";
+            str << "ArrayBase<" << type_printer<T>::print() << ">";
             return str.str();
         }
     };
@@ -187,12 +187,12 @@ private:
     size_type size_;
 };
 
-// helpers for identifying ranges
+// helpers for identifying array bases
 template <typename T>
-struct is_range : std::false_type {};
+struct is_array_base : std::false_type {};
 
 template <typename T>
-struct is_range<ArrayBase<T>> : std::true_type {};
+struct is_array_base<ArrayBase<T>> : std::true_type {};
 
 } // namespace memory
 ////////////////////////////////////////////////////////////////////////////////

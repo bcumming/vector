@@ -10,7 +10,7 @@ struct packer {
     char vals[s];
 };
 
-TEST(allocator, minimum_possible_alignment) {
+TEST(Allocator, minimum_possible_alignment) {
     using namespace memory::impl;
     size_t tmp;
     tmp = minimum_possible_alignment< packer<1> >::value;

@@ -3,7 +3,7 @@
 #include <storage.h>
 
 // basic test that gtest is working and installed
-TEST(storage, types) {
+TEST(Storage, types) {
     //Storage<T, N, M>
     typedef memory::Storage<float,  16, 1> StorageFloatAoS;
     typedef memory::Storage<double, 16, 1> StorageDoubleAoS;
@@ -19,7 +19,7 @@ TEST(storage, types) {
     ::testing::StaticAssertTypeEq<memory::Storage<double, 16>, StorageDoubleAoS>();
 }
 
-TEST(storage, static_values) {
+TEST(Storage, static_values) {
     //Storage<T, N, M>
     typedef memory::Storage<float,  16, 1> StorageFloatAoS;
     typedef memory::Storage<double, 16, 1> StorageDoubleAoS;
@@ -51,7 +51,7 @@ TEST(storage, static_values) {
 
 // test that the fill function, which sets all values in the underlying
 // storage to a constant value.
-TEST(storage, fill) {
+TEST(Storage, fill) {
     typedef memory::Storage<float,  1, 1> S11;
     typedef memory::Storage<float,  1, 4> S14;
     typedef memory::Storage<float,  8, 1> S81;
@@ -88,7 +88,7 @@ TEST(storage, fill) {
 }
 
 // test that the equality operator works
-TEST(storage, equals) {
+TEST(Storage, equals) {
     typedef memory::Storage<float,  4, 2> S42;
     typedef memory::Storage<int,  3, 7> S37;
 
@@ -126,7 +126,7 @@ TEST(storage, equals) {
 }
 
 // test that the equality operator works
-TEST(storage, constructors) {
+TEST(Storage, constructors) {
     typedef memory::Storage<double, 4, 2> Sdouble;
     typedef memory::Storage<float,  4, 2> Sfloat;
 
@@ -136,7 +136,7 @@ TEST(storage, constructors) {
 }
 
 // test that slice operator works
-TEST(storage, slice) {
+TEST(Storage, slice) {
     typedef memory::Storage<double, 4, 3> AoSoA;
     typedef memory::Storage<double,  4, 1> AoS;
 

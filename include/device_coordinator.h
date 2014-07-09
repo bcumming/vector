@@ -1,7 +1,7 @@
 #pragma once
 
 #include "definitions.h"
-#include "range.h"
+#include "array.h"
 #include "allocator.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -34,7 +34,7 @@ namespace util {
 } // namespace util
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T, class Allocator_=cuda_allocator<T> >
+template <typename T, class Allocator_=CudaAllocator<T> >
 class DeviceCoordinator {
 public:
     typedef T value_type;
@@ -45,7 +45,7 @@ public:
     typedef value_type& reference;
     typedef const value_type& const_reference;
 
-    typedef range<value_type> range_type;
+    typedef ArrayBase<value_type> range_type;
 
     typedef typename types::size_type size_type;
     typedef typename types::difference_type difference_type;

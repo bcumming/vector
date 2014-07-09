@@ -13,21 +13,21 @@ void print(VEC const& v) {
 }
 
 // test that constructors work
-TEST(pinned_vector, constructor) {
+TEST(PinnedVector, constructor) {
     using namespace memory;
 
     // default constructor
-    pinned_vector<float> v2;
+    PinnedVector<float> v2;
 
     // length constructor
-    pinned_vector<float> v1(100);
+    PinnedVector<float> v1(100);
 
     // initialize values as monotone sequence
     for(int i=0; i<v1.size(); ++i)
         v1[i] = float(i);
 
-    // initialize new pinned_vector from a subrange
-    pinned_vector<float> v3(v1(90, 100));
+    // initialize new PinnedVector from a subrange
+    PinnedVector<float> v3(v1(90, 100));
 
     // reset values in range
     for(auto &v : v1(90, 100))
@@ -40,38 +40,3 @@ TEST(pinned_vector, constructor) {
     for(int i=90; i<100; i++)
         EXPECT_EQ(float(-1), v1[i]);
 }
-
-/*
-// test that constructors work
-TEST(gpu_vector, iterators_and_ranges) {
-    using namespace memory;
-
-    // length constructor
-    pinned_vector<float> v1(100);
-
-    // check that begin()/end() iterators work
-    for(auto it=v1.begin(); it<v1.end(); ++it)
-        *it = float(3.0);
-
-    // check that range based for loop works
-    for(auto &val : v1)
-        val = float(3.0);
-    {
-        float sum = 0;
-        // check it works for const
-        for(auto val : v1)
-            sum+=val;
-        EXPECT_EQ(float(3*100), sum);
-    }
-
-    // check that std::for_each works
-    // add 1 to every value in v1
-    std::for_each(v1.begin(), v1.end(), [] (float& val) {val+=1;});
-    {
-        float sum = 0;
-        for(auto val : v1)
-            sum+=val;
-        EXPECT_EQ(float(4*100), sum);
-    }
-}
-*/

@@ -12,7 +12,7 @@ void print(VEC const& v) {
 }
 
 // test that constructors work
-TEST(host_vector, constructor) {
+TEST(HostVector, constructor) {
     using namespace memory;
 
     // default constructor
@@ -25,7 +25,7 @@ TEST(host_vector, constructor) {
     for(int i=0; i<v1.size(); ++i)
         v1[i] = float(i);
 
-    // initialize new host_vector from a subrange
+    // initialize new HostVector from a subrange
     HostVector<float> v3(v1(90, 100));
 
     // reset values in range
@@ -41,7 +41,7 @@ TEST(host_vector, constructor) {
 }
 
 // test that constructors work
-TEST(host_vector, iterators_and_ranges) {
+TEST(HostVector, iterators_and_ranges) {
     using namespace memory;
 
     // length constructor

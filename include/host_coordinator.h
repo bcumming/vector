@@ -37,7 +37,7 @@ namespace util {
 } // namespace util
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T, class Allocator=aligned_allocator<T> >
+template <typename T, class Allocator=AlignedAllocator<T> >
 class HostCoordinator {
 public:
     typedef T value_type;

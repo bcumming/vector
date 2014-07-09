@@ -19,7 +19,7 @@ template <typename T, typename Coord>
 class Vector : public Array<T, Coord> {
 public:
     typedef Array<T, Coord> base;
-    typedef typename get_reference_range<base>::type reference_range;
+    typedef typename get_view<base>::type reference_range;
 
     typedef typename base::value_type value_type;
     typedef typename base::coordinator_type coordinator_type;
@@ -54,11 +54,11 @@ using HostVector = Vector<T, HostCoordinator<T>>;
 // all of the helpers (copy, set, etc) are the same with and without page locked
 // memory
 template <typename T>
-using pinned_vector = Vector<T, HostCoordinator<T, pinned_allocator<T>>>;
+using PinnedVector = Vector<T, HostCoordinator<T, PinnedAllocator<T>>>;
 
 // specialization for device memory
 template <typename T>
-using device_vector = Vector<T, HostCoordinator<T, cuda_allocator<T>>>;
+using DeviceVector = Vector<T, HostCoordinator<T, CudaAllocator<T>>>;
 #endif
 
 } // namespace memory

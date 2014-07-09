@@ -70,7 +70,7 @@ namespace impl {
 #ifdef WITH_CUDA
     namespace cuda {
         template <size_t Alignment>
-        class pinned_policy {
+        class PinnedPolicy {
         public:
             void *allocate_policy(size_t size) {
                 // first allocate memory with the desired alignment
@@ -104,7 +104,7 @@ namespace impl {
             }
         };
 
-        class device_policy {
+        class DevicePolicy {
         public:
             void *allocate_policy(size_t size) {
                 // first allocate memory with the desired alignment
@@ -205,7 +205,7 @@ namespace util {
 
     #ifdef WITH_CUDA
     template <size_t Alignment>
-    struct type_printer<impl::cuda::pinned_policy<Alignment>>{
+    struct type_printer<impl::cuda::PinnedPolicy<Alignment>>{
         static std::string print() {
             std::stringstream str;
             str << "pinned_policy<" << Alignment << ">";
@@ -214,7 +214,7 @@ namespace util {
     };
 
     template <>
-    struct type_printer<impl::cuda::device_policy>{
+    struct type_printer<impl::cuda::DevicePolicy>{
         static std::string print() {
             return std::string("device_policy");
         }
@@ -234,17 +234,17 @@ namespace util {
 
 // helper for generating an aligned allocator
 template <class T, size_t alignment=impl::minimum_possible_alignment<T>::value>
-using aligned_allocator = Allocator<T, impl::AlignedPolicy<alignment>>;
+using AlignedAllocator = Allocator<T, impl::AlignedPolicy<alignment>>;
 
 #ifdef WITH_CUDA
 // for pinned allocation we set the default alignment to correspond to the
 // alignment of a page (4096 bytes), because by default pinned memory is
 // allocated at page boundaries.
 template <class T, size_t alignment=4096>
-using pinned_allocator = Allocator<T, impl::cuda::pinned_policy<alignment>>;
+using PinnedAllocator = Allocator<T, impl::cuda::PinnedPolicy<alignment>>;
 
 template <class T, size_t alignment=impl::minimum_possible_alignment<T>::value>
-using cuda_allocator = Allocator<T, impl::cuda::device_policy>;
+using CudaAllocator = Allocator<T, impl::cuda::DevicePolicy>;
 #endif
 
 } // namespace memory

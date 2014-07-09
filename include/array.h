@@ -9,7 +9,8 @@
 
 #include <type_traits>
 
-#include "detail/array_base.h"
+//#include "detail/array_base.h"
+#include "array_base.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace memory{
@@ -19,14 +20,14 @@ template<typename T, typename Coord>
 struct Array;
 
 template<typename T, typename Coord>
-struct ArrayRange;
+struct ArrayView;
 
 namespace util {
     template <typename T, typename Coord>
     struct type_printer<Array<T,Coord>>{
         static std::string print() {
             std::stringstream str;
-            str << "range_by_value<" << type_printer<T>::print()
+            str << "Array<" << type_printer<T>::print()
                 << ", " << type_printer<Coord>::print() << ">";
             return str.str();
         }
@@ -44,22 +45,22 @@ namespace util {
     };
 }
 
-// metafunctions for checking range types
+// metafunctions for checking array types
 template <typename T>
-struct is_range_by_value : std::false_type {};
+struct is_array_by_value : std::false_type {};
 
 template <typename T, typename Coord>
-struct is_range_by_value<Array<T, Coord> > : std::true_type {};
+struct is_array_by_value<Array<T, Coord> > : std::true_type {};
 
 template <typename T>
-struct is_range_by_reference : std::false_type{};
+struct is_array_by_reference : std::false_type{};
 
 template <typename T, typename Coord>
-struct is_range_by_reference<ArrayRange<T, Coord> > : std::true_type {};
+struct is_array_by_reference<ArrayView<T, Coord> > : std::true_type {};
 
 template <typename T>
-struct is_range_wrapper
-    : std::conditional< is_range_by_value<T>::value || is_range_by_reference<T>::value,
+struct is_array
+    : std::conditional< is_array_by_value<T>::value || is_array_by_reference<T>::value,
                                  std::true_type,
                                  std::false_type>::type
 {};
@@ -75,7 +76,7 @@ public:
     typedef ArrayBase<value_type> base;
     typedef typename Coord::template rebind<value_type>::other coordinator_type;
 
-    typedef ArrayRange<value_type, Coord> reference_wrapper;
+    typedef ArrayView<value_type, Coord> reference_wrapper;
 
     typedef typename base::size_type size_type;
     typedef typename base::difference_type difference_type;
@@ -109,7 +110,7 @@ public:
     // construct as a copy of another range
     template <
         class RangeType,
-        typename std::enable_if<is_range_wrapper<RangeType>::value, void>::type = 0
+        typename std::enable_if<is_array<RangeType>::value, void>::type = 0
     >
     explicit Array(const RangeType& other)
         : base(coordinator_type().allocate(other.size()))
@@ -117,7 +118,6 @@ public:
         #ifndef NDEBUG
         std::cerr << "CONSTRUCTOR " << util::pretty_printer<Array>::print(*this) << std::endl;
         #endif
-
         coordinator_.copy(other.as_range(), *this);
     }
 
@@ -127,17 +127,16 @@ public:
         #ifndef NDEBUG
         std::cerr << "CONSTRUCTOR " << util::pretty_printer<Array>::print(*this) << std::endl;
         #endif
-
         coordinator_.copy(static_cast<base const&>(other), *this);
     }
 
-    // construct a copy from a range
-    // TODO: this could be dangerous, because we assume that the pointer in rng is safe to 
+    // construct a copy from a another array
+    // TODO: this could be dangerous, because we assume that the pointer in a is safe to 
     // copy from using our coordinator
-    explicit Array(base const& rng)
-        :   base(coordinator_type().allocate(rng.size()))
+    explicit Array(base const& a)
+        :   base(coordinator_type().allocate(a.size()))
     {
-        coordinator_.copy(rng, *this);
+        coordinator_.copy(a, *this);
     }
 
     // have to free the memory in a "by value" range
@@ -145,17 +144,16 @@ public:
         #ifndef NDEBUG
         std::cerr << "DESCTRUCTOR " << util::pretty_printer<Array>::print(*this) << std::endl;
         #endif
-
         coordinator_.free(*this);
     }
 
     reference_wrapper operator()(all_type) {
-        return reference_wrapper::make_range_by_reference( base::operator()(all) );
+        return reference_wrapper::make_array_by_reference( base::operator()(all) );
     }
 
     template <typename Ts, typename Te>
     reference_wrapper operator()(Ts s, Te e) {
-        return reference_wrapper::make_range_by_reference( base::operator()(s, e) );
+        return reference_wrapper::make_array_by_reference( base::operator()(s, e) );
     }
 
     const coordinator_type& coordinator() const {
@@ -166,13 +164,13 @@ private:
     coordinator_type coordinator_;
 };
 
-// An ArrayRange type refers to a sub-range of an Array. It does not own the
+// An ArrayView type refers to a sub-range of an Array. It does not own the
 // memory, i.e. it is not responsible for allocation and freeing.
 // Currently the ArrayRange type has no way of testing whether the memory to
 // which it refers is still valid (i.e. whether or not the original memory has
 // been freed)
 template <typename T, typename Coord>
-class ArrayRange
+class ArrayView
     : public ArrayBase<T> {
 public:
     typedef ArrayBase<T> base;
@@ -192,19 +190,19 @@ public:
     // construct as a reference to a range_wrapper
     template <
         class RangeType,
-        typename std::enable_if<is_range_wrapper<RangeType>::value>::type = 0
+        typename std::enable_if<is_array<RangeType>::value>::type = 0
     >
-    explicit ArrayRange(const RangeType& other)
+    explicit ArrayView(const RangeType& other)
         :   base(other.data(), other.size())
     {}
 
     // construct as a reference to a range_wrapper
-    explicit ArrayRange(value_wrapper const& rng)
+    explicit ArrayView(value_wrapper const& rng)
         :   base(rng.data(), rng.size())
     {}
 
-    static ArrayRange make_range_by_reference(base const& rng) {
-        return ArrayRange(rng);
+    static ArrayView make_array_by_reference(base const& rng) {
+        return ArrayView(rng);
     }
 
     // TODO : do we have an equality operator == for ranges, to test whether they point
@@ -212,20 +210,20 @@ public:
     // for ranges?
 
     // do nothing for destructor: we don't own the memory in range
-    ~ArrayRange() {}
+    ~ArrayView() {}
 
 private:
-    // construct as a reference to a range
+    // construct as a reference to an array
     //      this should come with a warning: no checks can be performed to assert that the range
     //      points to valid memory (passing a GPU range to a host wrapper would have disasterous side effects)
-    //explicit range_by_reference(range_type const& rng)
-    explicit ArrayRange(base const& rng)
+    //explicit array_by_reference(range_type const& rng)
+    explicit ArrayView(base const& rng)
         :   base(rng)
     {}
 
     // disallow constructors that imply allocation of memory
-    ArrayRange() {};
-    ArrayRange(const size_t &n) {};
+    ArrayView() {};
+    ArrayView(const size_t &n) {};
 
     coordinator_type coordinator_;
 };
@@ -233,13 +231,13 @@ private:
 // metafunction for returning reference range type for an arbitrary range
 //  NULL case: fall through to here if invalid range wrapper is used
 template <typename T, typename specialize=void>
-struct get_reference_range{};
+struct get_view{};
 
 template <typename T>
-struct get_reference_range<T, typename std::enable_if< is_range_wrapper<T>::value>::type > {
+struct get_view<T, typename std::enable_if< is_array<T>::value>::type > {
     typedef typename T::coordinator_type Coord;
     typedef typename T::value_type Value;
-    typedef ArrayRange<Value, Coord> type;
+    typedef ArrayView<Value, Coord> type;
 };
 
 } // namespace memory
