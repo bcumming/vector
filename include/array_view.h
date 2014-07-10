@@ -23,10 +23,9 @@ template<typename T, typename Coord>
 struct ArrayView;
 
 template <typename T>
-struct is_array_by_value : std::false_type {};
+struct is_array;
 
-template <typename T, typename Coord>
-struct is_array_by_value<Array<T, Coord> > : std::true_type {};
+// metafunction for indicating whether a type is an ArrayView
 
 template <typename T>
 struct is_array_by_reference : std::false_type{};
@@ -34,12 +33,6 @@ struct is_array_by_reference : std::false_type{};
 template <typename T, typename Coord>
 struct is_array_by_reference<ArrayView<T, Coord> > : std::true_type {};
 
-template <typename T>
-struct is_array
-    : std::conditional< is_array_by_value<T>::value || is_array_by_reference<T>::value,
-                                 std::true_type,
-                                 std::false_type>::type
-{};
 // An ArrayView type refers to a sub-range of an Array. It does not own the
 // memory, i.e. it is not responsible for allocation and freeing.
 // Currently the ArrayRange type has no way of testing whether the memory to
@@ -73,30 +66,30 @@ public:
     {}
 
     // construct as a reference to a range_wrapper
+    // need this because it isn't caught by the generic constructor above:
+    // the default constructor, which isn't templated, would be chosen
     explicit ArrayView(value_wrapper const& rng)
         :   base(rng.data(), rng.size())
     {}
 
-    static ArrayView make_array_by_reference(base const& rng) {
-        return ArrayView(rng);
+    template<typename T1, typename T2>
+    ArrayView operator()(const T1& b, const T2& e) {
+        return ArrayView(base::operator()(b, e));
     }
-
-    // TODO : do we have an equality operator == for ranges, to test whether they point
-    // to the same range in memory? Is it implemented here, or should it use an equality operator 
-    // for ranges?
 
     // do nothing for destructor: we don't own the memory in range
     ~ArrayView() {}
 
-private:
-    // construct as a reference to an array
-    //      this should come with a warning: no checks can be performed to assert that the range
-    //      points to valid memory (passing a GPU range to a host wrapper would have disasterous side effects)
-    //explicit array_by_reference(range_type const& rng)
+protected:
+    // this constructor provides an interface for Array, which is derived from
+    // ArrayView, to allocate storage from a raw pointer.
+    // this functionality isn't exposed, to avoid a user attempting to initialize
+    // an array view with a pointer allocated with an incompatible coordinator
     explicit ArrayView(base const& rng)
         :   base(rng)
     {}
 
+private:
     // disallow constructors that imply allocation of memory
     ArrayView() {};
     ArrayView(const size_t &n) {};
@@ -104,8 +97,7 @@ private:
     coordinator_type coordinator_;
 };
 
-// metafunction for returning reference range type for an arbitrary range
-//  NULL case: fall through to here if invalid range wrapper is used
+// metafunction to get view type for an Array/ArrayView
 template <typename T, typename specialize=void>
 struct get_view{};
 
