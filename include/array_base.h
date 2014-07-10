@@ -120,6 +120,7 @@ public:
 
     // return direct access to data. This should be provided by specializations
     // for a given architecture, or handled at a higher level
+    // TODO: this has to be performed by the Coordinator in ArrayView
     const_reference operator[](size_type i) const {
         #ifndef NDEBUG
         assert(i<size_);
@@ -134,15 +135,17 @@ public:
         return *(pointer_+i);
     }
 
+    // ArrayBase types do not allocate or free the storage to which they refer
+    // the reset() and set() member functions are used by Coordinators when
+    // performing dynamic memory allocation and deallocation
+
     // resets to NULL pointer and length 0
-    // use when memory has been freed
     void reset() {
         pointer_ = 0;
         size_ = 0;
     }
 
     // set new pointer and range size
-    // might be used for realloc
     void set(const_pointer ptr, size_type sz) {
         pointer_ = ptr;
         size_ = sz;
@@ -174,26 +177,21 @@ public:
         return pointer_+size_;
     }
 
-    // -----------------------
     bool is_empty() const {
         return size_==0;
     }
 
-    // -----------------------
     size_type size() const {
         return size_;
     }
 
+    // two arrays are equal if both pointer and size are the same, and value_type
     bool operator== (ArrayBase const& other) {
         return other.size_==size_ && other.pointer_==pointer_;
     }
 
-    // -----------------------
     // test whether memory overlaps that referenced by other
-    template <typename R>
-    // assert that both have same value_type
-    // assert that either Range or ReferenceRange
-    bool overlaps(const R& other) const {
+    bool overlaps(const ArrayBase& other) const {
         return( !((this->begin()>=other.end()) || (other.begin()>=this->end())) );
     }
 

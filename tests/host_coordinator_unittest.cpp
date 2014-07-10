@@ -114,7 +114,6 @@ TEST(HostCoordinator, copy) {
     coordinator.copy(rng(N/2,end), aa);
     for(auto i=0; i<N/2; i++)
         EXPECT_EQ(rng[i], rng[i+N/2]);
-    //print_range(rng);
 
     // create a new range of the same length, and initialize to new values
     auto rng2 = coordinator.allocate(N);
