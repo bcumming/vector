@@ -28,11 +28,4 @@ TEST(SplitRange, split) {
 
     for(auto s : SplitRange(Range(0,100), 13)) 
         splits.push_back(vector(s));
-
-    for(auto v : splits)
-        std::cout << v.size() << " ";
-    std::cout << std::endl;
-    for(auto s : SplitRange(Range(0,100), 13)) 
-        std::cout << s << " ";
-    std::cout << std::endl;
 }
