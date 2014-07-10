@@ -5,13 +5,17 @@
 
 #include <cassert>
 
-#include "include/range.h"
+#include "range.h"
+
+namespace memory {
 
 class SplitRange {
   public:
+    typedef Range::size_type size_type;
+    typedef Range::difference_type difference_type;
 
     // split range into n chunks
-    SplitRange(Range const& rng, size_t n) : range_(rng) {
+    SplitRange(Range const& rng, size_type n) : range_(rng) {
         // it makes no sense to break a range into 0 chunks
         assert(n>0);
 
@@ -32,7 +36,7 @@ class SplitRange {
       : public std::iterator<std::input_iterator_tag, Range>
     {
       public:
-          iterator(size_t first, size_t end, size_t step)
+          iterator(size_type first, size_type end, size_type step)
               : range_(first, first+step),
                 step_(step),
                 end_(end)
@@ -68,11 +72,11 @@ class SplitRange {
               // to be passed off to a team of worker threads, so that sub-range
               // lookup can be performed in constant time, not linear time as is the
               // case with a forward iterator.
-              size_t first = range_.begin()+step_;
+              size_type first = range_.begin()+step_;
               if(first>end_)
                   first=end_;
 
-              size_t last = range_.end()+step_;
+              size_type last = range_.end()+step_;
               if(last>end_)
                   last=end_;
 
@@ -92,8 +96,8 @@ class SplitRange {
 
       private:
         Range range_;
-        size_t end_;    // final value for end
-        size_t step_;   // step by which range limits get increased
+        size_type end_;    // final value for end
+        size_type step_;   // step by which range limits get increased
     };
     ///////////////////////////////////////
 
@@ -105,7 +109,7 @@ class SplitRange {
         return iterator(range_.end(), range_.end(), step_);
     }
 
-    size_t step_size() const {
+    size_type step_size() const {
         return step_;
     }
 
@@ -114,7 +118,7 @@ class SplitRange {
     }
 
   private:
-    size_t step_;
+    size_type step_;
     Range range_;
 };
 
@@ -122,4 +126,6 @@ class SplitRange {
 std::ostream& operator << (std::ostream& os, const SplitRange& split) {
     os << "(" << split.range() << " by " << split.step_size() << ")";
     return os;
+}
+
 }

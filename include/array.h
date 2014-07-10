@@ -132,7 +132,9 @@ public:
         coordinator_.free(*this);
     }
 
-    // use 
+    // use the accessors provided by ArrayView
+    // this enforces the requirement that accessing all or a sub-array of an
+    // Array should return a view, not a new array.
     using base::operator();
 
     const coordinator_type& coordinator() const {

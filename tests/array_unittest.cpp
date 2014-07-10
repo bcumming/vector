@@ -4,14 +4,6 @@
 #include <host_coordinator.h>
 #include <storage.h>
 
-// helper function for outputting an array
-template <typename R>
-void print_range(const R& rng) {
-    for(auto v: rng)
-        std::cout << v << " ";
-    std::cout << std::endl;
-}
-
 // verify that metafunctions for checking range wrappers work
 TEST(Array, is_array) {
     using namespace memory;
@@ -94,8 +86,7 @@ TEST(Array,new_array_by_ref) {
     EXPECT_NE(v2.data(), v1.data());
 }
 
-TEST(Array,sub_ranges) {
-    /*
+TEST(Array, sub_ranges_by_index) {
     using namespace memory;
 
     typedef Array<double, HostCoordinator<double> > by_value;
@@ -122,6 +113,36 @@ TEST(Array,sub_ranges) {
         EXPECT_EQ(*it1, *it2);
         ++it2;
         ++it1;
-    }*/
-    //print_range(v2);
+    }
+}
+
+// test use of Range type to get views on an Array
+TEST(Array, sub_ranges_by_range) {
+    using namespace memory;
+
+    typedef Array<double, HostCoordinator<double> > by_value;
+    typedef ArrayView<double, HostCoordinator<double> > by_reference;
+
+    // check that a view of a subrange works
+    by_value array1(10);
+    for(int i=0; i<10; i++)
+        array1[i] = double(i);
+
+    Range range1(5,10);
+    auto view1 = array1(range1);
+    EXPECT_EQ(view1.size(), 5);
+    EXPECT_EQ(array1.data()+5, view1.data());
+
+    // create a copy of the data in a view
+    // should contain a copy of the second half of array1
+    by_value array2(view1);
+    EXPECT_NE(view1.data(), array2.data());
+    EXPECT_EQ(view1.size(), array2.size());
+    auto it1 = array1.begin()+5;
+    auto it2 = array2.begin()+5;
+    while(it2!=array2.end()) {
+        EXPECT_EQ(*it1, *it2);
+        ++it2;
+        ++it1;
+    }
 }

@@ -3,7 +3,8 @@
 #include <cstddef>
 #include <type_traits>
 
-#include <definitions.h>
+#include "definitions.h"
+#include "range.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace memory {
@@ -106,6 +107,17 @@ public:
         return ArrayBase<T>(pointer_, size_);
     }
 
+    // generate a view base
+    ArrayBase<T>
+    operator() (Range const& rng) const {
+        size_type left  = rng.begin();
+        size_type right = rng.end();
+        #ifndef NDEBUG
+        assert(left<=size_ && right<=size_);
+        #endif
+        return ArrayBase<T>(pointer_+left, right-left);
+    }
+
     // return direct access to data. This should be provided by specializations
     // for a given architecture, or handled at a higher level
     const_reference operator[](size_type i) const {
@@ -170,6 +182,10 @@ public:
     // -----------------------
     size_type size() const {
         return size_;
+    }
+
+    bool operator== (ArrayBase const& other) {
+        return other.size_==size_ && other.pointer_==pointer_;
     }
 
     // -----------------------

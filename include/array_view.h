@@ -9,8 +9,8 @@
 
 #include <type_traits>
 
-//#include "detail/array_base.h"
 #include "array_base.h"
+#include "range.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace memory{
@@ -72,9 +72,15 @@ public:
         :   base(rng.data(), rng.size())
     {}
 
+    // this works both whee T1 and T2 are integral types, and where T2 is end_type
     template<typename T1, typename T2>
-    ArrayView operator()(const T1& b, const T2& e) {
+    ArrayView operator()(T1 const& b, T2 const& e) {
         return ArrayView(base::operator()(b, e));
+    }
+
+    // access using a Range
+    ArrayView operator()(Range const& range) {
+        return ArrayView(base::operator()(range));
     }
 
     // do nothing for destructor: we don't own the memory in range
