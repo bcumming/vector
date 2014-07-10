@@ -6,6 +6,7 @@ set(DRIVER_SOURCES
     array_unittest.cpp
     host_vector_unittest.cpp
     allocator_unittest.cpp
+    split_range_unittest.cpp
     gtest-all.cc
 )
 set(DRIVER_CUDA_SOURCES

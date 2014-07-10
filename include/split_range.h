@@ -123,7 +123,7 @@ class SplitRange {
 };
 
 // overload output operator for split range
-std::ostream& operator << (std::ostream& os, const SplitRange& split) {
+static std::ostream& operator << (std::ostream& os, const SplitRange& split) {
     os << "(" << split.range() << " by " << split.step_size() << ")";
     return os;
 }
