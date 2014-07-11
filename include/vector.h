@@ -5,6 +5,7 @@
 #include "definitions.h"
 #include "array.h"
 #include "host_coordinator.h"
+#include "device_coordinator.h"
 
 
 namespace memory {
@@ -26,9 +27,9 @@ using PinnedView = ArrayView<T, HostCoordinator<T, PinnedAllocator<T>>>;
 
 // specialization for device memory
 template <typename T>
-using DeviceVector = Array<T, HostCoordinator<T, CudaAllocator<T>>>;
+using DeviceVector = Array<T, DeviceCoordinator<T, CudaAllocator<T>>>;
 template <typename T>
-using DeviceView = ArrayView<T, HostCoordinator<T, CudaAllocator<T>>>;
+using DeviceView = ArrayView<T, DeviceCoordinator<T, CudaAllocator<T>>>;
 #endif
 
 } // namespace memory

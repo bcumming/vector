@@ -20,7 +20,7 @@ namespace util {
     struct type_printer<HostCoordinator<T,Allocator>>{
         static std::string print() {
             std::stringstream str;
-            str << "host_coordinator<" << type_printer<T>::print()
+            str << "HostCoordinator<" << type_printer<T>::print()
                 << ", " << type_printer<Allocator>::print() << ">";
             return str.str();
         }
