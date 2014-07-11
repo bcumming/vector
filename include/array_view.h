@@ -53,8 +53,8 @@ public:
 
     typedef value_type* pointer;
     typedef const pointer const_pointer;
-    typedef value_type& reference;
-    typedef value_type const& const_reference;
+    typedef typename coordinator_type::reference reference;
+    typedef typename coordinator_type::const_reference const_reference;
 
     // construct as a reference to a range_wrapper
     template <
@@ -83,13 +83,16 @@ public:
         return ArrayView(base::operator()(range));
     }
 
-    // 
+    // per element accessors
+    // return a reference type provided by Coordinator
     reference operator[] (size_type i) {
-        return base::data()[i];
+        //return base::data()[i];
+        return coordinator_.make_reference(base::data()+i);
     }
 
     const_reference operator[] (size_type i) const {
-        return base::data()[i];
+        //return base::data()[i];
+        return coordinator_.make_reference(base::data()+i);
     }
 
     // do nothing for destructor: we don't own the memory in range

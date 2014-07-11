@@ -35,6 +35,24 @@ namespace util {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
+class ConstDeviceReference {
+public:
+    typedef T  value_type;
+    typedef T* pointer;
+
+    ConstDeviceReference(pointer p) : pointer_(p) {}
+
+    operator T() const {
+        T tmp;
+        cudaMemcpy(&tmp, pointer_, sizeof(T), cudaMemcpyDeviceToHost );
+        return T(tmp);
+    }
+
+protected:
+    pointer pointer_;
+};
+
+template <typename T>
 class DeviceReference {
 public:
     typedef T  value_type;
@@ -43,13 +61,20 @@ public:
     DeviceReference(pointer p) : pointer_(p) {}
 
     DeviceReference& operator = (const T& value) {
-        // device copy host to device sizeof(T)
-        std::cout << "assigning " << value << " to gpu" << std::endl;
+        cudaMemcpy(pointer_, &value, sizeof(T), cudaMemcpyHostToDevice );
+        return *this;
+    }
+
+    operator T() const {
+        T tmp;
+        cudaMemcpy(&tmp, pointer_, sizeof(T), cudaMemcpyDeviceToHost );
+        return T(tmp);
     }
 
 private:
     pointer pointer_;
 };
+
 
 template <typename T, class Allocator_=CudaAllocator<T> >
 class DeviceCoordinator {
@@ -59,8 +84,8 @@ public:
 
     typedef value_type* pointer;
     typedef const value_type* const_pointer;
-    typedef value_type& reference;
-    typedef const value_type& const_reference;
+    typedef DeviceReference<T> reference;
+    typedef ConstDeviceReference<T> const_reference;
 
     typedef ArrayBase<value_type> range_type;
 
@@ -105,7 +130,6 @@ public:
 
     // copy memory from one gpu range to another
     void copy(const range_type &from, range_type &to) {
-        // free memory associated with R2
         assert(from.size()==to.size());
         assert(!from.overlaps(to));
 
@@ -115,15 +139,14 @@ public:
                 from.size()*sizeof(value_type),
                 cudaMemcpyDeviceToDevice
         );
+    }
 
-        #ifndef NDEBUG
-        if(status != cudaSuccess)
-            std::cerr << "ERROR : unable to perform GPU to GPU memory copy : "
-                      << from.size() << " * " << util::type_printer<T>::print()
-                      << " from " << from.begin()
-                      << " to "   << to.begin()
-                      << std::endl;
-        #endif
+    reference make_reference(value_type* p) {
+        return reference(p);
+    }
+
+    const_reference make_reference(value_type const* p) const {
+        return const_reference(p);
     }
 
     // copy memory from gpu range to host range
@@ -140,15 +163,6 @@ public:
                 from.size()*sizeof(value_type),
                 cudaMemcpyDeviceToDevice
         );
-
-        #ifndef NDEBUG
-        if(status != cudaSuccess)
-            std::cerr << "ERROR : unable to perform GPU to GPU memory copy : "
-                      << from.size() << " * " << util::type_printer<T>::print()
-                      << " from " << from.begin()
-                      << " to "   << to.begin()
-                      << std::endl;
-        #endif
     }
     */
 

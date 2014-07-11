@@ -98,6 +98,15 @@ public:
 
         std::copy(from.begin(), from.end(), to.begin());
     }
+
+    reference make_reference(value_type* p) {
+        return *p;
+    }
+
+    const_reference make_reference(value_type const* p) const {
+        return *p;
+    }
+
 };
 
 } //namespace memory
