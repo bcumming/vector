@@ -5,6 +5,8 @@ set(DRIVER_SOURCES
     storage_unittest.cpp
     array_unittest.cpp
     host_vector_unittest.cpp
+    device_vector_unittest.cpp
+    pinned_vector_unittest.cpp
     allocator_unittest.cpp
     split_range_unittest.cpp
     gtest-all.cc

@@ -63,15 +63,15 @@ class SplitRange {
 
           const iterator* operator++() {
               // shifting the range
-              // we can't just use range_+=step_ in case the original range can't be
-              // split into equally-sized sub-ranges
+              // we can't just use range_+=step_ in case the original range
+              // can't be split into equally-sized sub-ranges
               //
               // this is why we don't have reverse or random access, which would
               // require additional state. It might be nice to create such an
               // iterator, if we are using this method to split up work that is
               // to be passed off to a team of worker threads, so that sub-range
-              // lookup can be performed in constant time, not linear time as is the
-              // case with a forward iterator.
+              // lookup can be performed in constant time, not linear time as is
+              // the case with a forward iterator.
               size_type first = range_.begin()+step_;
               if(first>end_)
                   first=end_;
