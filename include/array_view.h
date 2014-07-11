@@ -83,6 +83,15 @@ public:
         return ArrayView(base::operator()(range));
     }
 
+    // 
+    reference operator[] (size_type i) {
+        return base::data()[i];
+    }
+
+    const_reference operator[] (size_type i) const {
+        return base::data()[i];
+    }
+
     // do nothing for destructor: we don't own the memory in range
     ~ArrayView() {}
 

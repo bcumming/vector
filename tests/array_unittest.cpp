@@ -107,12 +107,10 @@ TEST(Array, sub_ranges_by_index) {
     by_value v2(r1);
     EXPECT_NE(r1.data(), v2.data());
     EXPECT_EQ(r1.size(), v2.size());
-    auto it1 = v1.begin()+5;
-    auto it2 = v2.begin()+5;
-    while(it2!=v2.end()) {
-        EXPECT_EQ(*it1, *it2);
-        ++it2;
-        ++it1;
+    auto it1 = v1.data();
+    auto it2 = v2.data();
+    for(auto i=0; i<5; ++i) {
+        EXPECT_EQ(it1[i+5], it2[i]);
     }
 }
 
@@ -138,9 +136,9 @@ TEST(Array, sub_ranges_by_range) {
     by_value array2(view1);
     EXPECT_NE(view1.data(), array2.data());
     EXPECT_EQ(view1.size(), array2.size());
-    auto it1 = array1.begin()+5;
-    auto it2 = array2.begin()+5;
-    while(it2!=array2.end()) {
+    auto it1 = array1.data()+5;
+    auto it2 = array2.data()+5;
+    while(it2!=array2.data()+array2.size()) {
         EXPECT_EQ(*it1, *it2);
         ++it2;
         ++it1;

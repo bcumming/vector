@@ -34,6 +34,23 @@ namespace util {
 } // namespace util
 ////////////////////////////////////////////////////////////////////////////////
 
+template <typename T>
+class DeviceReference {
+public:
+    typedef T  value_type;
+    typedef T* pointer;
+
+    DeviceReference(pointer p) : pointer_(p) {}
+
+    DeviceReference& operator = (const T& value) {
+        // device copy host to device sizeof(T)
+        std::cout << "assigning " << value << " to gpu" << std::endl;
+    }
+
+private:
+    pointer pointer_;
+};
+
 template <typename T, class Allocator_=CudaAllocator<T> >
 class DeviceCoordinator {
 public:

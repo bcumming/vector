@@ -121,6 +121,7 @@ public:
     // return direct access to data. This should be provided by specializations
     // for a given architecture, or handled at a higher level
     // TODO: this has to be performed by the Coordinator in ArrayView
+    /*
     const_reference operator[](size_type i) const {
         #ifndef NDEBUG
         assert(i<size_);
@@ -134,6 +135,7 @@ public:
         #endif
         return *(pointer_+i);
     }
+     */
 
     // ArrayBase types do not allocate or free the storage to which they refer
     // the reset() and set() member functions are used by Coordinators when
@@ -161,6 +163,13 @@ public:
     }
 
     // begin and end iterator pairs
+    //
+    // these, along with data(), should be used only by calling code that
+    // knows about the pointer: e.g. a DeviceCoordinator that knows the memory
+    // is on the GPU. They are part of the public interface because I don't want
+    // to make them private and use friendship to access them. Furthermore, this
+    // type should never be used directly in user code: it is for implementation
+    // of the library
     pointer begin() {
         return pointer_;
     }
@@ -192,7 +201,8 @@ public:
 
     // test whether memory overlaps that referenced by other
     bool overlaps(const ArrayBase& other) const {
-        return( !((this->begin()>=other.end()) || (other.begin()>=this->end())) );
+        //return( !((this->begin()>=other.end()) || (other.begin()>=this->end())) );
+        return( !((this->data()>=other.data()+other.size()) || (other.data()>=this->data()+this->size())) );
     }
 
 private:
