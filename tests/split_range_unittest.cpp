@@ -7,25 +7,27 @@
 #include <split_range.h>
 #include <vector.h>
 
-template <typename VEC>
-void print(VEC const& v) {
-    for(auto v_: v)
-        std::cout << v_ << " ";
-    std::cout << std::endl;
-}
-
-// test that constructors work
 TEST(SplitRange, split) {
     using namespace memory;
 
     typedef HostVector<float> vector_type;
     typedef vector_type::view_type view_type;
 
-    // length constructor
-    vector_type vector(100);
+    const size_t num_splits=13;
+    const size_t range_length=100;
+
+    vector_type vector(range_length);
 
     std::vector<view_type> splits;
+    std::vector<Range> ranges;
 
-    for(auto s : SplitRange(Range(0,100), 13)) 
+    for(auto s : SplitRange(Range(0,range_length), num_splits)) {
         splits.push_back(vector(s));
+        ranges.push_back(s);
+    }
+
+    EXPECT_EQ(splits.size(), num_splits);
+    EXPECT_EQ(ranges.size(), num_splits);
+    for(int i=0; i<num_splits; ++i)
+        EXPECT_EQ(splits[i].size(), ranges[i].size());
 }
