@@ -3,15 +3,6 @@
 #include <device_coordinator.h>
 #include <storage.h>
 
-// helper function for outputting a array
-template <typename A>
-void print_array(const A& array) {
-    return;
-    for(auto v: array)
-        std::cout << v << " ";
-    std::cout << std::endl;
-}
-
 // verify that type members set correctly
 TEST(DeviceCoordinator, type_members) {
     using namespace memory;
@@ -51,7 +42,7 @@ TEST(DeviceCoordinator, arraybase_alloc_free) {
     intcoord_t coord;
 
     // test that array is a base array
-    EXPECT_TRUE(is_array_base<arr_t>::value);
+    EXPECT_TRUE(is_array_by_reference<arr_t>::value);
 
     // test that array has correct storage type
     ::testing::StaticAssertTypeEq<int, arr_t::value_type >();

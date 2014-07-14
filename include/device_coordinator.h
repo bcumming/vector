@@ -86,12 +86,13 @@ public:
     typedef T value_type;
     typedef typename Allocator_::template rebind<value_type>::other Allocator;
 
-    typedef value_type* pointer;
+    typedef       value_type* pointer;
     typedef const value_type* const_pointer;
-    typedef DeviceReference<T> reference;
+    typedef DeviceReference<T>      reference;
     typedef ConstDeviceReference<T> const_reference;
 
-    typedef ArrayBase<value_type> array_type;
+    //typedef ArrayBase<value_type> array_type;
+    typedef ArrayView<value_type, DeviceCoordinator> array_type;
 
     typedef typename types::size_type size_type;
     typedef typename types::difference_type difference_type;
@@ -139,7 +140,7 @@ public:
 
         cudaError_t status = cudaMemcpy(
                 reinterpret_cast<void*>(to.begin()),
-                reinterpret_cast<void*>(from.begin()),
+                reinterpret_cast<const void*>(from.begin()),
                 from.size()*sizeof(value_type),
                 cudaMemcpyDeviceToDevice
         );

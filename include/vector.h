@@ -5,7 +5,9 @@
 #include "definitions.h"
 #include "array.h"
 #include "host_coordinator.h"
+#ifdef WITH_CUDA
 #include "device_coordinator.h"
+#endif
 
 
 namespace memory {

@@ -33,6 +33,7 @@ TEST(DeviceVector, indexing) {
     // length constructor
     const size_t N = 10;
     DeviceVector<float> v1(N);
+
     for(int i=0; i<N; ++i)
         v1[i] = i;
 

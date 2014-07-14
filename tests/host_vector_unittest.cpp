@@ -40,7 +40,8 @@ TEST(HostVector, constructor) {
         EXPECT_EQ(float(-1), v1[i]);
 }
 
-// test that constructors work
+/*
+// test that iterators and ranges work
 TEST(HostVector, iterators_and_ranges) {
     using namespace memory;
 
@@ -70,4 +71,4 @@ TEST(HostVector, iterators_and_ranges) {
             sum+=val;
         EXPECT_EQ(float(4*100), sum);
     }
-}
+}*/
