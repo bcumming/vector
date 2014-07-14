@@ -11,6 +11,10 @@ namespace memory {
 template <typename T, class Allocator>
 class DeviceCoordinator;
 
+//template <typename T, class Allocator=AlignedAllocator<T> >
+template <typename T, class Allocator>
+class HostCoordinator;
+
 ////////////////////////////////////////////////////////////////////////////////
 namespace util {
     template <typename T, typename Allocator>
@@ -87,7 +91,7 @@ public:
     typedef DeviceReference<T> reference;
     typedef ConstDeviceReference<T> const_reference;
 
-    typedef ArrayBase<value_type> range_type;
+    typedef ArrayBase<value_type> array_type;
 
     typedef typename types::size_type size_type;
     typedef typename types::difference_type difference_type;
@@ -98,7 +102,7 @@ public:
         typedef DeviceCoordinator<Tother, Allocator> other;
     };
 
-    range_type allocate(size_type n) {
+    array_type allocate(size_type n) {
         Allocator allocator;
 
         // only allocate memory if nonzero memory allocation has been requested
@@ -111,10 +115,10 @@ public:
                   << std::endl;
         #endif
 
-        return range_type(ptr, n);
+        return array_type(ptr, n);
     }
 
-    void free(range_type& rng) {
+    void free(array_type& rng) {
         Allocator allocator;
 
         if(rng.data())
@@ -129,7 +133,7 @@ public:
     }
 
     // copy memory from one gpu range to another
-    void copy(const range_type &from, range_type &to) {
+    void copy(const array_type &from, array_type &to) {
         assert(from.size()==to.size());
         assert(!from.overlaps(to));
 
@@ -141,6 +145,34 @@ public:
         );
     }
 
+    // copy memory from host memory to device
+    template <class CoordOther>
+    void copy( const ArrayView<value_type, CoordOther> &from,
+               array_type &to) {
+        static_assert(true, "DeviceCoordinator: unable to copy from other Coordinator");
+    }
+
+    template <class Alloc>
+    void copy(const ArrayView<value_type, HostCoordinator<value_type, Alloc>> &from,
+              array_type &to) {
+        assert(from.size()==to.size());
+
+        cudaError_t status = cudaMemcpy(
+                reinterpret_cast<void*>(to.begin()),
+                reinterpret_cast<void*>(from.begin()),
+                from.size()*sizeof(value_type),
+                cudaMemcpyHostToDevice
+        );
+    }
+
+    // fill memory
+    // todo: use thrust?
+    //void fill(array_type &rng, const T& value) {
+    //}
+
+    // these shouldn't be necessary. We need to remove ArrayBase class, and
+    // have the coordinator provide both reference and pointer types that
+    // don't require explicit casts
     reference make_reference(value_type* p) {
         return reference(p);
     }
@@ -149,26 +181,6 @@ public:
         return const_reference(p);
     }
 
-    // copy memory from gpu range to host range
-    /*
-    template <typename >
-    void copy(const range_type &from, range_type &tto) {
-        // free memory associated with R2
-        assert(from.size()==to.size());
-        assert(!from.overlaps(to));
-
-        cudaError_t status = cudaMemcpy(
-                reinterpret_cast<void*>(to.begin()),
-                reinterpret_cast<void*>(from.begin()),
-                from.size()*sizeof(value_type),
-                cudaMemcpyDeviceToDevice
-        );
-    }
-    */
-
-    // fill memory
-    //void fill(range_type &rng, const T& value) {
-    //}
 };
 
 } // namespace memory

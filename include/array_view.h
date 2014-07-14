@@ -86,12 +86,10 @@ public:
     // per element accessors
     // return a reference type provided by Coordinator
     reference operator[] (size_type i) {
-        //return base::data()[i];
         return coordinator_.make_reference(base::data()+i);
     }
 
     const_reference operator[] (size_type i) const {
-        //return base::data()[i];
         return coordinator_.make_reference(base::data()+i);
     }
 
