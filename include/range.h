@@ -7,7 +7,7 @@
 namespace memory {
 
 class Range {
-  public:
+public:
     typedef std::size_t size_type;
     typedef std::ptrdiff_t difference_type;
 
@@ -64,7 +64,75 @@ class Range {
         return (left_ != other.left_) || (right_ != other.right_);
     }
 
-  private:
+    ///////////////////////////////////////////////////////////////////////////
+    // Iterator to generate a sequence of integral values
+    //
+    // Derived from input_iterator because it only makes sense to use as a read
+    // only iterator: the iterator does not refer to any external memory,
+    // instead returns to state that can only change when iterator is
+    // incremented via ++ operator
+    ///////////////////////////////////////////////////////////////////////////
+    class iterator
+    : public std::iterator<std::input_iterator_tag, size_type>
+    {
+    public:
+        /*
+        iterator(size_type first, size_type end)
+        : range_(first, end)
+        , index_(step)
+        {
+            assert(first<=end);
+        }
+        */
+
+        iterator(size_type first)
+        : index_(first)
+        {}
+
+        size_type const& operator*() const {
+            return index_;
+        }
+
+        size_type const* operator->() const {
+            return &index_;
+        }
+
+        iterator operator++(int) {
+            iterator previous(*this);
+            ++(*this);
+            return previous;
+        }
+
+        const iterator* operator++() {
+            ++index_;
+            return this;
+        }
+
+        bool operator == (const iterator& other) const {
+            return index_ == other.index_;
+        }
+
+        bool operator != (const iterator& other) const {
+            return index_ != other.index_;
+        }
+
+    private:
+        //Range range_;
+        size_type index_;
+    };
+    ///////////////////////////////////////
+
+    iterator begin() const {
+        //return iterator(left_, right_);
+        return iterator(left_);
+    }
+
+    iterator end() const {
+        //return iterator(right_, right_);
+        return iterator(right_);
+    }
+
+private:
     size_type left_;
     size_type right_;
 };

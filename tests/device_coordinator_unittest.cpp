@@ -136,9 +136,7 @@ TEST(DeviceCoordinator, host_to_device_copy) {
         std::cout << v << " ";
     std::cout << std::endl;
 
-    //for(auto &v : device_array)
-        //std::cout << v << " ";
-    for(int i=0; i<N; ++i)
+    for(auto i: Range(0,N))
         std::cout << device_array[i] << " ";
     std::cout << std::endl;
 }
