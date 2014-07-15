@@ -158,6 +158,14 @@ public:
               array_type &to) {
         assert(from.size()==to.size());
 
+        #ifndef NDEBUG
+        typedef ArrayView<value_type, HostCoordinator<value_type, Alloc>> oType;
+        std::cout << util::pretty_printer<DeviceCoordinator>::print(*this)
+                  <<  "::copy(\n\t"
+                  << util::pretty_printer<oType>::print(from) << ",\n\t"
+                  << util::pretty_printer<array_type>::print(to) << ")" << std::endl;
+        #endif
+
         cudaError_t status = cudaMemcpy(
                 reinterpret_cast<void*>(to.begin()),
                 reinterpret_cast<const void*>(from.begin()),

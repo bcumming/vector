@@ -116,27 +116,51 @@ TEST(DeviceCoordinator, overlap) {
 TEST(DeviceCoordinator, host_to_device_copy) {
     using namespace memory;
 
-    const int N = 20;
+    const int N = 100;
 
+    {
+        typedef int T;
+        typedef DeviceCoordinator<T> dc_t;
+        typedef HostCoordinator<T>   hc_t;
+        typedef ArrayView<T, dc_t> da_t;
+        typedef ArrayView<T, hc_t> ha_t;
 
-    typedef DeviceCoordinator<int> dc_t;
-    typedef HostCoordinator<int>   hc_t;
-    typedef ArrayView<int, dc_t> da_t;
-    typedef ArrayView<int, hc_t> ha_t;
+        // allocate array on host and device
+        ha_t host_array(hc_t().allocate(N));
+        da_t device_array(dc_t().allocate(N));
 
-    ha_t host_array(hc_t().allocate(N));
-    da_t device_array(dc_t().allocate(N));
+        // initialize host memory to linear sequence of integers
+        for(auto i: Range(0,N))
+            host_array[i] = T(i);
 
-    for(auto &v : host_array)
-        v = 18;
+        // copy host array to device array
+        dc_t().copy(host_array, device_array);
 
-    dc_t().copy(host_array, device_array);
+        // check that host and device values are the same
+        for(auto i: Range(0,N))
+            EXPECT_EQ( host_array[i], T(device_array[i]) );
+    }
 
-    for(auto v : host_array)
-        std::cout << v << " ";
-    std::cout << std::endl;
+    {
+        typedef double T;
+        typedef DeviceCoordinator<T> dc_t;
+        typedef HostCoordinator<T>   hc_t;
+        typedef ArrayView<T, dc_t> da_t;
+        typedef ArrayView<T, hc_t> ha_t;
 
-    for(auto i: Range(0,N))
-        std::cout << device_array[i] << " ";
-    std::cout << std::endl;
+        // allocate array on host and device
+        ha_t host_array(hc_t().allocate(N));
+        da_t device_array(dc_t().allocate(N));
+
+        // initialize host memory to linear sequence of integers
+        for(auto i: Range(0,N))
+            host_array[i] = T(i);
+
+        // copy host array to device array
+        dc_t().copy(host_array, device_array);
+
+        // check that host and device values are the same
+        for(auto i: Range(0,N))
+            EXPECT_EQ( host_array[i], T(device_array[i]) );
+    }
 }
