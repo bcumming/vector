@@ -17,18 +17,23 @@ namespace impl {
     template <size_t x>
     struct is_power_of_two : std::integral_constant< bool, !(x&(x-1)) > {};
 
-    // meta function that returns the smallest power of two that is strictly greater than x
+    // meta function that returns the smallest power of two that is strictly
+    // greater than x
     template <size_t x, size_t p=1>
     struct next_power_of_two
-        : std::integral_constant< size_t, next_power_of_two<x-(x&p), (p<<1) >::value > {};
-    template <size_t p>
-    struct next_power_of_two<0,p>
-        : std::integral_constant< size_t, p > {};
+    : std::integral_constant< size_t,
+        next_power_of_two<x-(x&p), (p<<1)>::value>
+    {};
 
-    // metafunction that returns the smallest power of two that is greater than or equal to x
+    template <size_t p>
+    struct next_power_of_two<0,p> : std::integral_constant< size_t, p > {};
+
+    // metafunction that returns the smallest power of two that is greater than
+    // or equal to x
     template <size_t x>
     struct round_up_power_of_two
-        : std::integral_constant< size_t, is_power_of_two<x>::value ? x : next_power_of_two<x>::value >
+    : std::integral_constant<size_t,
+        is_power_of_two<x>::value ? x : next_power_of_two<x>::value >
     {};
 
     // metafunction that returns the smallest power of two that is greater than
@@ -43,7 +48,8 @@ namespace impl {
     // function that allocates memory with alignment specified as a template parameter
     template <typename T, size_t alignment=minimum_possible_alignment<T>::value>
     T* aligned_malloc(size_t size) {
-        // double check that alignment is a multiple of sizeof(void*), a prerequisite for posix_memalign()
+        // double check that alignment is a multiple of sizeof(void*),
+        // which is a prerequisite for posix_memalign()
         static_assert( !(alignment%sizeof(void*)),
                 "alignment is not a multiple of sizeof(void*)");
         static_assert( is_power_of_two<alignment>::value,
@@ -74,18 +80,21 @@ namespace impl {
         public:
             void *allocate_policy(size_t size) {
                 // first allocate memory with the desired alignment
-                void* ptr = reinterpret_cast<void *>(aligned_malloc<char, Alignment>(size));
+                void* ptr = reinterpret_cast<void *>
+                                (aligned_malloc<char, Alignment>(size));
 
                 if(ptr == nullptr)
                     return nullptr;
 
                 // now register the memory with CUDA
-                cudaError_t status  = cudaHostRegister(ptr, size, cudaHostRegisterPortable);
+                cudaError_t status
+                    = cudaHostRegister(ptr, size, cudaHostRegisterPortable);
 
                 // check that there were no CUDA errors
                 if(status != cudaSuccess) {
                     #ifndef NDEBUG
-                    std::cerr << "ERROR :: pinned_policy :: unable to register host memory with with cudaHostRegister" << std::endl;
+                    std::cerr << "ERROR :: Pinned :: unable to register host memory with with cudaHostRegister"
+                              << std::endl;
                     #endif
                     // free the memory before returning nullptr
                     free(ptr);
@@ -113,7 +122,8 @@ namespace impl {
 
                 if(status != cudaSuccess) {
                     #ifndef NDEBUG
-                    std::cerr << "ERROR :: unable to allocate memory with cudaMalloc" << std::endl;
+                    std::cerr << "ERROR :: unable to allocate memory with cudaMalloc"
+                              << std::endl;
                     #endif
                     return nullptr; // return null on failure
                 }
@@ -198,7 +208,7 @@ namespace util {
     struct type_printer<impl::AlignedPolicy<Alignment>>{
         static std::string print() {
             std::stringstream str;
-            str << "aligned_policy<" << Alignment << ">";
+            str << "AlignedPolicy<" << Alignment << ">";
             return str.str();
         }
     };
@@ -208,7 +218,7 @@ namespace util {
     struct type_printer<impl::cuda::PinnedPolicy<Alignment>>{
         static std::string print() {
             std::stringstream str;
-            str << "pinned_policy<" << Alignment << ">";
+            str << "PinnedPolicy<" << Alignment << ">";
             return str.str();
         }
     };
@@ -216,7 +226,7 @@ namespace util {
     template <>
     struct type_printer<impl::cuda::DevicePolicy>{
         static std::string print() {
-            return std::string("device_policy");
+            return std::string("DevicePolicy");
         }
     };
 #endif
@@ -225,7 +235,7 @@ namespace util {
     struct type_printer<Allocator<T,Policy>>{
         static std::string print() {
             std::stringstream str;
-            str << "allocator<" << type_printer<T>::print()
+            str << "Allocator<" << type_printer<T>::print()
                 << ", " << type_printer<Policy>::print() << ">";
             return str.str();
         }
@@ -238,8 +248,8 @@ using AlignedAllocator = Allocator<T, impl::AlignedPolicy<alignment>>;
 
 #ifdef WITH_CUDA
 // for pinned allocation we set the default alignment to correspond to the
-// alignment of a page (4096 bytes), because by default pinned memory is
-// allocated at page boundaries.
+// alignment of a page (4096 bytes), because pinned memory is allocated at page
+// boundaries.
 template <class T, size_t alignment=4096>
 using PinnedAllocator = Allocator<T, impl::cuda::PinnedPolicy<alignment>>;
 

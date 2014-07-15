@@ -12,6 +12,9 @@ namespace types {
 
 namespace util {
 
+    // forward declare type printer
+    template <typename T> struct type_printer;
+
     template <typename T>
     struct pretty_printer{
         static std::string print(const T& val) {
@@ -42,6 +45,19 @@ namespace util {
         static std::string print(const size_t& val) {
             std::stringstream str;
             str << "size_t(" << val << ")";
+            return str.str();
+        }
+    };
+
+    template <typename First, typename Second>
+    struct pretty_printer<std::pair<First, Second>>{
+        typedef std::pair<First, Second> T;
+        static std::string print(const T& val) {
+            std::stringstream str;
+            str << type_printer<T>::print()
+                << "(\n\t" << pretty_printer<First>::print(val.first)
+                << ",\n\t" << pretty_printer<Second>::print(val.second)
+                << ")";
             return str.str();
         }
     };
@@ -78,6 +94,17 @@ namespace util {
     struct type_printer<int>{
         static std::string print() {
             return std::string("int");
+        }
+    };
+
+    // std::pair printer
+    template <typename First, typename Second>
+    struct type_printer<std::pair<First, Second>>{
+        static std::string print() {
+            std::stringstream str;
+            str << "std::pair<" << type_printer<First>::print()
+                << ", " << type_printer<Second>::print() << ">";
+            return str.str();
         }
     };
 } // namespace util

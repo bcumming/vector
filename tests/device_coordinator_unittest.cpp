@@ -112,8 +112,8 @@ TEST(DeviceCoordinator, overlap) {
     EXPECT_TRUE(array(10,end).overlaps(array(0,11)));
 }
 
-// test copy from host to device memory works
-TEST(DeviceCoordinator, host_to_device_copy) {
+// test copy from host to device memory works for unpinned host memory
+TEST(DeviceCoordinator, host_to_device_copy_synchronous) {
     using namespace memory;
 
     const int N = 100;
@@ -157,7 +157,67 @@ TEST(DeviceCoordinator, host_to_device_copy) {
             host_array[i] = T(i);
 
         // copy host array to device array
+        auto event = dc_t().copy(host_array, device_array);
+        std::cout << util::type_printer<decltype(event)>::print() << std::endl;
+        //std::cout << util::pretty_printer<decltype(event)>::print(event) << std::endl;
+
+        // check that host and device values are the same
+        for(auto i: Range(0,N))
+            EXPECT_EQ( host_array[i], T(device_array[i]) );
+    }
+}
+
+template <typename T>
+using PinnedCoord = memory::HostCoordinator<T, memory::PinnedAllocator<T>>;
+
+// test copy from host to device memory works for pinned host memory
+TEST(DeviceCoordinator, host_to_device_copy_asynchronous) {
+    using namespace memory;
+
+    const int N = 100;
+
+    {
+        typedef int T;
+        typedef DeviceCoordinator<T> dc_t;
+        typedef PinnedCoord<T>   hc_t;
+        typedef ArrayView<T, dc_t> da_t;
+        typedef ArrayView<T, hc_t> ha_t;
+
+        // allocate array on host and device
+        ha_t host_array(hc_t().allocate(N));
+        da_t device_array(dc_t().allocate(N));
+
+        // initialize host memory to linear sequence of integers
+        for(auto i: Range(0,N))
+            host_array[i] = T(i);
+
+        // copy host array to device array
         dc_t().copy(host_array, device_array);
+
+        // check that host and device values are the same
+        for(auto i: Range(0,N))
+            EXPECT_EQ( host_array[i], T(device_array[i]) );
+    }
+
+    {
+        typedef double T;
+        typedef DeviceCoordinator<T> dc_t;
+        typedef PinnedCoord<T>   hc_t;
+        typedef ArrayView<T, dc_t> da_t;
+        typedef ArrayView<T, hc_t> ha_t;
+
+        // allocate array on host and device
+        ha_t host_array(hc_t().allocate(N));
+        da_t device_array(dc_t().allocate(N));
+
+        // initialize host memory to linear sequence of integers
+        for(auto i: Range(0,N))
+            host_array[i] = T(i);
+
+        // copy host array to device array
+        auto event = dc_t().copy(host_array, device_array);
+        std::cout << util::type_printer<decltype(event)>::print() << std::endl;
+        //std::cout << util::pretty_printer<decltype(event)>::print(event) << std::endl;
 
         // check that host and device values are the same
         for(auto i: Range(0,N))

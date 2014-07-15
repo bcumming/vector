@@ -1,8 +1,9 @@
 #pragma once
 
-#include "definitions.h"
-#include "array.h"
 #include "allocator.h"
+#include "array.h"
+#include "definitions.h"
+#include "event.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace memory {
@@ -154,14 +155,16 @@ public:
     }
 
     template <class Alloc>
-    void copy(const ArrayView<value_type, HostCoordinator<value_type, Alloc>> &from,
-              array_type &to) {
+    std::pair<SynchEvent, array_type>
+    copy(const ArrayView<value_type, HostCoordinator<value_type, Alloc>> &from,
+         array_type &to) {
         assert(from.size()==to.size());
 
         #ifndef NDEBUG
         typedef ArrayView<value_type, HostCoordinator<value_type, Alloc>> oType;
-        std::cout << util::pretty_printer<DeviceCoordinator>::print(*this)
-                  <<  "::copy(\n\t"
+        std::cout << "synchronous copy from host to device memory :\n  " 
+                  << util::pretty_printer<DeviceCoordinator>::print(*this)
+                  << "::copy(\n\t"
                   << util::pretty_printer<oType>::print(from) << ",\n\t"
                   << util::pretty_printer<array_type>::print(to) << ")" << std::endl;
         #endif
@@ -172,6 +175,39 @@ public:
                 from.size()*sizeof(value_type),
                 cudaMemcpyHostToDevice
         );
+
+        return std::make_pair(SynchEvent(), to);
+    }
+
+    template <size_t alignment>
+    std::pair<CUDAEvent, array_type>
+    copy(const ArrayView<
+                value_type,
+                HostCoordinator<
+                    value_type,
+                    PinnedAllocator<
+                        value_type,
+                        alignment>>> &from,
+         array_type &to) {
+        assert(from.size()==to.size());
+
+        #ifndef NDEBUG
+        typedef ArrayView<value_type, HostCoordinator<value_type, Alloc>> oType;
+        std::cout << "asynchronous copy from host to device memory :\n  "
+                  << util::pretty_printer<DeviceCoordinator>::print(*this)
+                  << "::copy(\n\t"
+                  << util::pretty_printer<oType>::print(from) << ",\n\t"
+                  << util::pretty_printer<array_type>::print(to) << ")" << std::endl;
+        #endif
+
+        cudaError_t status = cudaMemcpy(
+                reinterpret_cast<void*>(to.begin()),
+                reinterpret_cast<const void*>(from.begin()),
+                from.size()*sizeof(value_type),
+                cudaMemcpyHostToDevice
+        );
+
+        return std::make_pair(CUDAEvent(), to);
     }
 
     // fill memory
@@ -189,7 +225,6 @@ public:
     const_reference make_reference(value_type const* p) const {
         return const_reference(p);
     }
-
 };
 
 } // namespace memory
