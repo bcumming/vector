@@ -168,8 +168,8 @@ public:
 
     // access using a Range
     ArrayView operator()(Range const& range) {
-        size_type left = range.begin();
-        size_type right = range.end();
+        size_type left = range.left();
+        size_type right = range.right();
 #ifndef NDEBUG
         assert(right<=size_ && left<=right);
 #endif

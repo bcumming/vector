@@ -160,7 +160,7 @@ public:
 
         cudaError_t status = cudaMemcpy(
                 reinterpret_cast<void*>(to.begin()),
-                reinterpret_cast<void*>(from.begin()),
+                reinterpret_cast<const void*>(from.begin()),
                 from.size()*sizeof(value_type),
                 cudaMemcpyHostToDevice
         );

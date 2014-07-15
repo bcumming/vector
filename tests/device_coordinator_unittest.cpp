@@ -1,6 +1,7 @@
 #include "gtest.h"
 
 #include <device_coordinator.h>
+#include <host_coordinator.h>
 #include <storage.h>
 
 // verify that type members set correctly
@@ -109,4 +110,35 @@ TEST(DeviceCoordinator, overlap) {
     EXPECT_TRUE(array(all).overlaps(array(all)));
     EXPECT_TRUE(array(0,11).overlaps(array(10,end)));
     EXPECT_TRUE(array(10,end).overlaps(array(0,11)));
+}
+
+// test copy from host to device memory works
+TEST(DeviceCoordinator, host_to_device_copy) {
+    using namespace memory;
+
+    const int N = 20;
+
+
+    typedef DeviceCoordinator<int> dc_t;
+    typedef HostCoordinator<int>   hc_t;
+    typedef ArrayView<int, dc_t> da_t;
+    typedef ArrayView<int, hc_t> ha_t;
+
+    ha_t host_array(hc_t().allocate(N));
+    da_t device_array(dc_t().allocate(N));
+
+    for(auto &v : host_array)
+        v = 18;
+
+    dc_t().copy(host_array, device_array);
+
+    for(auto v : host_array)
+        std::cout << v << " ";
+    std::cout << std::endl;
+
+    //for(auto &v : device_array)
+        //std::cout << v << " ";
+    for(int i=0; i<N; ++i)
+        std::cout << device_array[i] << " ";
+    std::cout << std::endl;
 }

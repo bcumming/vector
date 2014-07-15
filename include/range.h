@@ -12,65 +12,65 @@ class Range {
     typedef std::ptrdiff_t difference_type;
 
     Range()
-    : ibegin_(0), iend_(0)
+    : left_(0), right_(0)
     {}
 
     explicit Range(size_type n)
-    : ibegin_(0), iend_(n)
+    : left_(0), right_(n)
     {}
 
     Range(size_type b, size_type e)
-    : ibegin_(b), iend_(e)
+    : left_(b), right_(e)
     {}
 
     Range(Range const& other) = default;
 
     size_type size() const {
-        return iend_ - ibegin_;
+        return right_ - left_;
     }
 
-    size_type begin() const {
-        return ibegin_;
+    size_type left() const {
+        return left_;
     }
 
-    size_type end() const {
-        return iend_;
+    size_type right() const {
+        return right_;
     }
 
     void set(size_type b, size_type e) {
-        ibegin_ = b;
-        iend_ = e;
+        left_ = b;
+        right_ = e;
     }
 
     Range& operator +=(size_type n) {
-        ibegin_ += n;
-        iend_ += n;
+        left_ += n;
+        right_ += n;
 
         return (*this);
     }
 
     Range& operator -=(size_type n) {
-        ibegin_ -= n;
-        iend_   -= n;
+        left_ -= n;
+        right_   -= n;
 
         return (*this);
     }
 
     bool operator == (const Range& other) const {
-        return (ibegin_ == other.ibegin_) && (iend_ == other.iend_);
+        return (left_ == other.left_) && (right_ == other.right_);
     }
 
     bool operator != (const Range& other) const {
-        return (ibegin_ != other.ibegin_) || (iend_ != other.iend_);
+        return (left_ != other.left_) || (right_ != other.right_);
     }
 
   private:
-    size_type ibegin_;
-    size_type iend_;
+    size_type left_;
+    size_type right_;
 };
 
 static std::ostream& operator << (std::ostream& os, const Range& rng) {
-    os << "[" << rng.begin() << ":" << rng.end() << "]";
+    os << "[" << rng.left() << ":" << rng.right() << "]";
     return os;
 }
 
