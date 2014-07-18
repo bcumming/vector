@@ -158,8 +158,7 @@ TEST(DeviceCoordinator, host_to_device_copy_synchronous) {
 
         // copy host array to device array
         auto event = dc_t().copy(host_array, device_array);
-        std::cout << util::type_printer<decltype(event)>::print() << std::endl;
-        //std::cout << util::pretty_printer<decltype(event)>::print(event) << std::endl;
+        //std::cout << util::type_printer<decltype(event)>::print() << std::endl;
 
         // check that host and device values are the same
         for(auto i: Range(0,N))
@@ -192,7 +191,7 @@ TEST(DeviceCoordinator, host_to_device_copy_asynchronous) {
             host_array[i] = T(i);
 
         // copy host array to device array
-        dc_t().copy(host_array, device_array);
+        auto event = dc_t().copy(host_array, device_array);
 
         // check that host and device values are the same
         for(auto i: Range(0,N))
@@ -216,8 +215,9 @@ TEST(DeviceCoordinator, host_to_device_copy_asynchronous) {
 
         // copy host array to device array
         auto event = dc_t().copy(host_array, device_array);
-        std::cout << util::type_printer<decltype(event)>::print() << std::endl;
-        //std::cout << util::pretty_printer<decltype(event)>::print(event) << std::endl;
+
+        //std::cout << util::type_printer<decltype(event)>::print() << std::endl;
+        //std::cout << "I have event " << event.first.event() << std::endl;
 
         // check that host and device values are the same
         for(auto i: Range(0,N))

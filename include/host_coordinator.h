@@ -5,7 +5,7 @@
 
 #include "definitions.h"
 #include "array.h"
-#include "allocator.h"
+#include "Allocator.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace memory {

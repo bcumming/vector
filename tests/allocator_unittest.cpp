@@ -1,6 +1,6 @@
 #include "gtest.h"
 
-#include <allocator.h>
+#include <Allocator.h>
 #include <host_coordinator.h>
 #include <storage.h>
 

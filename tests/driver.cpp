@@ -4,6 +4,8 @@
 
 #include "gtest.h"
 
+//#include <mpi.h>
+
 #ifdef WITH_CUDA
 #include <cuda.h>
 #include <cuda_runtime.h>
@@ -15,6 +17,8 @@ bool initialize_cuda() {
 #endif
 
 int main(int argc, char **argv) {
+    //MPI_Init(&argc, &argv);
+
     #ifdef WITH_CUDA
     // if testing with CUDA turned on, first check that we can initialize CUDA
     if(!initialize_cuda()) {
@@ -25,5 +29,6 @@ int main(int argc, char **argv) {
 
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
+    //MPI_Finalize();
 }
 

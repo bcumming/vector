@@ -76,15 +76,6 @@ public:
     : public std::iterator<std::input_iterator_tag, size_type>
     {
     public:
-        /*
-        iterator(size_type first, size_type end)
-        : range_(first, end)
-        , index_(step)
-        {
-            assert(first<=end);
-        }
-        */
-
         iterator(size_type first)
         : index_(first)
         {}
@@ -117,18 +108,15 @@ public:
         }
 
     private:
-        //Range range_;
         size_type index_;
     };
     ///////////////////////////////////////
 
     iterator begin() const {
-        //return iterator(left_, right_);
         return iterator(left_);
     }
 
     iterator end() const {
-        //return iterator(right_, right_);
         return iterator(right_);
     }
 

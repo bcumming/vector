@@ -1,9 +1,10 @@
 #pragma once
 
-#include "allocator.h"
+#include "Allocator.h"
 #include "array.h"
 #include "definitions.h"
-#include "event.h"
+#include "Event.h"
+#include "CudaEvent.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace memory {
@@ -49,7 +50,7 @@ public:
 
     operator T() const {
         T tmp;
-        cudaMemcpy(&tmp, pointer_, sizeof(T), cudaMemcpyDeviceToHost );
+        cudaMemcpy(&tmp, pointer_, sizeof(T), cudaMemcpyDeviceToHost);
         return T(tmp);
     }
 
@@ -66,13 +67,13 @@ public:
     DeviceReference(pointer p) : pointer_(p) {}
 
     DeviceReference& operator = (const T& value) {
-        cudaMemcpy(pointer_, &value, sizeof(T), cudaMemcpyHostToDevice );
+        cudaMemcpy(pointer_, &value, sizeof(T), cudaMemcpyHostToDevice);
         return *this;
     }
 
     operator T() const {
         T tmp;
-        cudaMemcpy(&tmp, pointer_, sizeof(T), cudaMemcpyDeviceToHost );
+        cudaMemcpy(&tmp, pointer_, sizeof(T), cudaMemcpyDeviceToHost);
         return T(tmp);
     }
 
@@ -155,7 +156,7 @@ public:
     }
 
     template <class Alloc>
-    std::pair<SynchEvent, array_type>
+    util::pair<SynchEvent, array_type>
     copy(const ArrayView<value_type, HostCoordinator<value_type, Alloc>> &from,
          array_type &to) {
         assert(from.size()==to.size());
@@ -176,11 +177,11 @@ public:
                 cudaMemcpyHostToDevice
         );
 
-        return std::make_pair(SynchEvent(), to);
+        return util::make_pair(SynchEvent(), to);
     }
 
     template <size_t alignment>
-    std::pair<CUDAEvent, array_type>
+    util::pair<CudaEvent, array_type>
     copy(const ArrayView<
                 value_type,
                 HostCoordinator<
@@ -192,7 +193,8 @@ public:
         assert(from.size()==to.size());
 
         #ifndef NDEBUG
-        typedef ArrayView<value_type, HostCoordinator<value_type, Alloc>> oType;
+        typedef ArrayView< value_type, HostCoordinator< value_type, PinnedAllocator< value_type, alignment>>> oType;
+        //typedef ArrayView<value_type, HostCoordinator<value_type, Alloc>> oType;
         std::cout << "asynchronous copy from host to device memory :\n  "
                   << util::pretty_printer<DeviceCoordinator>::print(*this)
                   << "::copy(\n\t"
@@ -207,7 +209,8 @@ public:
                 cudaMemcpyHostToDevice
         );
 
-        return std::make_pair(CUDAEvent(), to);
+        CudaEvent event;
+        return util::make_pair(event, to);
     }
 
     // fill memory
