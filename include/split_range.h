@@ -43,7 +43,7 @@ class SplitRange {
           {
               assert(first<=end);
 
-              if(range_.end()>end)
+              if(range_.right()>end)
                   range_.set(first, end);
           }
 
@@ -72,11 +72,11 @@ class SplitRange {
               // to be passed off to a team of worker threads, so that sub-range
               // lookup can be performed in constant time, not linear time as is
               // the case with a forward iterator.
-              size_type first = range_.begin()+step_;
+              size_type first = range_.left()+step_;
               if(first>end_)
                   first=end_;
 
-              size_type last = range_.end()+step_;
+              size_type last = range_.right()+step_;
               if(last>end_)
                   last=end_;
 
@@ -102,11 +102,11 @@ class SplitRange {
     ///////////////////////////////////////
 
     iterator begin() const {
-        return iterator(range_.begin(), range_.end(), step_);
+        return iterator(range_.left(), range_.right(), step_);
     }
 
     iterator end() const {
-        return iterator(range_.end(), range_.end(), step_);
+        return iterator(range_.right(), range_.right(), step_);
     }
 
     size_type step_size() const {

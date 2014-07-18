@@ -6,21 +6,20 @@ Prototype simple vector storage with ranges and support for seamless CPU-GPU int
 Starts with concept of an array, which is a wrapper around a pointer and a length:
 
 ``` cpp
-template <class T>
-class ArrayBase {
+template <class T, class Coordinator>
+class ArrayView {
     ...
     size_t size_;
     T* pointer_;
 }
 ```
-
-These are coupled with a stateless Coordinator type, which performs memory operations like allocation, copy, and so on. This sounds like an allocator, and indeed Coordinators take an allocator type as a template parameter. Coordinators can be specialized with allocators that allocate memory in "incompatible" memory spaces, for example GPU device memory or HDF5 storage.
+which are coupled with a stateless Coordinator type, which performs memory operations like allocation, copy, and so on. This sounds like an allocator, and indeed Coordinators take an allocator type as a template parameter. Coordinators can be specialized with allocators that allocate memory in "incompatible" memory spaces, for example GPU device memory or HDF5 storage.
 
 Coordinators are used to copy memory from one memory space to another, and dispatching execution on the data according to where it is located (launch a CUDA version of a kernel if the data is on a GPU, or a host version if on the host)
 
-The ArrayView type inherits from ArrayBase, taking a Coordinator type as a template parameter, binding the (pointer,size) tupple of an ArrayBase with a memory space. The Array type derives from this, adding constructor and desctructor that use Coordinator to allocate and free memory.
+The ArrayView type binds the (pointer,size) tupple with a memory space. The Array type derives from this, adding constructor and desctructor that use Coordinator to allocate and free memory.
 
-ArrayBase <- ArrayView <- Array
+ArrayView <- Array
 
 The concept of simple ranges are also supported:
 ```cpp

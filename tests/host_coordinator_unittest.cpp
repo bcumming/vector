@@ -49,7 +49,8 @@ TEST(HostCoordinator, baserange_alloc_free) {
     intcoord_t coord;
 
     // test that range is a base range
-    EXPECT_TRUE(is_array_base<rng_t>::value);
+    //EXPECT_TRUE(is_array_base<rng_t>::value);
+    EXPECT_TRUE(is_array_by_reference<rng_t>::value);
 
     // test that range has correct storage type
     ::testing::StaticAssertTypeEq<int, rng_t::value_type >();

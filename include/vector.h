@@ -2,10 +2,13 @@
 
 #include <iostream>
 
-#include "definitions.h"
 #include "array.h"
+#include "definitions.h"
 #include "host_coordinator.h"
+
+#ifdef WITH_CUDA
 #include "device_coordinator.h"
+#endif
 
 
 namespace memory {

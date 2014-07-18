@@ -1,8 +1,10 @@
 #pragma once
 
-#include "definitions.h"
+#include "Allocator.h"
 #include "array.h"
-#include "allocator.h"
+#include "definitions.h"
+#include "Event.h"
+#include "CudaEvent.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace memory {
@@ -10,6 +12,10 @@ namespace memory {
 // forward declare
 template <typename T, class Allocator>
 class DeviceCoordinator;
+
+//template <typename T, class Allocator=AlignedAllocator<T> >
+template <typename T, class Allocator>
+class HostCoordinator;
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace util {
@@ -44,7 +50,7 @@ public:
 
     operator T() const {
         T tmp;
-        cudaMemcpy(&tmp, pointer_, sizeof(T), cudaMemcpyDeviceToHost );
+        cudaMemcpy(&tmp, pointer_, sizeof(T), cudaMemcpyDeviceToHost);
         return T(tmp);
     }
 
@@ -61,13 +67,13 @@ public:
     DeviceReference(pointer p) : pointer_(p) {}
 
     DeviceReference& operator = (const T& value) {
-        cudaMemcpy(pointer_, &value, sizeof(T), cudaMemcpyHostToDevice );
+        cudaMemcpy(pointer_, &value, sizeof(T), cudaMemcpyHostToDevice);
         return *this;
     }
 
     operator T() const {
         T tmp;
-        cudaMemcpy(&tmp, pointer_, sizeof(T), cudaMemcpyDeviceToHost );
+        cudaMemcpy(&tmp, pointer_, sizeof(T), cudaMemcpyDeviceToHost);
         return T(tmp);
     }
 
@@ -82,12 +88,13 @@ public:
     typedef T value_type;
     typedef typename Allocator_::template rebind<value_type>::other Allocator;
 
-    typedef value_type* pointer;
+    typedef       value_type* pointer;
     typedef const value_type* const_pointer;
-    typedef DeviceReference<T> reference;
+    typedef DeviceReference<T>      reference;
     typedef ConstDeviceReference<T> const_reference;
 
-    typedef ArrayBase<value_type> range_type;
+    //typedef ArrayBase<value_type> array_type;
+    typedef ArrayView<value_type, DeviceCoordinator> array_type;
 
     typedef typename types::size_type size_type;
     typedef typename types::difference_type difference_type;
@@ -98,7 +105,7 @@ public:
         typedef DeviceCoordinator<Tother, Allocator> other;
     };
 
-    range_type allocate(size_type n) {
+    array_type allocate(size_type n) {
         Allocator allocator;
 
         // only allocate memory if nonzero memory allocation has been requested
@@ -111,10 +118,10 @@ public:
                   << std::endl;
         #endif
 
-        return range_type(ptr, n);
+        return array_type(ptr, n);
     }
 
-    void free(range_type& rng) {
+    void free(array_type& rng) {
         Allocator allocator;
 
         if(rng.data())
@@ -129,18 +136,91 @@ public:
     }
 
     // copy memory from one gpu range to another
-    void copy(const range_type &from, range_type &to) {
+    void copy(const array_type &from, array_type &to) {
         assert(from.size()==to.size());
         assert(!from.overlaps(to));
 
         cudaError_t status = cudaMemcpy(
                 reinterpret_cast<void*>(to.begin()),
-                reinterpret_cast<void*>(from.begin()),
+                reinterpret_cast<const void*>(from.begin()),
                 from.size()*sizeof(value_type),
                 cudaMemcpyDeviceToDevice
         );
     }
 
+    // copy memory from host memory to device
+    template <class CoordOther>
+    void copy( const ArrayView<value_type, CoordOther> &from,
+               array_type &to) {
+        static_assert(true, "DeviceCoordinator: unable to copy from other Coordinator");
+    }
+
+    template <class Alloc>
+    util::pair<SynchEvent, array_type>
+    copy(const ArrayView<value_type, HostCoordinator<value_type, Alloc>> &from,
+         array_type &to) {
+        assert(from.size()==to.size());
+
+        #ifndef NDEBUG
+        typedef ArrayView<value_type, HostCoordinator<value_type, Alloc>> oType;
+        std::cout << "synchronous copy from host to device memory :\n  " 
+                  << util::pretty_printer<DeviceCoordinator>::print(*this)
+                  << "::copy(\n\t"
+                  << util::pretty_printer<oType>::print(from) << ",\n\t"
+                  << util::pretty_printer<array_type>::print(to) << ")" << std::endl;
+        #endif
+
+        cudaError_t status = cudaMemcpy(
+                reinterpret_cast<void*>(to.begin()),
+                reinterpret_cast<const void*>(from.begin()),
+                from.size()*sizeof(value_type),
+                cudaMemcpyHostToDevice
+        );
+
+        return util::make_pair(SynchEvent(), to);
+    }
+
+    template <size_t alignment>
+    util::pair<CudaEvent, array_type>
+    copy(const ArrayView<
+                value_type,
+                HostCoordinator<
+                    value_type,
+                    PinnedAllocator<
+                        value_type,
+                        alignment>>> &from,
+         array_type &to) {
+        assert(from.size()==to.size());
+
+        #ifndef NDEBUG
+        typedef ArrayView< value_type, HostCoordinator< value_type, PinnedAllocator< value_type, alignment>>> oType;
+        //typedef ArrayView<value_type, HostCoordinator<value_type, Alloc>> oType;
+        std::cout << "asynchronous copy from host to device memory :\n  "
+                  << util::pretty_printer<DeviceCoordinator>::print(*this)
+                  << "::copy(\n\t"
+                  << util::pretty_printer<oType>::print(from) << ",\n\t"
+                  << util::pretty_printer<array_type>::print(to) << ")" << std::endl;
+        #endif
+
+        cudaError_t status = cudaMemcpy(
+                reinterpret_cast<void*>(to.begin()),
+                reinterpret_cast<const void*>(from.begin()),
+                from.size()*sizeof(value_type),
+                cudaMemcpyHostToDevice
+        );
+
+        CudaEvent event;
+        return util::make_pair(event, to);
+    }
+
+    // fill memory
+    // todo: use thrust?
+    //void fill(array_type &rng, const T& value) {
+    //}
+
+    // these shouldn't be necessary. We need to remove ArrayBase class, and
+    // have the coordinator provide both reference and pointer types that
+    // don't require explicit casts
     reference make_reference(value_type* p) {
         return reference(p);
     }
@@ -148,27 +228,6 @@ public:
     const_reference make_reference(value_type const* p) const {
         return const_reference(p);
     }
-
-    // copy memory from gpu range to host range
-    /*
-    template <typename >
-    void copy(const range_type &from, range_type &tto) {
-        // free memory associated with R2
-        assert(from.size()==to.size());
-        assert(!from.overlaps(to));
-
-        cudaError_t status = cudaMemcpy(
-                reinterpret_cast<void*>(to.begin()),
-                reinterpret_cast<void*>(from.begin()),
-                from.size()*sizeof(value_type),
-                cudaMemcpyDeviceToDevice
-        );
-    }
-    */
-
-    // fill memory
-    //void fill(range_type &rng, const T& value) {
-    //}
 };
 
 } // namespace memory

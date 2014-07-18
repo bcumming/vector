@@ -9,6 +9,7 @@
 
 #include <type_traits>
 
+#include "definitions.h"
 #include "array_view.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -65,7 +66,6 @@ public:
     typedef T value_type;
     typedef ArrayView<value_type, Coord> base;
     typedef ArrayView<value_type, Coord> view_type;
-    typedef typename view_type::base view_base;
 
     typedef typename Coord::template rebind<value_type>::other coordinator_type;
 
@@ -78,8 +78,8 @@ public:
     typedef value_type const& const_reference;
 
     // default constructor
-    // we have to call constructor in ArrayView: pass view_base
-    Array() : base(view_base(nullptr, 0)) {}
+    // we have to call constructor in ArrayView: pass base
+    Array() : base(nullptr, 0) {}
 
     // constructor by size
     explicit Array(const size_t &n)
@@ -115,13 +115,13 @@ public:
     explicit Array(const view_type& other)
         : base(coordinator_type().allocate(other.size()))
     {
-        coordinator_.copy(static_cast<view_base const&>(other), *this);
+        coordinator_.copy(static_cast<base const&>(other), *this);
     }
 
     explicit Array(const Array& other)
         : base(coordinator_type().allocate(other.size()))
     {
-        coordinator_.copy(static_cast<view_base const&>(other), *this);
+        coordinator_.copy(static_cast<base const&>(other), *this);
     }
 
     // have to free the memory in a "by value" range

@@ -5,7 +5,7 @@
 
 #include "definitions.h"
 #include "array.h"
-#include "allocator.h"
+#include "Allocator.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace memory {
@@ -42,12 +42,12 @@ class HostCoordinator {
 public:
     typedef T value_type;
 
-    typedef value_type* pointer;
+    typedef       value_type* pointer;
     typedef const value_type* const_pointer;
-    typedef value_type& reference;
+    typedef       value_type& reference;
     typedef const value_type& const_reference;
 
-    typedef ArrayBase<value_type> range_type;
+    typedef ArrayView<value_type, HostCoordinator> range_type;
 
     typedef typename types::size_type size_type;
     typedef typename types::difference_type difference_type;
@@ -92,7 +92,6 @@ public:
 
     // copy memory from one range into another
     void copy(const range_type &from, range_type &to) {
-        // free memory associated with R2
         assert(from.size()==to.size());
         assert(!from.overlaps(to));
 
