@@ -217,7 +217,8 @@ TEST(DeviceCoordinator, host_to_device_copy_asynchronous) {
         auto event = dc_t().copy(host_array, device_array);
 
         //std::cout << util::type_printer<decltype(event)>::print() << std::endl;
-        //std::cout << "I have event " << event.first.event() << std::endl;
+        auto &event_ref = event.first;
+        event_ref.wait();
 
         // check that host and device values are the same
         for(auto i: Range(0,N))

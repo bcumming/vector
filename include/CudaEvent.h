@@ -45,7 +45,9 @@ public:
     ~CudaEvent() {
 #ifndef NDEBUG
         std::cout << "CudaEvent< " << event() << " > :: destruct count = "
-                  << event_.use_count() << std::endl;
+                  << event_.use_count()
+                  << " " << (event_.unique() ? " deleting" : "")
+                  << std::endl;
 #endif
         if(event_.unique())
             cudaEventDestroy(event());

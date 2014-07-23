@@ -26,14 +26,12 @@ struct pair
         second(b)
     {}
 
-
     template<class U1, class U2>
     pair(const pair<U1, U2>& p)
     :   first(p.first),
         second(p.second)
     {}
 
-    /*
     template<class U1, class U2>
     pair(U1&& x, U2&& y)
     :    first(std::forward<U1>(x)),
@@ -44,7 +42,6 @@ struct pair
     :    first(std::move(p.first)),
          second(std::move(p.second))
     {}
-    */
 };
 
 template<class T1, class T2>
