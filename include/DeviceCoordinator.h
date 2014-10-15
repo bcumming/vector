@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Allocator.h"
-#include "array.h"
+#include "Array.h"
 #include "definitions.h"
 #include "Event.h"
 #include "CudaEvent.h"

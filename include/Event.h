@@ -1,5 +1,7 @@
 #pragma once
 
+#include <utility>
+
 #include "definitions.h"
 
 namespace memory {
@@ -7,6 +9,7 @@ namespace memory {
 enum EventStatus {kEventBusy, kEventReady};
 
 namespace util {
+/*
 template<class T1, class T2>
 struct pair
 {
@@ -55,6 +58,16 @@ struct type_printer<pair<First, Second>>{
     static std::string print() {
         std::stringstream str;
         str << "util::pair<" << type_printer<First>::print()
+            << ", " << type_printer<Second>::print() << ">";
+        return str.str();
+    }
+};
+*/
+template <typename First, typename Second>
+struct type_printer<std::pair<First, Second>>{
+    static std::string print() {
+        std::stringstream str;
+        str << "std::pair<" << type_printer<First>::print()
             << ", " << type_printer<Second>::print() << ">";
         return str.str();
     }

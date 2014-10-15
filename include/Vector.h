@@ -2,9 +2,9 @@
 
 #include <iostream>
 
-#include "array.h"
+#include "Array.h"
 #include "definitions.h"
-#include "host_coordinator.h"
+#include "HostCoordinator.h"
 
 #ifdef WITH_CUDA
 #include "device_coordinator.h"

@@ -1,6 +1,6 @@
 #include "gtest.h"
 
-#include <array.h>
+#include <Array.h>
 
 TEST(ArrayBase, indexes) {
     // get an array of 10 integers

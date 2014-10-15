@@ -1,0 +1,34 @@
+What do we need in storage?
+- ability to allocate aligned memory
+- storage containers that are portable across different memory spaces (host, gpu, mic, etc)
+    - next generation accelerators might be self hosting, yet they will have more complicated memory hierarchies with 3D memory.
+- ability to copy between memory spaces
+    - mechanisms for performing this asynchronously, e.g. host <-> gpu/mic
+- cheap references to array sections (ranges)
+    - a contiguous array can be broken into chunks that are to be processed in parallel, or in a specific order. a lightweight
+
+
+What to avoid
+- cyme specific parameters (avx, unrolled, storage<Width, Size>)
+
+// launch process v in two chunks, sequentially
+Vector<double> v(100);
+auto event1 = process(v(0,50));
+event1.wait();
+auto event2 = process(v(50,end));
+event2.wait();
+
+// launch process v in num threads chunks in parallel
+int num_threads = omp_get_max_threads();
+Vector<double v(100);
+auto split = SplitRange(Range(0,100), num_threads);
+
+#pragma omp parallel shared(v, split)
+{
+    int this_tread = omp_get_thread_num();
+    auto range = split(this_thread);
+    auto event = process(v(range));
+    event.wait();
+}
+
+

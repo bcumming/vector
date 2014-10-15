@@ -4,7 +4,7 @@
 #include <algorithm>
 
 #include "definitions.h"
-#include "array.h"
+#include "Array.h"
 #include "Allocator.h"
 
 ////////////////////////////////////////////////////////////////////////////////

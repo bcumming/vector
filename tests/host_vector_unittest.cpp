@@ -1,7 +1,7 @@
 #include "gtest.h"
 
-#include <vector.h>
-#include <host_coordinator.h>
+#include <Vector.h>
+#include <HostCoordinator.h>
 #include <algorithm>
 
 template <typename VEC>

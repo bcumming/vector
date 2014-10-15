@@ -1,8 +1,8 @@
 #include "gtest.h"
 
 #include <Allocator.h>
-#include <host_coordinator.h>
-#include <storage.h>
+#include <HostCoordinator.h>
+#include <Storage.h>
 
 // verify that metafunction for memory alignment works
 template <size_t s>

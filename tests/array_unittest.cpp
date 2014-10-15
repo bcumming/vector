@@ -1,8 +1,8 @@
 #include "gtest.h"
 
-#include <array.h>
-#include <host_coordinator.h>
-#include <storage.h>
+#include <Array.h>
+#include <HostCoordinator.h>
+#include <Storage.h>
 
 // verify that metafunctions for checking range wrappers work
 TEST(Array, is_array) {

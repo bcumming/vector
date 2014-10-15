@@ -1,7 +1,7 @@
 #include "gtest.h"
 
-#include <host_coordinator.h>
-#include <storage.h>
+#include <HostCoordinator.h>
+#include <Storage.h>
 
 // helper function for outputting a range
 template <typename R>

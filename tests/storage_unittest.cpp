@@ -1,6 +1,6 @@
 #include "gtest.h"
 
-#include <storage.h>
+#include <Storage.h>
 
 // basic test that gtest is working and installed
 TEST(Storage, types) {

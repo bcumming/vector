@@ -10,7 +10,7 @@
 #include <type_traits>
 
 #include "definitions.h"
-#include "array_view.h"
+#include "ArrayView.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace memory{
