@@ -156,7 +156,7 @@ public:
     }
 
     template <class Alloc>
-    util::pair<SynchEvent, array_type>
+    std::pair<SynchEvent, array_type>
     copy(const ArrayView<value_type, HostCoordinator<value_type, Alloc>> &from,
          array_type &to) {
         assert(from.size()==to.size());
@@ -177,11 +177,11 @@ public:
                 cudaMemcpyHostToDevice
         );
 
-        return util::make_pair(SynchEvent(), to);
+        return std::make_pair(SynchEvent(), to);
     }
 
     template <size_t alignment>
-    util::pair<CudaEvent, array_type>
+    std::pair<CudaEvent, array_type>
     copy(const ArrayView<
                 value_type,
                 HostCoordinator<
@@ -210,7 +210,7 @@ public:
         );
 
         CudaEvent event;
-        return util::make_pair(event, to);
+        return std::make_pair(event, to);
     }
 
     // fill memory

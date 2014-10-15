@@ -1,8 +1,8 @@
 #include "gtest.h"
 
-#include <device_coordinator.h>
-#include <host_coordinator.h>
-#include <storage.h>
+#include <DeviceCoordinator.h>
+#include <HostCoordinator.h>
+#include <Storage.h>
 
 // verify that type members set correctly
 TEST(DeviceCoordinator, type_members) {

@@ -63,15 +63,6 @@ struct type_printer<pair<First, Second>>{
     }
 };
 */
-template <typename First, typename Second>
-struct type_printer<std::pair<First, Second>>{
-    static std::string print() {
-        std::stringstream str;
-        str << "std::pair<" << type_printer<First>::print()
-            << ", " << type_printer<Second>::print() << ">";
-        return str.str();
-    }
-};
 } // namespace util
 
 // empty event that can be used for synchronous events, or for events that are

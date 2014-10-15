@@ -1,8 +1,9 @@
 #include "gtest.h"
 
-#include <vector.h>
-#include <host_coordinator.h>
-#include <device_coordinator.h>
+#include <Vector.h>
+#include <HostCoordinator.h>
+#include <DeviceCoordinator.h>
+
 #include <algorithm>
 
 template <typename VEC>

@@ -7,7 +7,7 @@
 #include "HostCoordinator.h"
 
 #ifdef WITH_CUDA
-#include "device_coordinator.h"
+#include "DeviceCoordinator.h"
 #endif
 
 
