@@ -111,7 +111,7 @@ public:
         // only allocate memory if nonzero memory allocation has been requested
         pointer ptr = n>0 ? allocator.allocate(n) : 0;
 
-        #ifndef NDEBUG
+        #ifdef VERBOSE
         std::cerr << util::type_printer<DeviceCoordinator>::print()
                   << "::allocate(" << n << ") "
                   << (ptr==nullptr && n>0 ? " failure" : " success")
@@ -127,7 +127,7 @@ public:
         if(rng.data())
             allocator.deallocate(rng.data(), rng.size());
 
-        #ifndef NDEBUG
+        #ifdef VERBOSE
         std::cerr << util::type_printer<DeviceCoordinator>::print()
                   << "::free()" << std::endl;
         #endif
@@ -161,7 +161,7 @@ public:
          array_type &to) {
         assert(from.size()==to.size());
 
-        #ifndef NDEBUG
+        #ifdef VERBOSE
         typedef ArrayView<value_type, HostCoordinator<value_type, Alloc>> oType;
         std::cout << "synchronous copy from host to device memory :\n  " 
                   << util::pretty_printer<DeviceCoordinator>::print(*this)
@@ -192,7 +192,7 @@ public:
          array_type &to) {
         assert(from.size()==to.size());
 
-        #ifndef NDEBUG
+        #ifdef VERBOSE
         typedef ArrayView< value_type, HostCoordinator< value_type, PinnedAllocator< value_type, alignment>>> oType;
         //typedef ArrayView<value_type, HostCoordinator<value_type, Alloc>> oType;
         std::cout << "asynchronous copy from host to device memory :\n  "

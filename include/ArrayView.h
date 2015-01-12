@@ -11,20 +11,10 @@
 
 //#include "array_base.h"
 #include "Range.h"
+#include "RangeLimits.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace memory{
-
-// tag for final element in a range
-struct end_type {};
-
-// tag for complete range
-struct all_type { };
-
-namespace{
-    end_type end;
-    all_type all;
-}
 
 // forward declarations
 template<typename T, typename Coord>
@@ -102,7 +92,7 @@ public:
     : pointer_(other.data())
     , size_(other.size())
     {
-#ifndef NDEBUG
+#ifdef VERBOSE
         std::cout << "CONSTRUCTOR "
                   << util::pretty_printer<ArrayView>::print(*this)
                   << "(GenericArrayView)"
@@ -121,7 +111,7 @@ public:
     : pointer_ (other.data())
     , size_(other.size())
     {
-#ifndef NDEBUG
+#ifdef VERBOSE
         std::cout << "CONSTRUCTOR "
                   << util::pretty_printer<ArrayView>::print(*this)
                   << "(ArrayView)"
@@ -135,13 +125,17 @@ public:
     : pointer_ (ptr)
     , size_(n)
     {
-#ifndef NDEBUG
+#ifdef VERBOSE
         std::cout << "CONSTRUCTOR "
                   << util::pretty_printer<ArrayView>::print(*this)
                   << "(pointer, size_type)"
                   << std::endl;
 #endif
     }
+
+    explicit ArrayView() {
+        reset();
+    };
 
     ////////////////////////////////////////////////////////////////////////////
     // ACCESSORS
@@ -235,7 +229,6 @@ private:
     }
 
     // disallow constructors that imply allocation of memory
-    ArrayView() {};
     ArrayView(const size_t &n) {};
 
     coordinator_type coordinator_;

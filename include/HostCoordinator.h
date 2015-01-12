@@ -65,7 +65,7 @@ public:
         // only allocate memory if nonzero memory allocation has been requested
         pointer ptr = n>0 ? allocator.allocate(n) : nullptr;
 
-        #ifndef NDEBUG
+        #ifdef VERBOSE
         std::cerr << util::type_printer<HostCoordinator>::print()
                   << "::allocate(" << n << ") "
                   << (ptr==nullptr && n>0 ? " failure" : " success")
@@ -79,7 +79,7 @@ public:
         // todo make this work with alignment
         typename Allocator::template rebind<value_type>::other allocator;
 
-        #ifndef NDEBUG
+        #ifdef VERBOSE
         std::cerr << util::type_printer<HostCoordinator>::print()
                   << "::free()" << std::endl;
         #endif

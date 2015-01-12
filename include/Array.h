@@ -85,7 +85,7 @@ public:
     explicit Array(const size_t &n)
         : base(coordinator_type().allocate(n))
     {
-        #ifndef NDEBUG
+        #ifdef VERBOSE
         std::cerr << "CONSTRUCTOR " << util::pretty_printer<Array>::print(*this) << std::endl;
         #endif
     }
@@ -94,7 +94,7 @@ public:
     explicit Array(const int &n)
         : base(coordinator_type().allocate(n))
     {
-        #ifndef NDEBUG
+        #ifdef VERBOSE
         std::cerr << "CONSTRUCTOR " << util::pretty_printer<Array>::print(*this) << std::endl;
         #endif
     }
@@ -126,7 +126,7 @@ public:
 
     // have to free the memory in a "by value" range
     ~Array() {
-        #ifndef NDEBUG
+        #ifdef VERBOSE
         std::cerr << "DESCTRUCTOR " << util::pretty_printer<Array>::print(*this) << std::endl;
         #endif
         coordinator_.free(*this);
@@ -139,6 +139,12 @@ public:
 
     const coordinator_type& coordinator() const {
         return coordinator_;
+    }
+
+    using base::size;
+
+    memory::Range range() const {
+        return memory::Range(0, size());
     }
 
 private:

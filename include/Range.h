@@ -4,6 +4,8 @@
 
 #include <cassert>
 
+#include "RangeLimits.h"
+
 namespace memory {
 
 class Range {
@@ -118,6 +120,22 @@ public:
 
     iterator end() const {
         return iterator(right_);
+    }
+
+    // operators to get sub-ranges
+    Range operator () (size_type left, size_type right) const {
+        #ifndef NDEBUG
+        assert(left_+left  <= right_);
+        assert(left_+right <= right_);
+        #endif
+        return Range(left_+left, left_+right);
+    }
+
+    Range operator () (size_type left, memory::end_type) const {
+        #ifndef NDEBUG
+        assert(left_+left  <= right_);
+        #endif
+        return Range(left_+left, right_);
     }
 
 private:
