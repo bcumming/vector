@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <iostream>
 #include <type_traits>
 
 #include "definitions.h"
@@ -17,7 +18,7 @@ namespace memory{
 
 // forward declarations
 template<typename T, typename Coord>
-struct Array;
+class Array;
 
 namespace util {
     template <typename T, typename Coord>
@@ -82,7 +83,7 @@ public:
     Array() : base(nullptr, 0) {}
 
     // constructor by size
-    explicit Array(const size_t &n)
+    explicit Array(const std::size_t &n)
         : base(coordinator_type().allocate(n))
     {
         #ifdef VERBOSE
@@ -115,13 +116,30 @@ public:
     explicit Array(const view_type& other)
         : base(coordinator_type().allocate(other.size()))
     {
+        #ifdef VERBOSE
+        std::cerr << "--- copy in from " << util::pretty_printer<view_type>::print(other) << std::endl;
+        #endif
         coordinator_.copy(static_cast<base const&>(other), *this);
     }
 
-    explicit Array(const Array& other)
+    Array(const Array& other)
         : base(coordinator_type().allocate(other.size()))
     {
+        //#ifdef VERBOSE
+        std::cerr << "--- Array(" << util::pretty_printer<view_type>::print(other) << ")" << std::endl;
+        //#endif
         coordinator_.copy(static_cast<base const&>(other), *this);
+    }
+
+    Array& operator = (const Array& other) {
+        //#ifdef VERBOSE
+        std::cerr << "--- Array = (" << util::pretty_printer<view_type>::print(other) << ")" << std::endl;
+        //#endif
+        coordinator_.free(*this);
+        auto ptr = coordinator_type().allocate(other.size());
+        base::reset(ptr.data(), other.size());
+        coordinator_.copy(static_cast<base const&>(other), *this);
+        return *this;
     }
 
     // have to free the memory in a "by value" range
@@ -133,7 +151,7 @@ public:
     }
 
     // use the accessors provided by ArrayView
-    // this enforces the requirement that accessing all or a sub-array of an
+    // this enforces the requirement that accessing all of or a sub-array of an
     // Array should return a view, not a new array.
     using base::operator();
 

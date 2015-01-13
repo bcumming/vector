@@ -9,7 +9,7 @@
 
 #include <type_traits>
 
-//#include "array_base.h"
+#include "definitions.h"
 #include "Range.h"
 #include "RangeLimits.h"
 
@@ -18,10 +18,10 @@ namespace memory{
 
 // forward declarations
 template<typename T, typename Coord>
-struct Array;
+class Array;
 
 template<typename T, typename Coord>
-struct ArrayView;
+class ArrayView;
 
 namespace util {
     template <typename T, typename Coord>
@@ -222,14 +222,20 @@ public:
         return( !((this->begin()>=other.end()) || (other.begin()>=this->end())) );
     }
 
-private:
+protected :
+
     void reset() {
         pointer_ = nullptr;
         size_ = 0;
     }
 
+    void reset(pointer ptr, size_type n) {
+        pointer_ = ptr;
+        size_ = n;
+    }
+
     // disallow constructors that imply allocation of memory
-    ArrayView(const size_t &n) {};
+    ArrayView(const std::size_t &n) {};
 
     coordinator_type coordinator_;
     pointer pointer_;
