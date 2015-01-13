@@ -11,6 +11,7 @@
 #include <type_traits>
 
 #include "definitions.h"
+#include "util.h"
 #include "ArrayView.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -87,7 +88,7 @@ public:
         : base(coordinator_type().allocate(n))
     {
         #ifdef VERBOSE
-        std::cerr << "CONSTRUCTOR " << util::pretty_printer<Array>::print(*this) << std::endl;
+        std::cerr << util::green("Array(size_t) ") << util::pretty_printer<view_type>::print(*this) << std::endl;
         #endif
     }
 
@@ -96,7 +97,7 @@ public:
         : base(coordinator_type().allocate(n))
     {
         #ifdef VERBOSE
-        std::cerr << "CONSTRUCTOR " << util::pretty_printer<Array>::print(*this) << std::endl;
+        std::cerr << util::green("Array(int) ") << util::pretty_printer<Array>::print(*this) << std::endl;
         #endif
     }
 
@@ -113,11 +114,11 @@ public:
     }
     */
 
-    explicit Array(const view_type& other)
+    Array(const view_type& other)
         : base(coordinator_type().allocate(other.size()))
     {
         #ifdef VERBOSE
-        std::cerr << "--- copy in from " << util::pretty_printer<view_type>::print(other) << std::endl;
+        std::cerr << util::green("Array(other&)") + " other = " << util::pretty_printer<view_type>::print(other) << std::endl;
         #endif
         coordinator_.copy(static_cast<base const&>(other), *this);
     }
@@ -125,16 +126,16 @@ public:
     Array(const Array& other)
         : base(coordinator_type().allocate(other.size()))
     {
-        //#ifdef VERBOSE
-        std::cerr << "--- Array(" << util::pretty_printer<view_type>::print(other) << ")" << std::endl;
-        //#endif
+        #ifdef VERBOSE
+        std::cerr << util::green("Array(other&)") + " other = " << util::pretty_printer<view_type>::print(other) << std::endl;
+        #endif
         coordinator_.copy(static_cast<base const&>(other), *this);
     }
 
     Array& operator = (const Array& other) {
-        //#ifdef VERBOSE
-        std::cerr << "--- Array = (" << util::pretty_printer<view_type>::print(other) << ")" << std::endl;
-        //#endif
+        #ifdef VERBOSE
+        std::cerr << util::green("Array operator=(other&)") + " other = " << util::pretty_printer<view_type>::print(other) << std::endl;
+        #endif
         coordinator_.free(*this);
         auto ptr = coordinator_type().allocate(other.size());
         base::reset(ptr.data(), other.size());
@@ -142,10 +143,19 @@ public:
         return *this;
     }
 
+    Array& operator = (Array&& other) {
+        #ifdef VERBOSE
+        std::cerr << util::green("Array operator=(other&&)") + " other = " << util::pretty_printer<view_type>::print(other) << std::endl;
+        #endif
+        base::swap(other);
+        return *this;
+    }
+
     // have to free the memory in a "by value" range
     ~Array() {
         #ifdef VERBOSE
-        std::cerr << "DESCTRUCTOR " << util::pretty_printer<Array>::print(*this) << std::endl;
+        //std::cerr << util::yellow("~Array() ") << util::pretty_printer<Array>::print(*this) << std::endl;
+        std::cerr << util::yellow("~Array() ") << "size " << size()*sizeof(value_type) << " bytes @ " << base::data() << std::endl;
         #endif
         coordinator_.free(*this);
     }
@@ -160,10 +170,6 @@ public:
     }
 
     using base::size;
-
-    memory::Range range() const {
-        return memory::Range(0, size());
-    }
 
 private:
     coordinator_type coordinator_;

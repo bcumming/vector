@@ -1,8 +1,9 @@
 #include "gtest.h"
 
+#include <algorithm>
+
 #include <Vector.h>
 #include <HostCoordinator.h>
-#include <algorithm>
 
 template <typename VEC>
 void print(VEC const& v) {
@@ -40,7 +41,7 @@ TEST(HostVector, constructor) {
         EXPECT_EQ(float(-1), v1[i]);
 }
 
-// test that constructors work
+// test that copy constructors work
 TEST(HostVector, copy_constructor) {
     using namespace memory;
 
@@ -62,6 +63,17 @@ TEST(HostVector, copy_constructor) {
     // check that v3 has values originally copied over from v1
     for(int i=0; i<100; i++)
         EXPECT_EQ(v1[i], v2[i]);
+}
+
+// test that move constructors work
+TEST(HostVector, move_constructor) {
+    using namespace memory;
+
+    // move constructor
+    HostVector<float> v1 = HostVector<float>(100);
+
+    for(auto i : v1.range())
+        v1[i] = i;
 }
 
 /*

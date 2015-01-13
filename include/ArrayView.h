@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <iostream>
+#include <string>
 #include <type_traits>
 
 #include "definitions.h"
@@ -93,10 +95,12 @@ public:
     , size_(other.size())
     {
 #ifdef VERBOSE
+     /*
         std::cout << "CONSTRUCTOR "
                   << util::pretty_printer<ArrayView>::print(*this)
                   << "(GenericArrayView)"
                   << std::endl;
+      */
 #endif
     }
 
@@ -112,10 +116,12 @@ public:
     , size_(other.size())
     {
 #ifdef VERBOSE
+        /*
         std::cout << "CONSTRUCTOR "
                   << util::pretty_printer<ArrayView>::print(*this)
                   << "(ArrayView)"
                   << std::endl;
+        */
 #endif
     }
 
@@ -126,10 +132,12 @@ public:
     , size_(n)
     {
 #ifdef VERBOSE
+        /*
         std::cout << "CONSTRUCTOR "
                   << util::pretty_printer<ArrayView>::print(*this)
                   << "(pointer, size_type)"
                   << std::endl;
+        */
 #endif
     }
 
@@ -168,6 +176,11 @@ public:
         assert(right<=size_ && left<=right);
 #endif
         return ArrayView(pointer_+left, right-left);
+    }
+
+    ArrayView operator=(value_type v) {
+        coordinator_.set(*this, v);
+        return *this;
     }
 
     // access to raw data
@@ -222,7 +235,19 @@ public:
         return( !((this->begin()>=other.end()) || (other.begin()>=this->end())) );
     }
 
+    memory::Range range() const {
+        return memory::Range(0, size());
+    }
+
 protected :
+
+    void swap(ArrayView& other) {
+        auto ptr = other.data();
+        auto sz  = other.size();
+        other.reset(pointer_, size_);
+        pointer_ = ptr;
+        size_    = sz;
+    }
 
     void reset() {
         pointer_ = nullptr;
