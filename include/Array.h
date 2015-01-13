@@ -143,6 +143,13 @@ public:
         return *this;
     }
 
+    Array(Array&& other) {
+        #ifdef VERBOSE
+        std::cerr << util::green("Array(other&&)") + " other = " << util::pretty_printer<view_type>::print(other) << std::endl;
+        #endif
+        base::swap(other);
+    }
+
     Array& operator = (Array&& other) {
         #ifdef VERBOSE
         std::cerr << util::green("Array operator=(other&&)") + " other = " << util::pretty_printer<view_type>::print(other) << std::endl;
