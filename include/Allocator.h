@@ -15,13 +15,13 @@ namespace memory {
 namespace impl {
     using size_type = std::size_t;
 
-    // true if x is a power of two (including 1==2^0)
+    /// true if x is a power of two (including 1==2^0)
     constexpr bool
     is_power_of_two(size_type x) {
         return !(x&(x-1));
     }
 
-    // returns the smallest power of two that is strictly greater than x
+    /// returns the smallest power of two that is strictly greater than x
     constexpr size_type
     next_power_of_two(size_type x, size_type p) {
         return x==0 ? p : next_power_of_two(x-(x&p), p<<1);
@@ -43,9 +43,30 @@ namespace impl {
                     :   round_up_power_of_two(sizeof(T));
     }
 
-    // function that allocates memory with alignment specified as a template parameter
-    template <typename T, size_t alignment=minimum_possible_alignment<T>()>
-    T* aligned_malloc(size_t size) {
+    /// calculate the padding that has to be added to an array of length n to
+    /// ensure that the length of an array is a multiple of alignment
+    /// allignment : in bytes
+    /// n          : length of array of items with type T
+    /// returns    : items of type T require for alignment
+    template<typename T>
+    size_type
+    get_padding(const size_type alignment, size_type n) {
+        // calculate the remaninder in bytes for n items of size sizeof(T)
+        auto remainder = (n*sizeof(T)) % alignment;
+        // calculate padding in bytes
+        return remainder ? (alignment - remainder)/sizeof(T)
+                         : 0;
+
+        // this is the c++11 constexpr version, which is more difficult to understand
+        // turn this on if we need to use this information at compile time
+        //return (n*sizeof(T))%alignment
+        //    ? (alignment - ((n*sizeof(T))%alignment)) / sizeof(T)
+        //    : 0;
+    }
+
+    /// function that allocates memory with alignment specified as a template parameter
+    template <typename T, size_type alignment=minimum_possible_alignment<T>()>
+    T* aligned_malloc(size_type size) {
         // double check that alignment is a multiple of sizeof(void*),
         // which is a prerequisite for posix_memalign()
         static_assert( !(alignment%sizeof(void*)),
@@ -59,10 +80,10 @@ namespace impl {
         return reinterpret_cast<T*>(ptr);
     }
 
-    template <size_t Alignment>
+    template <size_type Alignment>
     class AlignedPolicy {
     public:
-        void *allocate_policy(size_t size) {
+        void *allocate_policy(size_type size) {
             return reinterpret_cast<void *>(aligned_malloc<char, Alignment>(size));
         }
 
@@ -73,10 +94,10 @@ namespace impl {
 
 #ifdef WITH_CUDA
     namespace cuda {
-        template <size_t Alignment>
+        template <size_type Alignment>
         class PinnedPolicy {
         public:
-            void *allocate_policy(size_t size) {
+            void *allocate_policy(size_type size) {
                 // first allocate memory with the desired alignment
                 void* ptr = reinterpret_cast<void *>
                                 (aligned_malloc<char, Alignment>(size));
@@ -113,7 +134,7 @@ namespace impl {
 
         class DevicePolicy {
         public:
-            void *allocate_policy(size_t size) {
+            void *allocate_policy(size_type size) {
                 // first allocate memory with the desired alignment
                 void* ptr = nullptr;
                 cudaError_t status = cudaMalloc(&ptr, size);

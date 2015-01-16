@@ -65,3 +65,35 @@ TEST(Allocator, minimum_possible_alignment) {
     EXPECT_EQ(tmp,512);
 }
 
+TEST(Allocator, padding) {
+    using namespace memory::impl;
+
+    EXPECT_EQ( get_padding<char>(8,  0), 0 );
+    EXPECT_EQ( get_padding<char>(8,  1), 7 );
+    EXPECT_EQ( get_padding<char>(8,  2), 6 );
+    EXPECT_EQ( get_padding<char>(8,  3), 5 );
+    EXPECT_EQ( get_padding<char>(8,  4), 4 );
+    EXPECT_EQ( get_padding<char>(8,  5), 3 );
+    EXPECT_EQ( get_padding<char>(8,  6), 2 );
+    EXPECT_EQ( get_padding<char>(8,  7), 1 );
+    EXPECT_EQ( get_padding<char>(8,  8), 0 );
+
+    EXPECT_EQ( get_padding<char>(8,  9), 7 );
+    EXPECT_EQ( get_padding<char>(8, 10), 6 );
+    EXPECT_EQ( get_padding<char>(8, 11), 5 );
+    EXPECT_EQ( get_padding<char>(8, 12), 4 );
+    EXPECT_EQ( get_padding<char>(8, 13), 3 );
+    EXPECT_EQ( get_padding<char>(8, 14), 2 );
+    EXPECT_EQ( get_padding<char>(8, 15), 1 );
+    EXPECT_EQ( get_padding<char>(8, 16), 0 );
+
+    EXPECT_EQ( get_padding<double>(64, 0), 0 );
+    EXPECT_EQ( get_padding<double>(64, 1), 7 );
+    EXPECT_EQ( get_padding<double>(64, 2), 6 );
+    EXPECT_EQ( get_padding<double>(64, 3), 5 );
+    EXPECT_EQ( get_padding<double>(64, 4), 4 );
+    EXPECT_EQ( get_padding<double>(64, 5), 3 );
+    EXPECT_EQ( get_padding<double>(64, 6), 2 );
+    EXPECT_EQ( get_padding<double>(64, 7), 1 );
+    EXPECT_EQ( get_padding<double>(64, 8), 0 );
+}
