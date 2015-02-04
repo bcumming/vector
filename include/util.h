@@ -76,6 +76,8 @@ static std::string colorize(std::string const& s, stringColor c) {
         case kCyan  :
             return "\033[1;36m" + s + "\033[0m";
     }
+    // avoid warnings from GCC
+    return s;
 }
 #else
 static std::string colorize(std::string const& s, stringColor c) {
