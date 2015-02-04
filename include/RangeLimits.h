@@ -8,7 +8,9 @@ struct end_type {};
 struct all_type { };
 
 namespace{
-    end_type end;
-    all_type all;
+    // attach the unused attribute so that -Wall won't generate warnings when
+    // translation units that include this file don't use these variables
+    end_type __attribute__((unused)) end;
+    all_type __attribute__((unused)) all;
 }
 } // namespace memory
