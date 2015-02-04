@@ -10,7 +10,7 @@ struct all_type { };
 namespace{
     // attach the unused attribute so that -Wall won't generate warnings when
     // translation units that include this file don't use these variables
-    end_type __attribute__((unused)) end;
-    all_type __attribute__((unused)) all;
+    end_type end [[gnu::unused]];
+    all_type all [[gnu::unused]];
 }
 } // namespace memory
