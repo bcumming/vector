@@ -30,7 +30,7 @@ TEST(HostCoordinator, rebind) {
     using namespace memory;
 
     typedef HostCoordinator<int> intcoord_t;
-    typedef typename intcoord_t::rebind<double>::other doublecoord_t;
+    typedef typename intcoord_t::rebind<double> doublecoord_t;
 
     // verify that the correct type is used for internal storage
     ::testing::StaticAssertTypeEq<double,doublecoord_t::value_type>();

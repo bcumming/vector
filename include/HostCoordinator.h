@@ -40,23 +40,21 @@ namespace util {
 template <typename T, class Allocator=AlignedAllocator<T> >
 class HostCoordinator {
 public:
-    typedef T value_type;
+    using value_type = T;
 
-    typedef       value_type* pointer;
-    typedef const value_type* const_pointer;
-    typedef       value_type& reference;
-    typedef const value_type& const_reference;
+    using  pointer       = value_type*;
+    using  const_pointer = const pointer;
+    using  reference       = value_type&;
+    using  const_reference = const reference;
 
-    typedef ArrayView<value_type, HostCoordinator> range_type;
+    using range_type = ArrayView<value_type, HostCoordinator>;
 
-    typedef typename types::size_type size_type;
-    typedef typename types::difference_type difference_type;
+    using size_type       = typename types::size_type;
+    using difference_type = typename types::difference_type;
 
-    // metafunction for rebinding host_coordinator with another type
+    // rebind host_coordinator with another type
     template <typename Tother>
-    struct rebind {
-        typedef HostCoordinator<Tother, Allocator> other;
-    };
+    using rebind = HostCoordinator<Tother, Allocator>;
 
     range_type allocate(size_type n) {
         // todo make this work with alignment

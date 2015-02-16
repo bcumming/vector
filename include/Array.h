@@ -67,7 +67,7 @@ public:
     typedef ArrayView<value_type, Coord> base;
     typedef ArrayView<value_type, Coord> view_type;
 
-    typedef typename Coord::template rebind<value_type>::other coordinator_type;
+    typedef typename Coord::template rebind<value_type> coordinator_type;
 
     typedef typename base::size_type size_type;
     typedef typename base::difference_type difference_type;

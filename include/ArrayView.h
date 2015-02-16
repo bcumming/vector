@@ -76,18 +76,18 @@ class ArrayView {
     // give Coord friendship so it can access private helpers
     friend Coord;
 public:
-    typedef typename Coord::template rebind<T>::other coordinator_type;
-    typedef T value_type;
+    using value_type = T;
+    using coordinator_type = typename Coord::template rebind<value_type>;
 
-    typedef Array<T, Coord> value_wrapper;
+    using value_wrapper = Array<value_type, Coord>;
 
-    typedef typename std::size_t size_type;
-    typedef typename std::ptrdiff_t difference_type;
+    using size_type       = typename std::size_t;
+    using difference_type = typename std::ptrdiff_t;
 
-    typedef typename coordinator_type::pointer         pointer;
-    typedef typename coordinator_type::const_pointer   const_pointer;
-    typedef typename coordinator_type::reference       reference;
-    typedef typename coordinator_type::const_reference const_reference;
+    using pointer         = typename coordinator_type::pointer;
+    using const_pointer   = typename coordinator_type::const_pointer;
+    using reference       = typename coordinator_type::reference;
+    using const_reference = typename coordinator_type::const_reference;
 
     ////////////////////////////////////////////////////////////////////////////
     // CONSTRUCTORS
@@ -239,8 +239,8 @@ private:
     ArrayView(const size_t &n) {};
 
     coordinator_type coordinator_;
-    pointer pointer_;
-    size_type size_;
+    pointer          pointer_;
+    size_type        size_;
 };
 
 // metafunction to get view type for an Array/ArrayView
@@ -249,9 +249,9 @@ struct get_view{};
 
 template <typename T>
 struct get_view<T, typename std::enable_if< is_array<T>::value>::type > {
-    typedef typename T::coordinator_type Coord;
-    typedef typename T::value_type Value;
-    typedef ArrayView<Value, Coord> type;
+    using coordinator_type = typename T::coordinator_type;
+    using value_type       = typename T::value_type;
+    using type  = ArrayView<value_type, coordinator_type>;
 };
 
 } // namespace memory
