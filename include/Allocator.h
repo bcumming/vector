@@ -13,46 +13,65 @@
 namespace memory {
 ////////////////////////////////////////////////////////////////////////////////
 namespace impl {
-    // meta function that returns true if x is a power of two (including 1==2^0)
-    template <size_t x>
-    struct is_power_of_two : std::integral_constant< bool, !(x&(x-1)) > {};
+    using size_type = std::size_t;
 
-    // meta function that returns the smallest power of two that is strictly
-    // greater than x
-    template <size_t x, size_t p=1>
-    struct next_power_of_two
-    : std::integral_constant< size_t,
-        next_power_of_two<x-(x&p), (p<<1)>::value>
-    {};
+    /// true if x is a power of two (including 1==2^0)
+    constexpr bool
+    is_power_of_two(size_type x) {
+        return !(x&(x-1));
+    }
 
-    template <size_t p>
-    struct next_power_of_two<0,p> : std::integral_constant< size_t, p > {};
+    /// returns the smallest power of two that is strictly greater than x
+    constexpr size_type
+    next_power_of_two(size_type x, size_type p) {
+        return x==0 ? p : next_power_of_two(x-(x&p), p<<1);
+    }
 
-    // metafunction that returns the smallest power of two that is greater than
-    // or equal to x
-    template <size_t x>
-    struct round_up_power_of_two
-    : std::integral_constant<size_t,
-        is_power_of_two<x>::value ? x : next_power_of_two<x>::value >
-    {};
+    /// returns the smallest power of two that is greater than or equal to x
+    constexpr size_type
+    round_up_power_of_two(size_type x) {
+        return is_power_of_two(x) ? x : next_power_of_two(x, 1);
+    }
 
-    // metafunction that returns the smallest power of two that is greater than
-    // or equal to sizeof(T), and greater than or equal to sizeof(void*)
+    /// returns the smallest power of two that is greater than
+    /// or equal to sizeof(T), and greater than or equal to sizeof(void*)
     template <typename T>
-    struct minimum_possible_alignment
-    {
-        static const size_t pot = round_up_power_of_two<sizeof(T)>::value;
-        static const size_t value = pot < sizeof(void*) ? sizeof(void*) : pot;
-    };
+    constexpr size_type
+    minimum_possible_alignment() {
+        return round_up_power_of_two(sizeof(T)) < sizeof(void*)
+                    ?   sizeof(void*)
+                    :   round_up_power_of_two(sizeof(T));
+    }
 
-    // function that allocates memory with alignment specified as a template parameter
-    template <typename T, size_t alignment=minimum_possible_alignment<T>::value>
-    T* aligned_malloc(size_t size) {
+    /// calculate the padding that has to be added to an array of length n to
+    /// ensure that the length of an array is a multiple of alignment
+    /// allignment : in bytes
+    /// n          : length of array of items with type T
+    /// returns    : items of type T require for alignment
+    template<typename T>
+    size_type
+    get_padding(const size_type alignment, size_type n) {
+        // calculate the remaninder in bytes for n items of size sizeof(T)
+        auto remainder = (n*sizeof(T)) % alignment;
+        // calculate padding in bytes
+        return remainder ? (alignment - remainder)/sizeof(T)
+                         : 0;
+
+        // this is the c++11 constexpr version, which is more difficult to understand
+        // turn this on if we need to use this information at compile time
+        //return (n*sizeof(T))%alignment
+        //    ? (alignment - ((n*sizeof(T))%alignment)) / sizeof(T)
+        //    : 0;
+    }
+
+    /// function that allocates memory with alignment specified as a template parameter
+    template <typename T, size_type alignment=minimum_possible_alignment<T>()>
+    T* aligned_malloc(size_type size) {
         // double check that alignment is a multiple of sizeof(void*),
         // which is a prerequisite for posix_memalign()
         static_assert( !(alignment%sizeof(void*)),
                 "alignment is not a multiple of sizeof(void*)");
-        static_assert( is_power_of_two<alignment>::value,
+        static_assert( is_power_of_two(alignment),
                 "alignment is not a power of two");
         void *ptr;
         int result = posix_memalign(&ptr, alignment, size*sizeof(T));
@@ -61,10 +80,10 @@ namespace impl {
         return reinterpret_cast<T*>(ptr);
     }
 
-    template <size_t Alignment>
+    template <size_type Alignment>
     class AlignedPolicy {
     public:
-        void *allocate_policy(size_t size) {
+        void *allocate_policy(size_type size) {
             return reinterpret_cast<void *>(aligned_malloc<char, Alignment>(size));
         }
 
@@ -75,10 +94,10 @@ namespace impl {
 
 #ifdef WITH_CUDA
     namespace cuda {
-        template <size_t Alignment>
+        template <size_type Alignment>
         class PinnedPolicy {
         public:
-            void *allocate_policy(size_t size) {
+            void *allocate_policy(size_type size) {
                 // first allocate memory with the desired alignment
                 void* ptr = reinterpret_cast<void *>
                                 (aligned_malloc<char, Alignment>(size));
@@ -115,7 +134,7 @@ namespace impl {
 
         class DevicePolicy {
         public:
-            void *allocate_policy(size_t size) {
+            void *allocate_policy(size_type size) {
                 // first allocate memory with the desired alignment
                 void* ptr = nullptr;
                 cudaError_t status = cudaMalloc(&ptr, size);
@@ -243,7 +262,7 @@ namespace util {
 } // namespace util
 
 // helper for generating an aligned allocator
-template <class T, size_t alignment=impl::minimum_possible_alignment<T>::value>
+template <class T, size_t alignment=impl::minimum_possible_alignment<T>()>
 using AlignedAllocator = Allocator<T, impl::AlignedPolicy<alignment>>;
 
 #ifdef WITH_CUDA
@@ -253,7 +272,7 @@ using AlignedAllocator = Allocator<T, impl::AlignedPolicy<alignment>>;
 template <class T, size_t alignment=4096>
 using PinnedAllocator = Allocator<T, impl::cuda::PinnedPolicy<alignment>>;
 
-template <class T, size_t alignment=impl::minimum_possible_alignment<T>::value>
+template <class T, size_t alignment=impl::minimum_possible_alignment<T>()>
 using CudaAllocator = Allocator<T, impl::cuda::DevicePolicy>;
 #endif
 

@@ -26,7 +26,7 @@ public:
         cudaEvent_t tmp;
         cudaError_t status = cudaEventCreate(&tmp);
         event_ = std::shared_ptr<cudaEvent_t>(new cudaEvent_t(tmp));
-#ifndef NDEBUG
+#ifdef VERBOSE
         std::cout << "CudaEvent< " << event() << " > :: create" << std::endl;
 #endif
         assert(status == cudaSuccess);
@@ -43,7 +43,7 @@ public:
     // it can be destroyed and the stream won't be affected (it will still
     // synchronize on the event)
     ~CudaEvent() {
-#ifndef NDEBUG
+#ifdef VERBOSE
         std::cout << "CudaEvent< " << event() << " > :: destruct count = "
                   << event_.use_count()
                   << " " << (event_.unique() ? " deleting" : "")

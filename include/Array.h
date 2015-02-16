@@ -7,9 +7,11 @@
 
 #pragma once
 
+#include <iostream>
 #include <type_traits>
 
 #include "definitions.h"
+#include "util.h"
 #include "ArrayView.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -17,7 +19,7 @@ namespace memory{
 
 // forward declarations
 template<typename T, typename Coord>
-struct Array;
+class Array;
 
 namespace util {
     template <typename T, typename Coord>
@@ -82,11 +84,11 @@ public:
     Array() : base(nullptr, 0) {}
 
     // constructor by size
-    explicit Array(const size_t &n)
+    explicit Array(const std::size_t &n)
         : base(coordinator_type().allocate(n))
     {
-        #ifndef NDEBUG
-        std::cerr << "CONSTRUCTOR " << util::pretty_printer<Array>::print(*this) << std::endl;
+        #ifdef VERBOSE
+        std::cerr << util::green("Array(size_t) ") << util::pretty_printer<view_type>::print(*this) << std::endl;
         #endif
     }
 
@@ -94,8 +96,8 @@ public:
     explicit Array(const int &n)
         : base(coordinator_type().allocate(n))
     {
-        #ifndef NDEBUG
-        std::cerr << "CONSTRUCTOR " << util::pretty_printer<Array>::print(*this) << std::endl;
+        #ifdef VERBOSE
+        std::cerr << util::green("Array(int) ") << util::pretty_printer<Array>::print(*this) << std::endl;
         #endif
     }
 
@@ -112,34 +114,69 @@ public:
     }
     */
 
-    explicit Array(const view_type& other)
+    Array(const view_type& other)
         : base(coordinator_type().allocate(other.size()))
     {
+        #ifdef VERBOSE
+        std::cerr << util::green("Array(other&)") + " other = " << util::pretty_printer<view_type>::print(other) << std::endl;
+        #endif
         coordinator_.copy(static_cast<base const&>(other), *this);
     }
 
-    explicit Array(const Array& other)
+    Array(const Array& other)
         : base(coordinator_type().allocate(other.size()))
     {
+        #ifdef VERBOSE
+        std::cerr << util::green("Array(other&)") + " other = " << util::pretty_printer<view_type>::print(other) << std::endl;
+        #endif
         coordinator_.copy(static_cast<base const&>(other), *this);
+    }
+
+    Array& operator = (const Array& other) {
+        #ifdef VERBOSE
+        std::cerr << util::green("Array operator=(other&)") + " other = " << util::pretty_printer<view_type>::print(other) << std::endl;
+        #endif
+        coordinator_.free(*this);
+        auto ptr = coordinator_type().allocate(other.size());
+        base::reset(ptr.data(), other.size());
+        coordinator_.copy(static_cast<base const&>(other), *this);
+        return *this;
+    }
+
+    Array(Array&& other) {
+        #ifdef VERBOSE
+        std::cerr << util::green("Array(other&&)") + " other = " << util::pretty_printer<view_type>::print(other) << std::endl;
+        #endif
+        base::swap(other);
+    }
+
+    Array& operator = (Array&& other) {
+        #ifdef VERBOSE
+        std::cerr << util::green("Array operator=(other&&)") + " other = " << util::pretty_printer<view_type>::print(other) << std::endl;
+        #endif
+        base::swap(other);
+        return *this;
     }
 
     // have to free the memory in a "by value" range
     ~Array() {
-        #ifndef NDEBUG
-        std::cerr << "DESCTRUCTOR " << util::pretty_printer<Array>::print(*this) << std::endl;
+        #ifdef VERBOSE
+        //std::cerr << util::yellow("~Array() ") << util::pretty_printer<Array>::print(*this) << std::endl;
+        std::cerr << util::yellow("~Array() ") << "size " << size()*sizeof(value_type) << " bytes @ " << base::data() << std::endl;
         #endif
         coordinator_.free(*this);
     }
 
     // use the accessors provided by ArrayView
-    // this enforces the requirement that accessing all or a sub-array of an
+    // this enforces the requirement that accessing all of or a sub-array of an
     // Array should return a view, not a new array.
     using base::operator();
 
     const coordinator_type& coordinator() const {
         return coordinator_;
     }
+
+    using base::size;
 
 private:
     coordinator_type coordinator_;

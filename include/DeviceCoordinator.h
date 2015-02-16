@@ -113,7 +113,7 @@ public:
         // only allocate memory if nonzero memory allocation has been requested
         pointer ptr = n>0 ? allocator.allocate(n) : 0;
 
-        #ifndef NDEBUG
+        #ifdef VERBOSE
         std::cerr << util::type_printer<DeviceCoordinator>::print()
                   << "::allocate(" << n << ") "
                   << (ptr==nullptr && n>0 ? " failure" : " success")
@@ -129,7 +129,7 @@ public:
         if(rng.data())
             allocator.deallocate(rng.data(), rng.size());
 
-        #ifndef NDEBUG
+        #ifdef VERBOSE
         std::cerr << util::type_printer<DeviceCoordinator>::print()
                   << "::free()" << std::endl;
         #endif

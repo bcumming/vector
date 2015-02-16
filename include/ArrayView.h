@@ -7,31 +7,23 @@
 
 #pragma once
 
+#include <iostream>
+#include <string>
 #include <type_traits>
 
-//#include "array_base.h"
+#include "definitions.h"
 #include "Range.h"
+#include "RangeLimits.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace memory{
 
-// tag for final element in a range
-struct end_type {};
-
-// tag for complete range
-struct all_type { };
-
-namespace{
-    end_type end;
-    all_type all;
-}
-
 // forward declarations
 template<typename T, typename Coord>
-struct Array;
+class Array;
 
 template<typename T, typename Coord>
-struct ArrayView;
+class ArrayView;
 
 namespace util {
     template <typename T, typename Coord>
@@ -102,11 +94,13 @@ public:
     : pointer_(other.data())
     , size_(other.size())
     {
-#ifndef NDEBUG
+#ifdef VERBOSE
+     /*
         std::cout << "CONSTRUCTOR "
                   << util::pretty_printer<ArrayView>::print(*this)
                   << "(GenericArrayView)"
                   << std::endl;
+      */
 #endif
     }
 
@@ -121,11 +115,13 @@ public:
     : pointer_ (other.data())
     , size_(other.size())
     {
-#ifndef NDEBUG
+#ifdef VERBOSE
+        /*
         std::cout << "CONSTRUCTOR "
                   << util::pretty_printer<ArrayView>::print(*this)
                   << "(ArrayView)"
                   << std::endl;
+        */
 #endif
     }
 
@@ -135,13 +131,19 @@ public:
     : pointer_ (ptr)
     , size_(n)
     {
-#ifndef NDEBUG
+#ifdef VERBOSE
+        /*
         std::cout << "CONSTRUCTOR "
                   << util::pretty_printer<ArrayView>::print(*this)
                   << "(pointer, size_type)"
                   << std::endl;
+        */
 #endif
     }
+
+    explicit ArrayView() {
+        reset();
+    };
 
     ////////////////////////////////////////////////////////////////////////////
     // ACCESSORS
@@ -174,6 +176,11 @@ public:
         assert(right<=size_ && left<=right);
 #endif
         return ArrayView(pointer_+left, right-left);
+    }
+
+    ArrayView operator=(value_type v) {
+        coordinator_.set(*this, v);
+        return *this;
     }
 
     // access to raw data
@@ -228,15 +235,32 @@ public:
         return( !((this->begin()>=other.end()) || (other.begin()>=this->end())) );
     }
 
-private:
+    memory::Range range() const {
+        return memory::Range(0, size());
+    }
+
+protected :
+
+    void swap(ArrayView& other) {
+        auto ptr = other.data();
+        auto sz  = other.size();
+        other.reset(pointer_, size_);
+        pointer_ = ptr;
+        size_    = sz;
+    }
+
     void reset() {
         pointer_ = nullptr;
         size_ = 0;
     }
 
+    void reset(pointer ptr, size_type n) {
+        pointer_ = ptr;
+        size_ = n;
+    }
+
     // disallow constructors that imply allocation of memory
-    ArrayView() {};
-    ArrayView(const size_t &n) {};
+    ArrayView(const std::size_t &n) {};
 
     coordinator_type coordinator_;
     pointer          pointer_;

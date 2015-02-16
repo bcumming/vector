@@ -63,10 +63,11 @@ public:
         // only allocate memory if nonzero memory allocation has been requested
         pointer ptr = n>0 ? allocator.allocate(n) : nullptr;
 
-        #ifndef NDEBUG
+        #ifdef VERBOSE
+        bool success = ptr;
         std::cerr << util::type_printer<HostCoordinator>::print()
-                  << "::allocate(" << n << ") "
-                  << (ptr==nullptr && n>0 ? " failure" : " success")
+                  << "::" + (success ? util::green("allocate") : util::red("allocate"))
+                  << "(" << n*sizeof(value_type) << " bytes) @ " << ptr
                   << std::endl;
         #endif
 
@@ -77,9 +78,12 @@ public:
         // todo make this work with alignment
         typename Allocator::template rebind<value_type>::other allocator;
 
-        #ifndef NDEBUG
+        #ifdef VERBOSE
         std::cerr << util::type_printer<HostCoordinator>::print()
-                  << "::free()" << std::endl;
+                  << "::" + util::green("free")
+                  << "(" << rng.size()*sizeof(value_type) << " bytes)"
+                  << " @ " << rng.data()
+                  << std::endl;
         #endif
 
         if(rng.data())
@@ -94,6 +98,11 @@ public:
         assert(!from.overlaps(to));
 
         std::copy(from.begin(), from.end(), to.begin());
+    }
+
+    // copy memory from one range into another
+    void set(range_type &rng, value_type val) {
+        std::fill(rng.begin(), rng.end(), val);
     }
 
     reference make_reference(value_type* p) {

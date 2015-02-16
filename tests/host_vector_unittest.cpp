@@ -1,8 +1,9 @@
 #include "gtest.h"
 
+#include <algorithm>
+
 #include <Vector.h>
 #include <HostCoordinator.h>
-#include <algorithm>
 
 template <typename VEC>
 void print(VEC const& v) {
@@ -38,6 +39,41 @@ TEST(HostVector, constructor) {
 
     for(int i=90; i<100; i++)
         EXPECT_EQ(float(-1), v1[i]);
+}
+
+// test that copy constructors work
+TEST(HostVector, copy_constructor) {
+    using namespace memory;
+
+    // length constructor
+    HostVector<float> v1(100);
+
+    // initialize values as monotone sequence
+    for(int i=0; i<v1.size(); ++i)
+        v1[i] = float(i);
+
+    // copy constructor
+    //HostVector<float> v2;
+    //v2 = v1;
+    HostVector<float> v2 = v1;
+
+    // ensure that new memory was allocated
+    EXPECT_NE(v2.data(), v1.data());
+
+    // check that v3 has values originally copied over from v1
+    for(int i=0; i<100; i++)
+        EXPECT_EQ(v1[i], v2[i]);
+}
+
+// test that move constructors work
+TEST(HostVector, move_constructor) {
+    using namespace memory;
+
+    // move constructor
+    HostVector<float> v1 = HostVector<float>(100);
+
+    for(auto i : v1.range())
+        v1[i] = i;
 }
 
 /*
