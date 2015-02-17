@@ -43,8 +43,8 @@ namespace util {
 template <typename T>
 class ConstDeviceReference {
 public:
-    typedef T  value_type;
-    typedef T* pointer;
+    using value_type = T;
+    using pointer = *value_type;
 
     ConstDeviceReference(pointer p) : pointer_(p) {}
 
@@ -61,8 +61,8 @@ protected:
 template <typename T>
 class DeviceReference {
 public:
-    typedef T  value_type;
-    typedef T* pointer;
+    using value_type = T;
+    using pointer = *value_type;
 
     DeviceReference(pointer p) : pointer_(p) {}
 
@@ -85,25 +85,27 @@ private:
 template <typename T, class Allocator_=CudaAllocator<T> >
 class DeviceCoordinator {
 public:
-    typedef T value_type;
-    typedef typename Allocator_::template rebind<value_type>::other Allocator;
+    using value_type = T;
+    using Allocator = typename Allocator_::template rebind<value_type>::other;
 
-    typedef       value_type* pointer;
-    typedef const value_type* const_pointer;
-    typedef DeviceReference<T>      reference;
-    typedef ConstDeviceReference<T> const_reference;
+    using pointer       = *value_type;
+    using const_pointer = const value_type*;
+    using reference       = DeviceReference<value_type>;
+    using const_reference = ConstDeviceReference<value_type>;
 
-    //typedef ArrayBase<value_type> array_type;
-    typedef ArrayView<value_type, DeviceCoordinator> array_type;
+    using array_type = ArrayView<value_type, DeviceCoordinator>;
 
-    typedef typename types::size_type size_type;
-    typedef typename types::difference_type difference_type;
+    using size_type       = typename types::size_type;
+    using difference_type = typename types::difference_type;
 
     // metafunction for rebinding host_coordinator with another type
     template <typename Tother>
     struct rebind {
         typedef DeviceCoordinator<Tother, Allocator> other;
     };
+
+    //template <typename Tother>
+    //using rebind = DeviceCoordinator<Tother, Allocator>;
 
     array_type allocate(size_type n) {
         Allocator allocator;
@@ -161,8 +163,8 @@ public:
          array_type &to) {
         assert(from.size()==to.size());
 
-        #ifdef VERBOSE
-        typedef ArrayView<value_type, HostCoordinator<value_type, Alloc>> oType;
+        #ifndef NDEBUG
+        using oType = ArrayView<value_type, HostCoordinator<value_type, Alloc>>;
         std::cout << "synchronous copy from host to device memory :\n  " 
                   << util::pretty_printer<DeviceCoordinator>::print(*this)
                   << "::copy(\n\t"
@@ -192,9 +194,8 @@ public:
          array_type &to) {
         assert(from.size()==to.size());
 
-        #ifdef VERBOSE
-        typedef ArrayView< value_type, HostCoordinator< value_type, PinnedAllocator< value_type, alignment>>> oType;
-        //typedef ArrayView<value_type, HostCoordinator<value_type, Alloc>> oType;
+        #ifndef NDEBUG
+        using oType = ArrayView< value_type, HostCoordinator< value_type, PinnedAllocator< value_type, alignment>>>;
         std::cout << "asynchronous copy from host to device memory :\n  "
                   << util::pretty_printer<DeviceCoordinator>::print(*this)
                   << "::copy(\n\t"
@@ -218,9 +219,10 @@ public:
     //void fill(array_type &rng, const T& value) {
     //}
 
-    // these shouldn't be necessary. We need to remove ArrayBase class, and
-    // have the coordinator provide both reference and pointer types that
-    // don't require explicit casts
+    // Generate reference objects for a raw pointer.
+    // These helpers allow the ArrayView types to return a reference object
+    // that can be used by host code to directly manipulate a memory location
+    // on the device.
     reference make_reference(value_type* p) {
         return reference(p);
     }

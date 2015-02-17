@@ -2,7 +2,6 @@
 
 #include <Array.h>
 #include <HostCoordinator.h>
-#include <Storage.h>
 
 // verify that metafunctions for checking range wrappers work
 TEST(Array, is_array) {

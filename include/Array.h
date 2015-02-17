@@ -65,39 +65,34 @@ template <typename T, typename Coord>
 class Array
     : public ArrayView<T, Coord> {
 public:
-    typedef T value_type;
-    typedef ArrayView<value_type, Coord> base;
-    typedef ArrayView<value_type, Coord> view_type;
+    using value_type = T;
+    using base       = ArrayView<value_type, Coord>;
+    using view_type  = ArrayView<value_type, Coord>;
 
-    typedef typename Coord::template rebind<value_type>::other coordinator_type;
+    using coordinator_type = typename Coord::template rebind<value_type>;
 
-    typedef typename base::size_type size_type;
-    typedef typename base::difference_type difference_type;
+    using size_type       = typename base::size_type;
+    using difference_type = typename base::difference_type;
 
-    typedef value_type* pointer;
-    typedef const pointer const_pointer;
-    typedef value_type& reference;
-    typedef value_type const& const_reference;
+    using pointer       = value_type*;
+    using const_pointer = const pointer;
+    // TODO what about specialized references for things like GPU memory?
+    using reference       = value_type&;
+    using const_reference = value_type const&;
 
     // default constructor
     // we have to call constructor in ArrayView: pass base
     Array() : base(nullptr, 0) {}
 
     // constructor by size
-    explicit Array(const std::size_t &n)
+    template < typename I,
+               typename std::enable_if<std::is_integral<I>::value>::type* = nullptr>
+    Array(I n)
         : base(coordinator_type().allocate(n))
     {
         #ifdef VERBOSE
-        std::cerr << util::green("Array(size_t) ") << util::pretty_printer<view_type>::print(*this) << std::endl;
-        #endif
-    }
-
-    // constructor by size
-    explicit Array(const int &n)
-        : base(coordinator_type().allocate(n))
-    {
-        #ifdef VERBOSE
-        std::cerr << util::green("Array(int) ") << util::pretty_printer<Array>::print(*this) << std::endl;
+        std::cerr << util::green("Array(integral_type) ")
+                  << util::pretty_printer<Array>::print(*this) << std::endl;
         #endif
     }
 
@@ -105,7 +100,7 @@ public:
     /*
     template <
         class RangeType,
-        typename std::enable_if<is_array<RangeType>::value, void>::type = 0
+        typename std::enable_if<is_array<RangeType>::value, void>::type* = nullptr
     >
     explicit Array(const RangeType& other)
         : base(coordinator_type().allocate(other.size()))
