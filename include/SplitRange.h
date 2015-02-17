@@ -11,8 +11,8 @@ namespace memory {
 
 class SplitRange {
   public:
-    typedef Range::size_type size_type;
-    typedef Range::difference_type difference_type;
+    using size_type       = Range::size_type;
+    using difference_type = Range::difference_type;
 
     // split range into n chunks
     SplitRange(Range const& rng, size_type n) : range_(rng) {

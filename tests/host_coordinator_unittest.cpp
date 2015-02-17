@@ -1,7 +1,6 @@
 #include "gtest.h"
 
 #include <HostCoordinator.h>
-#include <Storage.h>
 
 // helper function for outputting a range
 template <typename R>
@@ -15,14 +14,10 @@ void print_range(const R& rng) {
 TEST(HostCoordinator, type_members) {
     using namespace memory;
 
-    typedef memory::Storage<float,  16, 4> StorageFloatAoSoA;
-
     typedef HostCoordinator<int> intcoord_t;
-    typedef HostCoordinator<StorageFloatAoSoA> storagecoord_t;
 
     // verify that the correct type is used for internal storage
     ::testing::StaticAssertTypeEq<int,   intcoord_t::value_type>();
-    ::testing::StaticAssertTypeEq<StorageFloatAoSoA, storagecoord_t::value_type>();
 }
 
 // verify that rebinding works

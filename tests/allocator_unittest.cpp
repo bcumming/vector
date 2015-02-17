@@ -2,7 +2,6 @@
 
 #include <Allocator.h>
 #include <HostCoordinator.h>
-#include <Storage.h>
 
 // verify that metafunction for memory alignment works
 template <size_t s>

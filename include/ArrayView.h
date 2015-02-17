@@ -86,6 +86,8 @@ public:
     ////////////////////////////////////////////////////////////////////////////
 
     // construct as a reference to a range_wrapper
+    // we probably don't need or want this
+    /*
     template <
         class RangeType,
         typename std::enable_if<is_array<RangeType>::value>::type = 0
@@ -95,14 +97,12 @@ public:
     , size_(other.size())
     {
 #ifdef VERBOSE
-     /*
-        std::cout << "CONSTRUCTOR "
-                  << util::pretty_printer<ArrayView>::print(*this)
-                  << "(GenericArrayView)"
+        std::cout << util::pretty_printer<ArrayView>::print(*this)
+                  << util::yellow("ctor") << "(GenericArrayView(" << pointer_ << ", " << size_ << "))"
                   << std::endl;
-      */
 #endif
     }
+    */
 
     // need this because it isn't caught by the generic constructor above
     // the default constructor, which isn't templated, would be chosen
@@ -116,12 +116,9 @@ public:
     , size_(other.size())
     {
 #ifdef VERBOSE
-        /*
-        std::cout << "CONSTRUCTOR "
-                  << util::pretty_printer<ArrayView>::print(*this)
-                  << "(ArrayView)"
+        std::cout << util::pretty_printer<ArrayView>::print(*this)
+                  << util::yellow("ctor") << "(ArrayView(" << pointer_ << ", " << size_ << "))"
                   << std::endl;
-        */
 #endif
     }
 
@@ -132,12 +129,9 @@ public:
     , size_(n)
     {
 #ifdef VERBOSE
-        /*
-        std::cout << "CONSTRUCTOR "
-                  << util::pretty_printer<ArrayView>::print(*this)
-                  << "(pointer, size_type)"
+        std::cout << util::pretty_printer<ArrayView>::print(*this)
+                  << util::yellow("ctor") << "(" << ptr << ", " << n << ")"
                   << std::endl;
-        */
 #endif
     }
 
