@@ -252,7 +252,7 @@ namespace util {
     struct type_printer<Allocator<T,Policy>>{
         static std::string print() {
             std::stringstream str;
-            str << "Allocator<" << type_printer<T>::print()
+            str << util::white("Allocator") << "<" << type_printer<T>::print()
                 << ", " << type_printer<Policy>::print() << ">";
             return str.str();
         }

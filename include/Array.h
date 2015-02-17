@@ -26,7 +26,7 @@ namespace util {
     struct type_printer<Array<T,Coord>>{
         static std::string print() {
             std::stringstream str;
-            str << "Array<" << type_printer<T>::print()
+            str << util::white("Array") << "<" << type_printer<T>::print()
                 << ", " << type_printer<Coord>::print() << ">";
             return str.str();
         }
@@ -86,7 +86,8 @@ public:
 
     // constructor by size
     template < typename I,
-               typename std::enable_if<std::is_integral<I>::value>::type* = nullptr>
+                // use (void*)0 to workaround intel bug with nullptr
+               typename std::enable_if<std::is_integral<I>::value>::type* = (void*)0>
     Array(I n)
         : base(coordinator_type().allocate(n))
     {
@@ -100,7 +101,7 @@ public:
     /*
     template <
         class RangeType,
-        typename std::enable_if<is_array<RangeType>::value, void>::type* = nullptr
+        typename std::enable_if<is_array<RangeType>::value, void>::type* = (void*)0
     >
     explicit Array(const RangeType& other)
         : base(coordinator_type().allocate(other.size()))
@@ -109,11 +110,12 @@ public:
     }
     */
 
-    Array(const view_type& other)
+    Array(view_type const& other)
         : base(coordinator_type().allocate(other.size()))
     {
         #ifdef VERBOSE
-        std::cerr << util::green("Array(other&)") + " other = " << util::pretty_printer<view_type>::print(other) << std::endl;
+        std::cerr << util::green("Array(other&)") + " other = "
+                  << util::pretty_printer<view_type>::print(other) << std::endl;
         #endif
         coordinator_.copy(static_cast<base const&>(other), *this);
     }
@@ -122,14 +124,16 @@ public:
         : base(coordinator_type().allocate(other.size()))
     {
         #ifdef VERBOSE
-        std::cerr << util::green("Array(other&)") + " other = " << util::pretty_printer<view_type>::print(other) << std::endl;
+        std::cerr << util::green("Array(other&)") + " other = "
+                  << util::pretty_printer<view_type>::print(other) << std::endl;
         #endif
         coordinator_.copy(static_cast<base const&>(other), *this);
     }
 
     Array& operator = (const Array& other) {
         #ifdef VERBOSE
-        std::cerr << util::green("Array operator=(other&)") + " other = " << util::pretty_printer<view_type>::print(other) << std::endl;
+        std::cerr << util::green("Array operator=(other&)") + " other = "
+                  << util::pretty_printer<view_type>::print(other) << std::endl;
         #endif
         coordinator_.free(*this);
         auto ptr = coordinator_type().allocate(other.size());
@@ -140,14 +144,16 @@ public:
 
     Array(Array&& other) {
         #ifdef VERBOSE
-        std::cerr << util::green("Array(other&&)") + " other = " << util::pretty_printer<view_type>::print(other) << std::endl;
+        std::cerr << util::green("Array(other&&)") + " other = "
+                  << util::pretty_printer<view_type>::print(other) << std::endl;
         #endif
         base::swap(other);
     }
 
     Array& operator = (Array&& other) {
         #ifdef VERBOSE
-        std::cerr << util::green("Array operator=(other&&)") + " other = " << util::pretty_printer<view_type>::print(other) << std::endl;
+        std::cerr << util::green("Array operator=(other&&)") + " other = "
+                  << util::pretty_printer<view_type>::print(other) << std::endl;
         #endif
         base::swap(other);
         return *this;

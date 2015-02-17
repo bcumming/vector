@@ -30,8 +30,13 @@ namespace util {
     struct type_printer<ArrayView<T,Coord>> {
         static std::string print() {
             std::stringstream str;
-            str << "ArrayView<" << type_printer<T>::print()
+            #if VERBOSE>1
+            str << util::white("ArrayView") << "<" << type_printer<T>::print()
                 << ", " << type_printer<Coord>::print() << ">";
+            #else
+            str << util::white("ArrayView")
+                << "<" << type_printer<Coord>::print() << ">";
+            #endif
             return str.str();
         }
     };
@@ -98,7 +103,7 @@ public:
     {
 #ifdef VERBOSE
         std::cout << util::pretty_printer<ArrayView>::print(*this)
-                  << util::yellow("ctor") << "(GenericArrayView(" << pointer_ << ", " << size_ << "))"
+                  << util::green("ctor") << "(GenericArrayView(" << pointer_ << ", " << size_ << "))"
                   << std::endl;
 #endif
     }
@@ -115,9 +120,9 @@ public:
     : pointer_ (other.data())
     , size_(other.size())
     {
-#ifdef VERBOSE
-        std::cout << util::pretty_printer<ArrayView>::print(*this)
-                  << util::yellow("ctor") << "(ArrayView(" << pointer_ << ", " << size_ << "))"
+#if VERBOSE>1
+        std::cout << util::green("ArrayView(&other)")
+                  << util::pretty_printer<ArrayView>::print(*this)
                   << std::endl;
 #endif
     }
@@ -128,9 +133,9 @@ public:
     : pointer_ (ptr)
     , size_(n)
     {
-#ifdef VERBOSE
-        std::cout << util::pretty_printer<ArrayView>::print(*this)
-                  << util::yellow("ctor") << "(" << ptr << ", " << n << ")"
+#if VERBOSE>1
+        std::cout << util::green("ArrayView(pointer, size)")
+                  << util::pretty_printer<ArrayView>::print(*this)
                   << std::endl;
 #endif
     }
@@ -173,7 +178,23 @@ public:
     }
 
     ArrayView operator=(value_type v) {
+#ifdef VERBOSE
+        std::cerr << util::pretty_printer<ArrayView>::print(*this)
+                  << "::" << util::blue("operator=") << "(" << v << ")"
+                  << std::endl;
+#endif
         coordinator_.set(*this, v);
+        return *this;
+    }
+
+    ArrayView operator=(ArrayView other) {
+#ifdef VERBOSE
+        std::cerr << util::pretty_printer<ArrayView>::print(*this)
+                  << "::" << util::blue("operator=") << "("
+                  << util::pretty_printer<ArrayView>::print(other)
+                  << ")" << std::endl;
+  #endif
+        coordinator_.copy(other, *this);
         return *this;
     }
 

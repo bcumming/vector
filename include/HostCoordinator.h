@@ -20,8 +20,13 @@ namespace util {
     struct type_printer<HostCoordinator<T,Allocator>>{
         static std::string print() {
             std::stringstream str;
-            str << "HostCoordinator<" << type_printer<T>::print()
+            #if VERBOSE>1
+            str << util::white("HostCoordinator") << "<" << type_printer<T>::print()
                 << ", " << type_printer<Allocator>::print() << ">";
+            #else
+            str << util::white("HostCoordinator")
+                << "<" << type_printer<T>::print() << ">";
+            #endif
             return str.str();
         }
     };
@@ -45,7 +50,7 @@ public:
     using  pointer       = value_type*;
     using  const_pointer = const pointer;
     using  reference       = value_type&;
-    using  const_reference = const reference;
+    using  const_reference = value_type const&;
 
     using range_type = ArrayView<value_type, HostCoordinator>;
 
@@ -66,7 +71,7 @@ public:
         #ifdef VERBOSE
         bool success = ptr;
         std::cerr << util::type_printer<HostCoordinator>::print()
-                  << "::" + (success ? util::green("allocate") : util::red("allocate"))
+                  << "::" + util::blue(success ? "allocate" : "allocate!")
                   << "(" << n*sizeof(value_type) << " bytes) @ " << ptr
                   << std::endl;
         #endif
@@ -80,7 +85,7 @@ public:
 
         #ifdef VERBOSE
         std::cerr << util::type_printer<HostCoordinator>::print()
-                  << "::" + util::green("free")
+                  << "::" + util::blue("free")
                   << "(" << rng.size()*sizeof(value_type) << " bytes)"
                   << " @ " << rng.data()
                   << std::endl;
@@ -97,11 +102,26 @@ public:
         assert(from.size()==to.size());
         assert(!from.overlaps(to));
 
+        #ifdef VERBOSE
+        std::cerr << util::type_printer<HostCoordinator>::print()
+                  << "::" + util::blue("copy")
+                  << "(" << from.size()*sizeof(value_type) << " bytes)"
+                  << " " << from.data() << util::yellow(" -> ") << to.data()
+                  << std::endl;
+        #endif
+
         std::copy(from.begin(), from.end(), to.begin());
     }
 
     // copy memory from one range into another
     void set(range_type &rng, value_type val) {
+        #ifdef VERBOSE
+        std::cerr << util::type_printer<HostCoordinator>::print()
+                  << "::" + util::blue("fill")
+                  << "(" << rng.size()  << " * " << val << ")"
+                  << " @ " << rng.data()
+                  << std::endl;
+        #endif
         std::fill(rng.begin(), rng.end(), val);
     }
 
