@@ -4,6 +4,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 set(CMAKE_EXPORT_COMPILE_COMMANDS "YES")
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
+SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
+
 # CUDA
 set( CUDA_BACKEND "OFF" CACHE BOOL "Compile CUDA version" )
 if( CUDA_BACKEND )
