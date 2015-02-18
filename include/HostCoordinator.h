@@ -54,8 +54,8 @@ public:
 
     using range_type = ArrayView<value_type, HostCoordinator>;
 
-    using size_type       = typename types::size_type;
-    using difference_type = typename types::difference_type;
+    using size_type       = types::size_type;
+    using difference_type = types::difference_type;
 
     // rebind host_coordinator with another type
     template <typename Tother>
@@ -83,16 +83,17 @@ public:
         // todo make this work with alignment
         typename Allocator::template rebind<value_type>::other allocator;
 
+        if(rng.data()) {
         #ifdef VERBOSE
-        std::cerr << util::type_printer<HostCoordinator>::print()
-                  << "::" + util::blue("free")
-                  << "(" << rng.size()*sizeof(value_type) << " bytes)"
-                  << " @ " << rng.data()
-                  << std::endl;
+            std::cerr << util::type_printer<HostCoordinator>::print()
+                      << "::" + util::blue("free")
+                      << "(" << rng.size()*sizeof(value_type) << " bytes)"
+                      << " @ " << rng.data()
+                      << std::endl;
         #endif
 
-        if(rng.data())
             allocator.deallocate(rng.data(), rng.size());
+        }
 
         rng.reset();
     }
@@ -104,8 +105,8 @@ public:
 
         #ifdef VERBOSE
         std::cerr << util::type_printer<HostCoordinator>::print()
-                  << "::" + util::blue("copy")
-                  << "(" << from.size()*sizeof(value_type) << " bytes)"
+                  << "::" + util::blue("copy") << "(" << from.size()
+                  << " [" << from.size()*sizeof(value_type) << " bytes])"
                   << " " << from.data() << util::yellow(" -> ") << to.data()
                   << std::endl;
         #endif

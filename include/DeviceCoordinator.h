@@ -40,6 +40,20 @@ namespace util {
 } // namespace util
 ////////////////////////////////////////////////////////////////////////////////
 
+namespace gpu {
+    template <typename T>
+    __global__
+    void fill(T* v, T value, n) {
+        size_t tid = threadIdx.x + blockDim.x*blockIdx.x;
+        size_t grid_step = blockDim.x * gridDim.x;
+
+        while(thread_id < n) {
+            v[tid] = value;
+            tid += grid_step;
+        }
+    }
+}
+
 template <typename T>
 class ConstDeviceReference {
 public:
@@ -111,11 +125,11 @@ public:
         Allocator allocator;
 
         // only allocate memory if nonzero memory allocation has been requested
-        pointer ptr = n>0 ? allocator.allocate(n) : 0;
+        pointer ptr = n>0 ? allocator.allocate(n) : nullptr;
 
         #ifdef VERBOSE
         std::cerr << util::type_printer<DeviceCoordinator>::print()
-                  << "::allocate(" << n << ") "
+                  << util::blue("::allocate") << "(" << n << ")"
                   << (ptr==nullptr && n>0 ? " failure" : " success")
                   << std::endl;
         #endif
@@ -216,8 +230,11 @@ public:
 
     // fill memory
     // todo: use thrust?
-    //void fill(array_type &rng, const T& value) {
+    //void fill(array_type &rng, value_type value) {
     //}
+    void fill(array_type &rng, value_type value) {
+        gpu::fill<<<...>>><value_type>(rng.data(), value);
+    }
 
     // Generate reference objects for a raw pointer.
     // These helpers allow the ArrayView types to return a reference object

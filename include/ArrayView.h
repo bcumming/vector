@@ -78,8 +78,8 @@ public:
 
     using value_wrapper = Array<value_type, Coord>;
 
-    using size_type       = typename std::size_t;
-    using difference_type = typename std::ptrdiff_t;
+    using size_type       = types::size_type;
+    using difference_type = types::difference_type;
 
     using pointer         = typename coordinator_type::pointer;
     using const_pointer   = typename coordinator_type::const_pointer;
@@ -178,7 +178,7 @@ public:
     }
 
     ArrayView operator=(value_type v) {
-#ifdef VERBOSE
+#if VERBOSE>1
         std::cerr << util::pretty_printer<ArrayView>::print(*this)
                   << "::" << util::blue("operator=") << "(" << v << ")"
                   << std::endl;
@@ -187,15 +187,26 @@ public:
         return *this;
     }
 
-    ArrayView operator=(ArrayView other) {
-#ifdef VERBOSE
+    ArrayView operator=(ArrayView const& other) {
+#if VERBOSE>1
         std::cerr << util::pretty_printer<ArrayView>::print(*this)
                   << "::" << util::blue("operator=") << "("
                   << util::pretty_printer<ArrayView>::print(other)
                   << ")" << std::endl;
-  #endif
+#endif
         coordinator_.copy(other, *this);
         return *this;
+    }
+
+    ArrayView set(ArrayView const& other) {
+#if VERBOSE>1
+        std::cerr << util::pretty_printer<ArrayView>::print(*this)
+                  << "::" << util::blue("set") << "("
+                  << util::pretty_printer<ArrayView>::print(other)
+                  << ")" << std::endl;
+#endif
+        pointer_ = other.data();
+        size_    = other.size();
     }
 
     // access to raw data

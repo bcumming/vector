@@ -26,8 +26,13 @@ namespace util {
     struct type_printer<Array<T,Coord>>{
         static std::string print() {
             std::stringstream str;
+#if VERBOSE > 1
             str << util::white("Array") << "<" << type_printer<T>::print()
                 << ", " << type_printer<Coord>::print() << ">";
+#else
+            str << util::white("Array") << "<"
+                << type_printer<Coord>::print() << ">";
+#endif
             return str.str();
         }
     };
@@ -91,10 +96,10 @@ public:
     Array(I n)
         : base(coordinator_type().allocate(n))
     {
-        #ifdef VERBOSE
+#ifdef VERBOSE
         std::cerr << util::green("Array(integral_type) ")
                   << util::pretty_printer<Array>::print(*this) << std::endl;
-        #endif
+#endif
     }
 
     // construct as a copy of another range
@@ -113,28 +118,28 @@ public:
     Array(view_type const& other)
         : base(coordinator_type().allocate(other.size()))
     {
-        #ifdef VERBOSE
+#ifdef VERBOSE
         std::cerr << util::green("Array(other&)") + " other = "
                   << util::pretty_printer<view_type>::print(other) << std::endl;
-        #endif
+#endif
         coordinator_.copy(static_cast<base const&>(other), *this);
     }
 
     Array(const Array& other)
         : base(coordinator_type().allocate(other.size()))
     {
-        #ifdef VERBOSE
+#ifdef VERBOSE
         std::cerr << util::green("Array(other&)") + " other = "
-                  << util::pretty_printer<view_type>::print(other) << std::endl;
-        #endif
+                  << util::pretty_printer<Array>::print(other) << std::endl;
+#endif
         coordinator_.copy(static_cast<base const&>(other), *this);
     }
 
     Array& operator = (const Array& other) {
-        #ifdef VERBOSE
+#ifdef VERBOSE
         std::cerr << util::green("Array operator=(other&)") + " other = "
-                  << util::pretty_printer<view_type>::print(other) << std::endl;
-        #endif
+                  << util::pretty_printer<Array>::print(other) << std::endl;
+#endif
         coordinator_.free(*this);
         auto ptr = coordinator_type().allocate(other.size());
         base::reset(ptr.data(), other.size());
@@ -143,28 +148,29 @@ public:
     }
 
     Array(Array&& other) {
-        #ifdef VERBOSE
-        std::cerr << util::green("Array(other&&)") + " other = "
-                  << util::pretty_printer<view_type>::print(other) << std::endl;
-        #endif
+#ifdef VERBOSE
+        std::cerr << util::green("Array(Array&&) ")
+                  << util::pretty_printer<Array>::print(other) << std::endl;
+#endif
         base::swap(other);
     }
 
     Array& operator = (Array&& other) {
-        #ifdef VERBOSE
-        std::cerr << util::green("Array operator=(other&&)") + " other = "
-                  << util::pretty_printer<view_type>::print(other) << std::endl;
-        #endif
+#ifdef VERBOSE
+        std::cerr << util::pretty_printer<Array>::print(*this)
+                  << "::" << util::blue("operator=") << "(Array&&) other = "
+                  << util::pretty_printer<Array>::print(other) << std::endl;
+#endif
         base::swap(other);
         return *this;
     }
 
     // have to free the memory in a "by value" range
     ~Array() {
-        #ifdef VERBOSE
-        //std::cerr << util::yellow("~Array() ") << util::pretty_printer<Array>::print(*this) << std::endl;
-        std::cerr << util::yellow("~Array() ") << "size " << size()*sizeof(value_type) << " bytes @ " << base::data() << std::endl;
-        #endif
+#ifdef VERBOSE
+        std::cerr << util::red("~") + util::green("Array()") + " "
+                  << util::pretty_printer<Array>::print(*this) << std::endl;
+#endif
         coordinator_.free(*this);
     }
 
