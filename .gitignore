@@ -13,6 +13,7 @@ compile_commands.json
 
 # executable names used in this project
 *.exe
+*.cuda
 
 # backup files
 *.back

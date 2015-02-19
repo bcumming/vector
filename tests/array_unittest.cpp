@@ -11,35 +11,35 @@ TEST(Array, is_array) {
     typedef ArrayView<double, HostCoordinator<double> > by_reference;
 
     static_assert(
-        is_array_by_value<by_value>::value,
+        impl::is_array_by_value<by_value>::value,
         "is_array_by_value incorrectly returned false for array_by_value" );
 
     static_assert(
-        !is_array_by_reference<by_value>::value,
+        !impl::is_array_by_reference<by_value>::value,
         "is_array_by_reference incorrectly returned true for array_by_value" );
 
     static_assert(
-        !is_array_by_value<by_reference>::value,
+        !impl::is_array_by_value<by_reference>::value,
         "is_array_by_value incorrectly returned true for array_by_reference" );
 
     static_assert(
-        is_array_by_reference<by_reference>::value,
+        impl::is_array_by_reference<by_reference>::value,
         "is_array_by_reference incorrectly returned false for array_by_reference" );
 
     static_assert(
-        is_array<by_value>::value,
+        impl::is_array<by_value>::value,
         "is_array incorrectly returned false for array_by_value" );
 
     static_assert(
-        is_array<by_reference>::value,
+        impl::is_array<by_reference>::value,
         "is_array incorrectly returned false for array_by_reference" );
 
     static_assert(
-        !is_array_by_value<int>::value,
+        !impl::is_array_by_value<int>::value,
         "is_array_by_value returns true for type other than array_by_value" );
 
     static_assert(
-        !is_array_by_reference<int>::value,
+        !impl::is_array_by_reference<int>::value,
         "is_array_by_reference returns true for type other than array_by_value" );
 }
 

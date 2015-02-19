@@ -95,7 +95,7 @@ public:
             allocator.deallocate(rng.data(), rng.size());
         }
 
-        rng.reset();
+        impl::reset(rng);
     }
 
     // copy memory from one range into another

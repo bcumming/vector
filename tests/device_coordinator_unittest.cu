@@ -2,29 +2,23 @@
 
 #include <DeviceCoordinator.h>
 #include <HostCoordinator.h>
-#include <Storage.h>
 
 // verify that type members set correctly
 TEST(DeviceCoordinator, type_members) {
     using namespace memory;
 
-    typedef memory::Storage<float,  16, 4> StorageFloatAoSoA;
-
     typedef DeviceCoordinator<int> intcoord_t;
-    typedef DeviceCoordinator<StorageFloatAoSoA> storagecoord_t;
 
     // verify that the correct type is used for internal storage
     ::testing::StaticAssertTypeEq<int,   intcoord_t::value_type>();
-    ::testing::StaticAssertTypeEq<StorageFloatAoSoA,
-                                  storagecoord_t::value_type>();
 }
 
 // verify that rebinding works
 TEST(DeviceCoordinator, rebind) {
     using namespace memory;
 
-    typedef DeviceCoordinator<int> intcoord_t;
-    typedef typename intcoord_t::rebind<double>::other doublecoord_t;
+    using intcoord_t    = DeviceCoordinator<int>;
+    using doublecoord_t = typename intcoord_t::rebind<double>;
 
     // verify that the correct type is used for internal storage
     ::testing::StaticAssertTypeEq<double,doublecoord_t::value_type>();
@@ -40,10 +34,10 @@ TEST(DeviceCoordinator, arraybase_alloc_free) {
     auto array = coordinator.allocate(5);
     typedef decltype(array) arr_t;
 
-    intcoord_t coord;
+    //intcoord_t coord;
 
     // test that array is a base array
-    EXPECT_TRUE(is_array_by_reference<arr_t>::value);
+    EXPECT_TRUE(impl::is_array_by_reference<arr_t>::value);
 
     // test that array has correct storage type
     ::testing::StaticAssertTypeEq<int, arr_t::value_type >();
@@ -69,7 +63,7 @@ TEST(DeviceCoordinator, refarray_alloc_free) {
     auto array = coordinator.allocate(5);
     typedef decltype(array) rng_t;
 
-    auto ref_array = array(all);
+    auto ref_array = array(memory::all);
     typedef decltype(ref_array) rrng_t;
 
     // test that array has correct storage type
@@ -105,9 +99,9 @@ TEST(DeviceCoordinator, overlap) {
     EXPECT_FALSE(array(10,end).overlaps(array(0,10)));
 
     EXPECT_TRUE(array.overlaps(array));
-    EXPECT_TRUE(array(all).overlaps(array));
-    EXPECT_TRUE(array.overlaps(array(all)));
-    EXPECT_TRUE(array(all).overlaps(array(all)));
+    EXPECT_TRUE(array(memory::all).overlaps(array));
+    EXPECT_TRUE(array.overlaps(array(memory::all)));
+    EXPECT_TRUE(array(memory::all).overlaps(array(memory::all)));
     EXPECT_TRUE(array(0,11).overlaps(array(10,end)));
     EXPECT_TRUE(array(10,end).overlaps(array(0,11)));
 }

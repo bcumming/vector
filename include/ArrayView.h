@@ -53,15 +53,47 @@ namespace util {
     };
 }
 
-template <typename T>
-struct is_array;
+namespace impl {
 
-// metafunction for indicating whether a type is an ArrayView
-template <typename T>
-struct is_array_by_reference : std::false_type{};
+    template <typename T>
+    struct is_array;
 
-template <typename T, typename Coord>
-struct is_array_by_reference<ArrayView<T, Coord> > : std::true_type {};
+    // metafunction for indicating whether a type is an ArrayView
+    template <typename T>
+    struct is_array_by_reference : std::false_type{};
+
+    template <typename T, typename Coord>
+    struct is_array_by_reference<ArrayView<T, Coord> > : std::true_type {};
+
+    // metafunction to get view type for an Array/ArrayView
+    template <typename T, typename specialize=void>
+    struct get_view{};
+
+    template <typename T>
+    struct get_view<T, typename std::enable_if< is_array<T>::value>::type > {
+        using coordinator_type = typename T::coordinator_type;
+        using value_type       = typename T::value_type;
+        using type  = ArrayView<value_type, coordinator_type>;
+    };
+
+    // Helper functions that access the reset() methods in ArrayView.
+    // Required to work around a bug in nvcc that makes it awkward to give
+    // Coordinator classes friend access to ArrayView types, so that the
+    // Coordinator can free and allocate memory. The reset() functions
+    // below are friend functions of ArrayView, and are placed in memory::impl::
+    // because users should not directly modify pointer or size information in an
+    // ArrayView.
+    template <typename T, typename Coord>
+    void reset(ArrayView<T, Coord> &v, T* ptr, std::size_t s) {
+        v.reset(ptr, s);
+    }
+
+    template <typename T, typename Coord>
+    void reset(ArrayView<T, Coord> &v) {
+        v.reset();
+    }
+}
+
 
 // An ArrayView type refers to a sub-range of an Array. It does not own the
 // memory, i.e. it is not responsible for allocation and freeing.
@@ -70,8 +102,6 @@ struct is_array_by_reference<ArrayView<T, Coord> > : std::true_type {};
 // been freed)
 template <typename T, typename Coord>
 class ArrayView {
-    // give Coord friendship so it can access private helpers
-    friend Coord;
 public:
     using value_type = T;
     using coordinator_type = typename Coord::template rebind<value_type>;
@@ -198,7 +228,16 @@ public:
         return *this;
     }
 
-    ArrayView set(ArrayView const& other) {
+    // TODO : this interface will be depreciated by ensuring that the behavior
+    //        of the following two operations will differ:
+    //          v = u;
+    //          v(0,n) = u;
+    //        where v and u are ArrayView types.
+    //        In the first case, v will simply point to the same view as u
+    //        (performed via ArrayView::reset(ptr, size))
+    //        The second case will copy n items from the memory viewd by u into
+    //        the memory viewed by v(0,n) (requiring that u.size()=n)
+    void set(ArrayView const& other) {
 #if VERBOSE>1
         std::cerr << util::pretty_printer<ArrayView>::print(*this)
                   << "::" << util::blue("set") << "("
@@ -266,6 +305,10 @@ public:
     }
 
 protected :
+    template <typename U, typename C>
+    friend void impl::reset(ArrayView<U, C>&, U*, std::size_t);
+    template <typename U, typename C>
+    friend void impl::reset(ArrayView<U, C>&);
 
     void swap(ArrayView& other) {
         auto ptr = other.data();
@@ -291,17 +334,6 @@ protected :
     coordinator_type coordinator_;
     pointer          pointer_;
     size_type        size_;
-};
-
-// metafunction to get view type for an Array/ArrayView
-template <typename T, typename specialize=void>
-struct get_view{};
-
-template <typename T>
-struct get_view<T, typename std::enable_if< is_array<T>::value>::type > {
-    using coordinator_type = typename T::coordinator_type;
-    using value_type       = typename T::value_type;
-    using type  = ArrayView<value_type, coordinator_type>;
 };
 
 } // namespace memory

@@ -23,8 +23,14 @@ namespace util {
     struct type_printer<DeviceCoordinator<T,Allocator>>{
         static std::string print() {
             std::stringstream str;
-            str << "DeviceCoordinator<" << type_printer<T>::print()
+            #if VERBOSE > 1
+            str << util::white("DeviceCoordinator") << "<"
+                << type_printer<T>::print()
                 << ", " << type_printer<Allocator>::print() << ">";
+            #else
+            str << util::white("DeviceCoordinator")
+                << "<" << type_printer<T>::print() << ">";
+            #endif
             return str.str();
         }
     };
@@ -41,24 +47,26 @@ namespace util {
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace gpu {
-    template <typename T>
+    /*
+    template <typename T, typename I>
     __global__
-    void fill(T* v, T value, n) {
-        size_t tid = threadIdx.x + blockDim.x*blockIdx.x;
-        size_t grid_step = blockDim.x * gridDim.x;
+    void fill(T* v, T value, I n) {
+        I tid = threadIdx.x + blockDim.x*blockIdx.x;
+        I grid_step = blockDim.x * gridDim.x;
 
         while(thread_id < n) {
             v[tid] = value;
             tid += grid_step;
         }
     }
+    */
 }
 
 template <typename T>
 class ConstDeviceReference {
 public:
     using value_type = T;
-    using pointer = *value_type;
+    using pointer = value_type*;
 
     ConstDeviceReference(pointer p) : pointer_(p) {}
 
@@ -76,7 +84,7 @@ template <typename T>
 class DeviceReference {
 public:
     using value_type = T;
-    using pointer = *value_type;
+    using pointer = value_type*;
 
     DeviceReference(pointer p) : pointer_(p) {}
 
@@ -102,21 +110,19 @@ public:
     using value_type = T;
     using Allocator = typename Allocator_::template rebind<value_type>::other;
 
-    using pointer       = *value_type;
+    using pointer       = value_type*;
     using const_pointer = const value_type*;
     using reference       = DeviceReference<value_type>;
     using const_reference = ConstDeviceReference<value_type>;
 
     using array_type = ArrayView<value_type, DeviceCoordinator>;
 
-    using size_type       = typename types::size_type;
-    using difference_type = typename types::difference_type;
+    using size_type       = types::size_type;
+    using difference_type = types::difference_type;
 
     // metafunction for rebinding host_coordinator with another type
     template <typename Tother>
-    struct rebind {
-        typedef DeviceCoordinator<Tother, Allocator> other;
-    };
+    using rebind = DeviceCoordinator<Tother, Allocator>;
 
     //template <typename Tother>
     //using rebind = DeviceCoordinator<Tother, Allocator>;
@@ -148,7 +154,8 @@ public:
                   << "::free()" << std::endl;
         #endif
 
-        rng.reset();
+        //rng.reset();
+        impl::reset(rng);
     }
 
     // copy memory from one gpu range to another
@@ -177,13 +184,13 @@ public:
          array_type &to) {
         assert(from.size()==to.size());
 
-        #ifndef NDEBUG
+        #ifdef VERBOSE
         using oType = ArrayView<value_type, HostCoordinator<value_type, Alloc>>;
-        std::cout << "synchronous copy from host to device memory :\n  " 
-                  << util::pretty_printer<DeviceCoordinator>::print(*this)
-                  << "::copy(\n\t"
-                  << util::pretty_printer<oType>::print(from) << ",\n\t"
-                  << util::pretty_printer<array_type>::print(to) << ")" << std::endl;
+        std::cout << util::pretty_printer<DeviceCoordinator>::print(*this)
+                  << "::" << util::blue("copy") << "(asynchronous, " << from.size() << ")"
+                  << "\n  " << util::type_printer<oType>::print() << " @ " << from.data()
+                  << util::yellow(" -> ")
+                  << util::type_printer<array_type>::print() << " @ " << to.data() << std::endl;
         #endif
 
         cudaError_t status = cudaMemcpy(
@@ -208,13 +215,13 @@ public:
          array_type &to) {
         assert(from.size()==to.size());
 
-        #ifndef NDEBUG
+        #ifdef VERBOSE
         using oType = ArrayView< value_type, HostCoordinator< value_type, PinnedAllocator< value_type, alignment>>>;
-        std::cout << "asynchronous copy from host to device memory :\n  "
-                  << util::pretty_printer<DeviceCoordinator>::print(*this)
-                  << "::copy(\n\t"
-                  << util::pretty_printer<oType>::print(from) << ",\n\t"
-                  << util::pretty_printer<array_type>::print(to) << ")" << std::endl;
+        std::cout << util::pretty_printer<DeviceCoordinator>::print(*this)
+                  << "::" << util::blue("copy") << "(asynchronous, " << from.size() << ")"
+                  << "\n  " << util::type_printer<oType>::print() << " @ " << from.data()
+                  << util::yellow(" -> ")
+                  << util::type_printer<array_type>::print() << " @ " << to.data() << std::endl;
         #endif
 
         cudaError_t status = cudaMemcpy(
@@ -233,7 +240,7 @@ public:
     //void fill(array_type &rng, value_type value) {
     //}
     void fill(array_type &rng, value_type value) {
-        gpu::fill<<<...>>><value_type>(rng.data(), value);
+        //gpu::fill<<<...>>><value_type>(rng.data(), value);
     }
 
     // Generate reference objects for a raw pointer.

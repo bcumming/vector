@@ -49,19 +49,21 @@ namespace util {
     };
 }
 
-// metafunctions for checking array types
-template <typename T>
-struct is_array_by_value : std::false_type {};
+namespace impl {
+    // metafunctions for checking array types
+    template <typename T>
+    struct is_array_by_value : std::false_type {};
 
-template <typename T, typename Coord>
-struct is_array_by_value<Array<T, Coord> > : std::true_type {};
+    template <typename T, typename Coord>
+    struct is_array_by_value<Array<T, Coord> > : std::true_type {};
 
-template <typename T>
-struct is_array
-    : std::conditional< is_array_by_value<T>::value || is_array_by_reference<T>::value,
-                        std::true_type,
-                        std::false_type>::type
-{};
+    template <typename T>
+    struct is_array
+        : std::conditional< impl::is_array_by_value<T>::value || impl::is_array_by_reference<T>::value,
+                            std::true_type,
+                            std::false_type>::type
+    {};
+}
 
 // array by value
 // this wrapper owns the memory in the array
