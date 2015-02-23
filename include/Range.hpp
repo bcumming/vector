@@ -4,7 +4,7 @@
 
 #include <cassert>
 
-#include "RangeLimits.h"
+#include "RangeLimits.hpp"
 
 namespace memory {
 

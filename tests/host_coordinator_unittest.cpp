@@ -1,6 +1,6 @@
 #include "gtest.h"
 
-#include <HostCoordinator.h>
+#include <HostCoordinator.hpp>
 
 // helper function for outputting a range
 template <typename R>
@@ -44,7 +44,7 @@ TEST(HostCoordinator, baserange_alloc_free) {
     intcoord_t coord;
 
     // test that range is a base range
-    EXPECT_TRUE(impl::is_array_by_reference<rng_t>::value);
+    EXPECT_TRUE(impl::is_array_view<rng_t>::value);
 
     // test that range has correct storage type
     ::testing::StaticAssertTypeEq<int, rng_t::value_type >();

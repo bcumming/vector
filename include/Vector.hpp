@@ -2,12 +2,12 @@
 
 #include <iostream>
 
-#include "Array.h"
-#include "definitions.h"
-#include "HostCoordinator.h"
+#include "Array.hpp"
+#include "definitions.hpp"
+#include "HostCoordinator.hpp"
 
 #ifdef WITH_CUDA
-#include "DeviceCoordinator.h"
+#include "DeviceCoordinator.hpp"
 #endif
 
 

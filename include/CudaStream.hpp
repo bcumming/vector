@@ -5,7 +5,7 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 
-#include "CudaEvent.h"
+#include "CudaEvent.hpp"
 
 namespace memory {
 

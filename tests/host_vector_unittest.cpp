@@ -2,8 +2,8 @@
 
 #include <algorithm>
 
-#include <Vector.h>
-#include <HostCoordinator.h>
+#include <Vector.hpp>
+#include <HostCoordinator.hpp>
 
 template <typename VEC>
 void print(VEC const& v) {

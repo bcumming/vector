@@ -2,6 +2,7 @@ set(DRIVER_SOURCES
     driver.cpp
     host_coordinator_unittest.cpp
     array_unittest.cpp
+    array_reference_unittest.cpp
     host_vector_unittest.cpp
     allocator_unittest.cpp
     split_range_unittest.cpp

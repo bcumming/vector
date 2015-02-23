@@ -3,9 +3,9 @@
 #include <memory>
 #include <algorithm>
 
-#include "definitions.h"
-#include "Array.h"
-#include "Allocator.h"
+#include "definitions.hpp"
+#include "Array.hpp"
+#include "Allocator.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace memory {
@@ -71,8 +71,8 @@ public:
         #ifdef VERBOSE
         bool success = ptr;
         std::cerr << util::type_printer<HostCoordinator>::print()
-                  << "::" + util::blue(success ? "allocate" : "allocate!")
-                  << "(" << n*sizeof(value_type) << " bytes) @ " << ptr
+                  << "::" + util::blue("alocate") << "(" << n
+                  << " [" << n*sizeof(value_type) << " bytes]) @ " << ptr
                   << std::endl;
         #endif
 
@@ -86,10 +86,11 @@ public:
         if(rng.data()) {
         #ifdef VERBOSE
             std::cerr << util::type_printer<HostCoordinator>::print()
-                      << "::" + util::blue("free")
-                      << "(" << rng.size()*sizeof(value_type) << " bytes)"
+                      << "::" + util::blue("free") << "(" << rng.size()
+                      << " [" << rng.size()*sizeof(value_type) << " bytes])"
                       << " @ " << rng.data()
                       << std::endl;
+
         #endif
 
             allocator.deallocate(rng.data(), rng.size());

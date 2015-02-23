@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   range_wrapper.h
  * Author: bcumming
  *
@@ -10,9 +10,9 @@
 #include <iostream>
 #include <type_traits>
 
-#include "definitions.h"
-#include "util.h"
-#include "ArrayView.h"
+#include "definitions.hpp"
+#include "util.hpp"
+#include "ArrayView.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace memory{
@@ -59,7 +59,7 @@ namespace impl {
 
     template <typename T>
     struct is_array
-        : std::conditional< impl::is_array_by_value<T>::value || impl::is_array_by_reference<T>::value,
+        : std::conditional< impl::is_array_by_value<T>::value || impl::is_array_view<T>::value,
                             std::true_type,
                             std::false_type>::type
     {};

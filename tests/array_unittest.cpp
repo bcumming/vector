@@ -1,46 +1,46 @@
 #include "gtest.h"
 
-#include <Array.h>
-#include <HostCoordinator.h>
+#include <Array.hpp>
+#include <HostCoordinator.hpp>
 
 // verify that metafunctions for checking range wrappers work
 TEST(Array, is_array) {
     using namespace memory;
 
     typedef Array<double, HostCoordinator<double> > by_value;
-    typedef ArrayView<double, HostCoordinator<double> > by_reference;
+    typedef ArrayView<double, HostCoordinator<double> > by_view;
 
     static_assert(
         impl::is_array_by_value<by_value>::value,
         "is_array_by_value incorrectly returned false for array_by_value" );
 
     static_assert(
-        !impl::is_array_by_reference<by_value>::value,
-        "is_array_by_reference incorrectly returned true for array_by_value" );
+        !impl::is_array_view<by_value>::value,
+        "is_array_view incorrectly returned true for array_by_value" );
 
     static_assert(
-        !impl::is_array_by_value<by_reference>::value,
-        "is_array_by_value incorrectly returned true for array_by_reference" );
+        !impl::is_array_by_value<by_view>::value,
+        "is_array_by_value incorrectly returned true for array_view" );
 
     static_assert(
-        impl::is_array_by_reference<by_reference>::value,
-        "is_array_by_reference incorrectly returned false for array_by_reference" );
+        impl::is_array_view<by_view>::value,
+        "is_array_view incorrectly returned false for array_view" );
 
     static_assert(
         impl::is_array<by_value>::value,
         "is_array incorrectly returned false for array_by_value" );
 
     static_assert(
-        impl::is_array<by_reference>::value,
-        "is_array incorrectly returned false for array_by_reference" );
+        impl::is_array<by_view>::value,
+        "is_array incorrectly returned false for array_view" );
 
     static_assert(
         !impl::is_array_by_value<int>::value,
         "is_array_by_value returns true for type other than array_by_value" );
 
     static_assert(
-        !impl::is_array_by_reference<int>::value,
-        "is_array_by_reference returns true for type other than array_by_value" );
+        !impl::is_array_view<int>::value,
+        "is_array_view returns true for type other than array_by_value" );
 }
 
 TEST(Array,new_array_by_value) {

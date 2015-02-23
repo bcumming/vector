@@ -3,9 +3,9 @@
 #include <algorithm>
 #include <vector>
 
-#include <HostCoordinator.h>
-#include <SplitRange.h>
-#include <Vector.h>
+#include <HostCoordinator.hpp>
+#include <SplitRange.hpp>
+#include <Vector.hpp>
 
 TEST(SplitRange, split) {
     using namespace memory;

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Allocator.h"
-#include "Array.h"
-#include "definitions.h"
-#include "Event.h"
-#include "CudaEvent.h"
+#include "Allocator.hpp"
+#include "Array.hpp"
+#include "definitions.hpp"
+#include "Event.hpp"
+#include "CudaEvent.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace memory {

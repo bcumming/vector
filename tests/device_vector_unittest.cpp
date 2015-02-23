@@ -1,8 +1,8 @@
 #include "gtest.h"
 
-#include <Vector.h>
-#include <HostCoordinator.h>
-#include <DeviceCoordinator.h>
+#include <Vector.hpp>
+#include <HostCoordinator.hpp>
+#include <DeviceCoordinator.hpp>
 
 #include <algorithm>
 

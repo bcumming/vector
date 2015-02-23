@@ -7,8 +7,8 @@
 #include <cuda_runtime.h>
 #endif
 
-#include "definitions.h"
-#include "util.h"
+#include "definitions.hpp"
+#include "util.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace memory {
