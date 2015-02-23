@@ -82,10 +82,30 @@ namespace impl {
 
     // metafunction for indicating whether a type is an ArrayView
     template <typename T>
-    struct is_array_view : std::false_type{};
+    struct is_array_view : std::false_type {};
 
     template <typename R, typename T, typename Coord>
     struct is_array_view<ArrayViewImpl<R, T, Coord> > : std::true_type {};
+
+    template <typename T>
+    struct is_array_reference : std::false_type {};
+
+    template <typename T, typename Coord>
+    struct is_array_reference<ArrayReference<T, Coord> > : std::true_type {};
+
+    template <typename A>
+    struct has_array_view_base : std::false_type {};
+
+    /*
+    template <typename T, typename Coord>
+    struct has_array_view_base<Array> :
+        std::is_base_of<
+            ArrayViewImpl<ArrayReference<typename A::value_type,
+                                         typename A::coordinator_type>, T, Coord>,
+            A
+        >
+    {};
+    */
 
     // Helper functions that access the reset() methods in ArrayView.
     // Required to work around a bug in nvcc that makes it awkward to give
@@ -130,13 +150,20 @@ public:
     ////////////////////////////////////////////////////////////////////////////
     // CONSTRUCTORS
     ////////////////////////////////////////////////////////////////////////////
-    explicit ArrayViewImpl(value_wrapper &other)
-    : pointer_ (other.data())
-    , size_(other.size())
+    template <
+        typename Other,
+        typename = typename std::enable_if<
+            impl::is_array<
+                typename std::decay<Other>::type
+            >::value
+        >::type
+    >
+    explicit ArrayViewImpl(Other&& other)
+        : pointer_ (other.data()) , size_(other.size())
     {
 #if VERBOSE>1
-        std::cout << util::green("ArrayView(&other)")
-                  << util::pretty_printer<ArrayViewImpl>::print(*this)
+        std::cout << util::green("ArrayView(&&Other)")
+                  << util::pretty_printer<typename std::decay<Other>::type>::print(*this)
                   << std::endl;
 #endif
     }
@@ -189,19 +216,15 @@ public:
         return array_reference_type(pointer_+left, right-left);
     }
 
-    /*
-    ArrayViewImpl operator=(value_type v) {
-#if VERBOSE>1
-        std::cerr << util::pretty_printer<ArrayViewImpl>::print(*this)
-                  << "::" << util::blue("operator=") << "(" << v << ")"
-                  << std::endl;
-#endif
-        coordinator_.set(*this, v);
-        return *this;
-    }
-    */
-
-    ArrayViewImpl operator=(ArrayViewImpl const& other) {
+    template <
+        typename Other,
+        typename = typename std::enable_if<
+            impl::is_array<
+                typename std::decay<Other>::type
+            >::value
+        >::type
+    >
+    ArrayViewImpl operator=(Other&& other) {
 #if VERBOSE>1
         std::cerr << util::pretty_printer<ArrayViewImpl>::print(*this)
                   << "::" << util::blue("operator=") << "("
@@ -336,28 +359,23 @@ public:
 
     // the operator=() operators are key: they facilitate copying data from
     // you can make these return an event type, for synchronization
-    ArrayReference& operator = (base const& other) {
+    template <
+        typename Other,
+        typename = typename std::enable_if<
+            impl::is_array<
+                typename std::decay<Other>::type
+            >::value
+        >::type
+    >
+    ArrayReference operator = (Other&& other) {
 #ifndef NDEBUG
         assert(other.size() == this->size());
 #endif
 #ifdef VERBOSE
-        std::cerr << util::pretty_printer<ArrayReference>::print(*this)
-                  << "::" << util::yellow("operator=") << "(other&)"
-                  << std::endl;
-#endif
-        base::coordinator_.copy(other, *this);
-
-        return *this;
-    }
-
-    ArrayReference& operator = (ArrayReference const& other) {
-#ifndef NDEBUG
-        assert(other.size() == this->size());
-#endif
-#ifdef VERBOSE
-        std::cerr << util::pretty_printer<ArrayReference>::print(*this)
-                  << "::" << util::yellow("operator=") << "(other&)"
-                  << std::endl;
+        std::cerr << util::type_printer<ArrayReference>::print()
+                  << "::" << util::blue("operator=") << "(&&"
+                  << util::type_printer<typename std::decay<Other>::type>::print()
+                  << ")" << std::endl;
 #endif
         base::coordinator_.copy(other, *this);
 
@@ -367,7 +385,7 @@ public:
     ArrayReference& operator = (value_type value) {
 #ifdef VERBOSE
         std::cerr << util::pretty_printer<ArrayReference>::print(*this)
-                  << "::" << util::yellow("operator=") << "(" << value << ")"
+                  << "::" << util::blue("operator=") << "(" << value << ")"
                   << std::endl;
 #endif
         if(size()>0) {

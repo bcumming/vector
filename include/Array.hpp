@@ -59,7 +59,7 @@ namespace impl {
 
     template <typename T>
     struct is_array
-        : std::conditional< impl::is_array_by_value<T>::value || impl::is_array_view<T>::value,
+        : std::conditional< impl::is_array_by_value<T>::value || impl::is_array_view<T>::value || impl::is_array_reference<T>::value,
                             std::true_type,
                             std::false_type>::type
     {};
@@ -93,8 +93,7 @@ public:
 
     // constructor by size
     template < typename I,
-                // use (void*)0 to workaround intel bug with nullptr
-               typename std::enable_if<std::is_integral<I>::value>::type* = (void*)0>
+               typename = typename std::enable_if<std::is_integral<I>::value>::type>
     Array(I n)
         : base(coordinator_type().allocate(n))
     {
@@ -137,6 +136,14 @@ public:
         coordinator_.copy(static_cast<base const&>(other), *this);
     }
 
+    Array(Array&& other) {
+#ifdef VERBOSE
+        std::cerr << util::green("Array(Array&&) ")
+                  << util::pretty_printer<Array>::print(other) << std::endl;
+#endif
+        base::swap(other);
+    }
+
     Array& operator = (const Array& other) {
 #ifdef VERBOSE
         std::cerr << util::green("Array operator=(other&)") + " other = "
@@ -147,14 +154,6 @@ public:
         base::reset(ptr.data(), other.size());
         coordinator_.copy(static_cast<base const&>(other), *this);
         return *this;
-    }
-
-    Array(Array&& other) {
-#ifdef VERBOSE
-        std::cerr << util::green("Array(Array&&) ")
-                  << util::pretty_printer<Array>::print(other) << std::endl;
-#endif
-        base::swap(other);
     }
 
     Array& operator = (Array&& other) {
