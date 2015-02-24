@@ -146,7 +146,7 @@ public:
     using reference       = DeviceReference<value_type>;
     using const_reference = ConstDeviceReference<value_type>;
 
-    using array_type = ArrayView<value_type, DeviceCoordinator>;
+    using view_type = ArrayView<value_type, DeviceCoordinator>;
 
     using size_type       = types::size_type;
     using difference_type = types::difference_type;
@@ -156,7 +156,7 @@ public:
     using rebind = DeviceCoordinator<Tother, Allocator>;
 
     // allocate memory on the device
-    array_type allocate(size_type n) {
+    view_type allocate(size_type n) {
         Allocator allocator;
 
         // only allocate memory if nonzero memory allocation has been requested
@@ -169,11 +169,11 @@ public:
                   << std::endl;
         #endif
 
-        return array_type(ptr, n);
+        return view_type(ptr, n);
     }
 
     // free memory on the device
-    void free(array_type& rng) {
+    void free(view_type& rng) {
         Allocator allocator;
 
         if(rng.data())
@@ -188,7 +188,7 @@ public:
     }
 
     // copy memory from one gpu range to another
-    void copy(const array_type &from, array_type &to) {
+    void copy(const view_type &from, view_type &to) {
         assert(from.size()==to.size());
         assert(!from.overlaps(to));
 
@@ -203,14 +203,14 @@ public:
     // copy memory from host memory to device
     template <class CoordOther>
     void copy( const ArrayView<value_type, CoordOther> &from,
-               array_type &to) {
+               view_type &to) {
         static_assert(true, "DeviceCoordinator: unable to copy from other Coordinator");
     }
 
     template <class Alloc>
-    std::pair<SynchEvent, array_type>
+    std::pair<SynchEvent, view_type>
     copy(const ArrayView<value_type, HostCoordinator<value_type, Alloc>> &from,
-         array_type &to) {
+         view_type &to) {
         assert(from.size()==to.size());
 
         #ifdef VERBOSE
@@ -219,7 +219,7 @@ public:
                   << "::" << util::blue("copy") << "(asynchronous, " << from.size() << ")"
                   << "\n  " << util::type_printer<oType>::print() << " @ " << from.data()
                   << util::yellow(" -> ")
-                  << util::type_printer<array_type>::print() << " @ " << to.data() << std::endl;
+                  << util::type_printer<view_type>::print() << " @ " << to.data() << std::endl;
         #endif
 
         cudaError_t status = cudaMemcpy(
@@ -233,7 +233,7 @@ public:
     }
 
     template <size_t alignment>
-    std::pair<CudaEvent, array_type>
+    std::pair<CudaEvent, view_type>
     copy(const ArrayView<
                 value_type,
                 HostCoordinator<
@@ -241,7 +241,7 @@ public:
                     PinnedAllocator<
                         value_type,
                         alignment>>> &from,
-         array_type &to) {
+         view_type &to) {
         assert(from.size()==to.size());
 
         #ifdef VERBOSE
@@ -250,7 +250,7 @@ public:
                   << "::" << util::blue("copy") << "(asynchronous, " << from.size() << ")"
                   << "\n  " << util::type_printer<oType>::print() << " @ " << from.data()
                   << util::yellow(" -> ")
-                  << util::type_printer<array_type>::print() << " @ " << to.data() << std::endl;
+                  << util::type_printer<view_type>::print() << " @ " << to.data() << std::endl;
         #endif
 
         cudaError_t status = cudaMemcpy(
@@ -265,7 +265,7 @@ public:
     }
 
     // fill memory
-    void set(array_type &rng, value_type value) {
+    void set(view_type &rng, value_type value) {
         gpu::fill<value_type>(rng.data(), value, rng.size());
     }
 

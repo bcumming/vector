@@ -47,13 +47,11 @@ class HostCoordinator {
 public:
     using value_type = T;
 
-    using  pointer       = value_type*;
-    using  const_pointer = const pointer;
-    using  reference       = value_type&;
-    using  const_reference = value_type const&;
-
-    using range_type = ArrayView<value_type, HostCoordinator>;
-
+    using pointer         = value_type*;
+    using const_pointer   = const pointer;
+    using reference       = value_type&;
+    using const_reference = value_type const&;
+    using view_type      = ArrayView<value_type, HostCoordinator>;
     using size_type       = types::size_type;
     using difference_type = types::difference_type;
 
@@ -61,8 +59,7 @@ public:
     template <typename Tother>
     using rebind = HostCoordinator<Tother, Allocator>;
 
-    range_type allocate(size_type n) {
-        // todo make this work with alignment
+    view_type allocate(size_type n) {
         typename Allocator::template rebind<value_type>::other allocator;
 
         // only allocate memory if nonzero memory allocation has been requested
@@ -76,11 +73,10 @@ public:
                   << std::endl;
         #endif
 
-        return range_type(ptr, n);
+        return view_type(ptr, n);
     }
 
-    void free(range_type& rng) {
-        // todo make this work with alignment
+    void free(view_type& rng) {
         typename Allocator::template rebind<value_type>::other allocator;
 
         if(rng.data()) {
@@ -100,7 +96,7 @@ public:
     }
 
     // copy memory from one range into another
-    void copy(const range_type &from, range_type &to) {
+    void copy(const view_type &from, view_type &to) {
         assert(from.size()==to.size());
         assert(!from.overlaps(to));
 
@@ -116,7 +112,7 @@ public:
     }
 
     // copy memory from one range into another
-    void set(range_type &rng, value_type val) {
+    void set(view_type &rng, value_type val) {
         #ifdef VERBOSE
         std::cerr << util::type_printer<HostCoordinator>::print()
                   << "::" + util::blue("fill")
