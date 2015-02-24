@@ -58,10 +58,13 @@ namespace impl {
     struct is_array_by_value<Array<T, Coord> > : std::true_type {};
 
     template <typename T>
-    struct is_array
-        : std::conditional< impl::is_array_by_value<T>::value || impl::is_array_view<T>::value || impl::is_array_reference<T>::value,
-                            std::true_type,
-                            std::false_type>::type
+    struct is_array :
+        std::conditional<
+            impl::is_array_by_value  <typename std::decay<T>::type> ::value ||
+            impl::is_array_view      <typename std::decay<T>::type> ::value ||
+            impl::is_array_reference <typename std::decay<T>::type> ::value,
+            std::true_type, std::false_type
+        >::type
     {};
 }
 
@@ -104,18 +107,6 @@ public:
     }
 
     // construct as a copy of another range
-    /*
-    template <
-        class RangeType,
-        typename std::enable_if<is_array<RangeType>::value, void>::type* = (void*)0
-    >
-    explicit Array(const RangeType& other)
-        : base(coordinator_type().allocate(other.size()))
-    {
-        coordinator_.copy(static_cast<view_base const&>(other), *this);
-    }
-    */
-
     Array(view_type const& other)
         : base(coordinator_type().allocate(other.size()))
     {
@@ -144,6 +135,7 @@ public:
         base::swap(other);
     }
 
+    // TODO : template this to catch array references etc
     Array& operator = (const Array& other) {
 #ifdef VERBOSE
         std::cerr << util::green("Array operator=(other&)") + " other = "

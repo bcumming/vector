@@ -96,17 +96,6 @@ namespace impl {
     template <typename A>
     struct has_array_view_base : std::false_type {};
 
-    /*
-    template <typename T, typename Coord>
-    struct has_array_view_base<Array> :
-        std::is_base_of<
-            ArrayViewImpl<ArrayReference<typename A::value_type,
-                                         typename A::coordinator_type>, T, Coord>,
-            A
-        >
-    {};
-    */
-
     // Helper functions that access the reset() methods in ArrayView.
     // Required to work around a bug in nvcc that makes it awkward to give
     // Coordinator classes friend access to ArrayView types, so that the
@@ -152,11 +141,7 @@ public:
     ////////////////////////////////////////////////////////////////////////////
     template <
         typename Other,
-        typename = typename std::enable_if<
-            impl::is_array<
-                typename std::decay<Other>::type
-            >::value
-        >::type
+        typename = typename std::enable_if< impl::is_array<Other>::value >::type
     >
     explicit ArrayViewImpl(Other&& other)
         : pointer_ (other.data()) , size_(other.size())
@@ -218,11 +203,7 @@ public:
 
     template <
         typename Other,
-        typename = typename std::enable_if<
-            impl::is_array<
-                typename std::decay<Other>::type
-            >::value
-        >::type
+        typename = typename std::enable_if< impl::is_array<Other>::value >::type
     >
     ArrayViewImpl operator=(Other&& other) {
 #if VERBOSE>1
@@ -361,11 +342,7 @@ public:
     // you can make these return an event type, for synchronization
     template <
         typename Other,
-        typename = typename std::enable_if<
-            impl::is_array<
-                typename std::decay<Other>::type
-            >::value
-        >::type
+        typename = typename std::enable_if< impl::is_array<Other>::value >::type
     >
     ArrayReference operator = (Other&& other) {
 #ifndef NDEBUG

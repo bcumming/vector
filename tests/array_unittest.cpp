@@ -143,3 +143,20 @@ TEST(Array, sub_ranges_by_range) {
         ++it1;
     }
 }
+
+// test that the assignment operator works
+TEST(Array, assignment) {
+    using namespace memory;
+
+    typedef Array<double, HostCoordinator<double> > by_value;
+    typedef ArrayView<double, HostCoordinator<double> > by_reference;
+
+    by_value other(10);
+    other(all) = 3.14;
+    by_value v;
+
+    v = other(all);
+    EXPECT_NE(v.data(), other.data());
+    for(auto value: v)
+        EXPECT_EQ(value, 3.14);
+}
