@@ -41,3 +41,29 @@ TEST(DeviceVector, indexing) {
     for(int i=0; i<N; ++i)
         EXPECT_EQ(float(v1[i]), (float)i);
 }
+
+TEST(DeviceVector, fill) {
+    using namespace memory;
+
+    // length constructor
+    const size_t N = 10;
+
+    {
+        DeviceVector<char> v(N);
+        v(memory::all) = 'a';
+        for(int i=0; i<N; ++i)
+            EXPECT_EQ(char(v[i]), 'a');
+    }
+    {
+        DeviceVector<float> v(N);
+        v(memory::all) = -1.f;
+        for(int i=0; i<N; ++i)
+            EXPECT_EQ(float(v[i]), -1.f);
+    }
+    {
+        DeviceVector<double> v(N);
+        v(memory::all) = -2.;
+        for(int i=0; i<N; ++i)
+            EXPECT_EQ(double(v[i]), -2.);
+    }
+}

@@ -1,7 +1,7 @@
 #include "gtest.h"
 
-#include <DeviceCoordinator.h>
-#include <HostCoordinator.h>
+#include <DeviceCoordinator.hpp>
+#include <HostCoordinator.hpp>
 
 // verify that type members set correctly
 TEST(DeviceCoordinator, type_members) {
@@ -34,10 +34,8 @@ TEST(DeviceCoordinator, arraybase_alloc_free) {
     auto array = coordinator.allocate(5);
     typedef decltype(array) arr_t;
 
-    //intcoord_t coord;
-
     // test that array is a base array
-    EXPECT_TRUE(impl::is_array_by_reference<arr_t>::value);
+    EXPECT_TRUE(impl::is_array_view<arr_t>::value);
 
     // test that array has correct storage type
     ::testing::StaticAssertTypeEq<int, arr_t::value_type >();
