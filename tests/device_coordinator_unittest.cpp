@@ -217,3 +217,11 @@ TEST(DeviceCoordinator, host_to_device_copy_asynchronous) {
             EXPECT_EQ( host_array[i], T(device_array[i]) );
     }
 }
+
+// test copy from host to device memory works for pinned host memory
+TEST(DeviceCoordinator, alignment) {
+    using namespace memory;
+    static_assert(DeviceCoordinator<double>::alignment() == 256,
+                  "bad alignment reported by CUDA Allocator");
+}
+

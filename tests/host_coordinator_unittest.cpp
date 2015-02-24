@@ -89,44 +89,6 @@ TEST(HostCoordinator, refrange_alloc_free) {
     EXPECT_EQ(rng_t::size_type(0), rng.size());
 }
 
-// test copying data between ranges using HostCoordinator
-/* the following needs to be reworked, because we remove
-   operator[] and begin()/end() from the BaseArray class
-TEST(HostCoordinator, copy) {
-    using namespace memory;
-
-    const int N = 20;
-
-    typedef HostCoordinator<int> intcoord_t;
-    intcoord_t coordinator;
-
-    ArrayView<int,HostCoordinator<int>> rng(coordinator.allocate(N));
-    int i=0;
-    for(auto &v: rng)
-        v = i++;
-
-    // todo : fix this lvalue issue
-    //coordinator.copy(rng(N/2,end), rng(0,N/2));
-    auto aa = rng(0,N/2);
-    coordinator.copy(rng(N/2,end), aa);
-    for(auto i=0; i<N/2; i++)
-        EXPECT_EQ(rng[i], rng[i+N/2]);
-
-    // create a new range of the same length, and initialize to new values
-    //auto rng2 = coordinator.allocate(N);
-    ArrayView<int,HostCoordinator<int>> rng2(coordinator.allocate(N));
-    i=0;
-    for(auto &v: rng2)
-        v = (i+=2);
-
-    // take a reference range to the original range
-    auto rrng = rng(all);
-
-    coordinator.copy(rng2, rrng);
-    for(auto i=0; i<N; i++)
-        EXPECT_EQ(rng2[i], rrng[i]);
-}*/
-
 // test that HostCoordinator can correctly detect overlap between ranges
 TEST(HostCoordinator, overlap) {
     using namespace memory;
@@ -148,4 +110,21 @@ TEST(HostCoordinator, overlap) {
     EXPECT_TRUE(rng(all).overlaps(rng(all)));
     EXPECT_TRUE(rng(0,11).overlaps(rng(10,end)));
     EXPECT_TRUE(rng(10,end).overlaps(rng(0,11)));
+}
+
+// test copy from host to device memory works for pinned host memory
+TEST(HostCoordinator, alignment) {
+    using namespace memory;
+    static_assert(
+      HostCoordinator<double, AlignedAllocator<double,64>>::alignment() == 64,
+      "bad alignment reported by Host Allocator");
+    static_assert(
+      HostCoordinator<double, AlignedAllocator<double,128>>::alignment() == 128,
+      "bad alignment reported by Host Allocator");
+    static_assert(
+      HostCoordinator<double, AlignedAllocator<double,256>>::alignment() == 256,
+      "bad alignment reported by Host Allocator");
+    static_assert(
+      HostCoordinator<double, AlignedAllocator<double,512>>::alignment() == 512,
+      "bad alignment reported by Host Allocator");
 }

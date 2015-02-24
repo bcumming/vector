@@ -91,6 +91,8 @@ namespace impl {
         void free_policy(void *ptr) {
             free(ptr);
         }
+
+        static constexpr size_type alignment() { return Alignment; }
     };
 
 #ifdef WITH_CUDA
@@ -131,6 +133,8 @@ namespace impl {
                 cudaHostUnregister(ptr);
                 free(ptr);
             }
+
+            static constexpr size_type alignment() { return Alignment; }
         };
 
         class DevicePolicy {
@@ -156,6 +160,9 @@ namespace impl {
                 if(ptr)
                     cudaFree(ptr);
             }
+
+            // CUDA default alignment is 256 bytes
+            static constexpr size_type alignment() { return 256; }
         };
     } // namespace cuda
 #endif
@@ -167,6 +174,7 @@ class Allocator : public Policy {
     using Policy::allocate_policy;
     using Policy::free_policy;
 public:
+    using Policy::alignment;
     //    typedefs
     typedef T value_type;
     typedef value_type* pointer;

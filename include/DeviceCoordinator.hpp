@@ -280,6 +280,11 @@ public:
     const_reference make_reference(value_type const* p) const {
         return const_reference(p);
     }
+
+    static constexpr auto
+    alignment() -> decltype(Allocator_::alignment()) {
+        return Allocator_::alignment();
+    }
 };
 
 } // namespace memory

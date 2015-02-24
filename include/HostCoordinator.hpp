@@ -135,6 +135,10 @@ public:
         return *p;
     }
 
+    static constexpr auto
+    alignment() -> decltype(Allocator::alignment()) {
+        return Allocator::alignment();
+    }
 };
 
 } //namespace memory
