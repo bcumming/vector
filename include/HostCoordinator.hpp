@@ -66,7 +66,6 @@ public:
         pointer ptr = n>0 ? allocator.allocate(n) : nullptr;
 
         #ifdef VERBOSE
-        bool success = ptr;
         std::cerr << util::type_printer<HostCoordinator>::print()
                   << "::" + util::blue("alocate") << "(" << n
                   << " [" << n*sizeof(value_type) << " bytes]) @ " << ptr
