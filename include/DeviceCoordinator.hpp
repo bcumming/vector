@@ -110,7 +110,7 @@ public:
 protected:
     // hide assignment operator
     template <typename Other>
-    ConstDeviceReference& operator =(Other&&) {};
+    void operator =(Other&&) {}
 
     pointer pointer_;
 };

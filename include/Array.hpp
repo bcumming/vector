@@ -66,6 +66,9 @@ namespace impl {
             std::true_type, std::false_type
         >::type
     {};
+
+    template <typename T>
+    using is_array_t = typename is_array<T>::type;
 }
 
 // array by value
@@ -104,6 +107,18 @@ public:
         std::cerr << util::green("Array(integral_type) ")
                   << util::pretty_printer<Array>::print(*this) << std::endl;
 #endif
+    }
+
+    template <typename Other,
+              typename = typename
+                  std::enable_if<
+                                 impl::is_array_t<Other>::value
+                                >::type
+             >
+    Array(Other&& other)
+        : base(coordinator_type().allocate(other.size()))
+    {
+        coordinator_.copy(other, *this);
     }
 
     // construct as a copy of another range
