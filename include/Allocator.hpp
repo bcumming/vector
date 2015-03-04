@@ -109,15 +109,14 @@ namespace impl {
                     return nullptr;
 
                 // now register the memory with CUDA
-                cudaError_t status
+                auto status
                     = cudaHostRegister(ptr, size, cudaHostRegisterPortable);
 
                 // check that there were no CUDA errors
                 if(status != cudaSuccess) {
-                    #ifndef NDEBUG
-                    std::cerr << "ERROR :: Pinned :: unable to register host memory with with cudaHostRegister"
+                    std::cerr << util::red("error") << " memory:: unable to "
+                              << "register host memory with with cudaHostRegister"
                               << std::endl;
-                    #endif
                     // free the memory before returning nullptr
                     free(ptr);
                     return nullptr;
@@ -142,14 +141,12 @@ namespace impl {
             void *allocate_policy(size_type size) {
                 // first allocate memory with the desired alignment
                 void* ptr = nullptr;
-                cudaError_t status = cudaMalloc(&ptr, size);
-
+                auto status = cudaMalloc(&ptr, size);
                 if(status != cudaSuccess) {
-                    #ifndef NDEBUG
-                    std::cerr << "ERROR :: unable to allocate memory with cudaMalloc"
-                              << std::endl;
-                    #endif
-                    return nullptr; // return null on failure
+                    std::cerr << util::red("error")
+                              << " CUDA: unable to allocate "
+                              << size << " bytes" << std::endl;;
+                    exit(-1);
                 }
 
                 // return our allocated memory
@@ -157,8 +154,15 @@ namespace impl {
             }
 
             void free_policy(void *ptr) {
-                if(ptr)
-                    cudaFree(ptr);
+                if(ptr) {
+                    auto status = cudaFree(ptr);
+                    if(status != cudaSuccess) {
+                        std::cerr << util::red("error")
+                                  << " unable to free CUDA pointer "
+                                  << ptr << std::endl;;
+                        exit(-1);
+                    }
+                }
             }
 
             // CUDA default alignment is 256 bytes

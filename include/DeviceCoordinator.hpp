@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <exception>
 
 #include "Allocator.hpp"
 #include "Array.hpp"
@@ -103,7 +104,12 @@ public:
 
     operator T() const {
         T tmp;
-        cudaMemcpy(&tmp, pointer_, sizeof(T), cudaMemcpyDeviceToHost);
+        auto success
+            = cudaMemcpy(&tmp, pointer_, sizeof(T), cudaMemcpyDeviceToHost);
+        if(success != cudaSuccess) {
+            std::cerr << util::red("error") << " bad CUDA memcopy, unable to copy " << sizeof(T) << " bytes from host to device";
+            exit(-1);
+        }
         return T(tmp);
     }
 
@@ -124,13 +130,23 @@ public:
     DeviceReference(pointer p) : pointer_(p) {}
 
     DeviceReference& operator = (const T& value) {
-        cudaMemcpy(pointer_, &value, sizeof(T), cudaMemcpyHostToDevice);
+        auto success =
+            cudaMemcpy(pointer_, &value, sizeof(T), cudaMemcpyHostToDevice);
+        if(success != cudaSuccess) {
+            std::cerr << util::red("error") << " bad CUDA memcopy, unable to copy " << sizeof(T) << " bytes from host to device";
+            exit(-1);
+        }
         return *this;
     }
 
     operator T() const {
         T tmp;
-        cudaMemcpy(&tmp, pointer_, sizeof(T), cudaMemcpyDeviceToHost);
+        auto success =
+            cudaMemcpy(&tmp, pointer_, sizeof(T), cudaMemcpyDeviceToHost);
+        if(success != cudaSuccess) {
+            std::cerr << util::red("error") << " bad CUDA memcopy, unable to copy " << sizeof(T) << " bytes from device to host";
+            exit(-1);
+        }
         return T(tmp);
     }
 
@@ -196,12 +212,16 @@ public:
         assert(from.size()==to.size());
         assert(!from.overlaps(to));
 
-        cudaError_t status = cudaMemcpy(
+        auto status = cudaMemcpy(
                 reinterpret_cast<void*>(to.begin()),
                 reinterpret_cast<const void*>(from.begin()),
                 from.size()*sizeof(value_type),
                 cudaMemcpyDeviceToDevice
         );
+        if(status != cudaSuccess) {
+            std::cerr << util::red("error") << " bad CUDA memcopy, unable to copy " << sizeof(T)*from.size() << " bytes from device to device";
+            exit(-1);
+        }
     }
 
     // copy memory from host memory to device
@@ -226,12 +246,16 @@ public:
                   << util::type_printer<view_type>::print() << " @ " << to.data() << std::endl;
         #endif
 
-        cudaError_t status = cudaMemcpy(
+        auto status = cudaMemcpy(
                 reinterpret_cast<void*>(to.begin()),
                 reinterpret_cast<const void*>(from.begin()),
                 from.size()*sizeof(value_type),
                 cudaMemcpyHostToDevice
         );
+        if(status != cudaSuccess) {
+            std::cerr << util::red("error") << " bad CUDA memcopy, unable to copy " << sizeof(T)*from.size() << " bytes from host to device";
+            exit(-1);
+        }
 
         return std::make_pair(SynchEvent(), to);
     }
@@ -257,12 +281,16 @@ public:
                   << util::type_printer<view_type>::print() << " @ " << to.data() << std::endl;
         #endif
 
-        cudaError_t status = cudaMemcpy(
+        auto status = cudaMemcpy(
                 reinterpret_cast<void*>(to.begin()),
                 reinterpret_cast<const void*>(from.begin()),
                 from.size()*sizeof(value_type),
                 cudaMemcpyHostToDevice
         );
+        if(status != cudaSuccess) {
+            std::cerr << util::red("error") << " bad CUDA memcopy, unable to copy " << sizeof(T)*from.size() << " bytes from host to device";
+            exit(-1);
+        }
 
         CudaEvent event;
         return std::make_pair(event, to);
