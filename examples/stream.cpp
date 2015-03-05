@@ -45,7 +45,7 @@ void init(vector<T> & a,
 }
 
 int main(void) {
-    const size_type N = size_type{1} << 28;
+    auto const N = size_type{1} << 30;
     auto num_trials = 4;
 
     std::cout << "arrays of length " << N << std::endl;
