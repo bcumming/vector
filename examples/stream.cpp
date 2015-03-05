@@ -30,6 +30,20 @@ void triad(vector<T>      & a,
     }
 }
 
+template <typename T>
+void init(vector<T> & a,
+          vector<T> & b,
+          vector<T> & c)
+{
+    auto const N = a.size();
+    #pragma omp parallel for
+    for(auto i=size_type{0}; i<N; ++i) {
+        a[i] = T{1};
+        b[i] = T{2};
+        c[i] = T{3};
+    }
+}
+
 int main(void) {
     const size_type N = size_type{1} << 28;
     auto num_trials = 4;
@@ -42,12 +56,12 @@ int main(void) {
     vector<value_type> c(N);
 
     // initialize values in arrays
-    a(all) = 1.;
-    b(all) = 2.;
-    c(all) = 3.;
+    init(a, b, c);
 
+    // do a dry run
     triad(a, b, c);
 
+    // do timed runs
     auto start = clock_type::now();
     for(auto i=0; i<num_trials; ++i) {
         triad(a, b, c);
