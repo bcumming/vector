@@ -5,8 +5,8 @@ FLAGS+=-std=c++11 -O3
 FLAGS+=-DWITH_CYME
 FLAGS+=-fopenmp
 
-#FLAGS+=-msse4.1 -D__CYME_SIMD_VALUE__=sse
-FLAGS+=-mavx -D__CYME_SIMD_VALUE__=avx
+FLAGS+=-msse4.1 -D__CYME_SIMD_VALUE__=sse
+#FLAGS+=-mavx -D__CYME_SIMD_VALUE__=avx
 #FLAGS+=-march=core-avx2  -D__CYME_SIMD_VALUE__=avx -D__FMA__
 
 FLAGS+=-I../external -I../include

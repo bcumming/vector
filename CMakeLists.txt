@@ -17,7 +17,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set( USE_CYME "OFF" CACHE BOOL "Use CYME" )
 if( USE_CYME )
     add_definitions(-DWITH_CYME)
-    include_directories($ENV{CYME_ROOT}/cyme)
+    include_directories(${CMAKE_SOURCE_DIR}/external)
 endif()
 
 # CUDA

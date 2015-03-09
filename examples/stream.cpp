@@ -11,6 +11,13 @@ using size_type  = std::size_t;
 using clock_type    = std::chrono::high_resolution_clock;
 using duration_type = std::chrono::duration<double>;
 
+#ifdef WITH_CYME
+template<typename T>
+constexpr std::size_t vec_width() {
+    return cyme::trait_register<T,cyme::__GETSIMD__()>::size / sizeof(T);
+}
+#endif
+
 // let's use 256-bit byte alignment
 // aka. the alignment of an AVX register
 constexpr std::size_t alignment() { return 256/8; }
@@ -25,15 +32,19 @@ void triad(vector<T>      & a,
            vector<T> const& b,
            vector<T> const& c)
 {
-    //auto const N = a.size()/4;
-    //#pragma omp parallel for
-    //for(auto i=size_type{0}; i<N; ++i) {
-        //a[i] += b[i] * c[i];
-    //}
-    auto const N = a.size()/4;
+#ifdef WITH_CYME
+    auto const N = a.size()/vec_width<T>();
+    #pragma omp parallel for
     for(auto i=size_type{0}; i<N; ++i) {
-        a.wvec(i) += b.rvec(i) * c.rvec(i);
+        a.wvec(i) = a.rvec(i) +  b.rvec(i) * c.rvec(i);
     }
+#else
+    auto const N = a.size();
+    #pragma omp parallel for
+    for(auto i=size_type{0}; i<N; ++i) {
+        a[i] += b[i] * c[i];
+    }
+#endif
 }
 
 template <typename T>
@@ -41,6 +52,15 @@ void init(vector<T> & a,
           vector<T> & b,
           vector<T> & c)
 {
+#ifdef WITH_CYME
+    auto const N = a.size()/vec_width<T>();
+    #pragma omp parallel for
+    for(auto i=size_type{0}; i<N; ++i) {
+        a.wvec(i) = T{1};
+        b.wvec(i) = T{2};
+        c.wvec(i) = T{3};
+    }
+#else
     auto const N = a.size();
     #pragma omp parallel for
     for(auto i=size_type{0}; i<N; ++i) {
@@ -48,15 +68,7 @@ void init(vector<T> & a,
         b[i] = T{2};
         c[i] = T{3};
     }
-
-    /*
-    #pragma omp parallel for
-    for(auto i=size_type{0}; i<N/4; ++i) {
-        a.wvec(i) = T{1};
-        b.wvec(i) = T{2};
-        c.wvec(i) = T{3};
-    }
-    */
+#endif
 }
 
 int main(void) {
