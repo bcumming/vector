@@ -8,6 +8,10 @@
 #include "Range.hpp"
 #include "RangeLimits.hpp"
 
+#ifdef WITH_CYME
+#include <cyme/cyme.h>
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 namespace memory{
 
@@ -122,6 +126,11 @@ namespace impl {
 template <typename R, typename T, typename Coord>
 class ArrayViewImpl {
 public:
+#ifdef WITH_CYME
+    using cyme_reference        = cyme::wvec<T,cyme::__GETSIMD__()>;
+    using cyme_const_reference  = cyme::rvec<T,cyme::__GETSIMD__()>;
+#endif
+
     using array_reference_type = R;
     using value_type = T;
     using coordinator_type = typename Coord::template rebind<value_type>;
@@ -271,6 +280,20 @@ public:
     memory::Range range() const {
         return memory::Range(0, size());
     }
+
+#ifdef WITH_CYME
+    cyme_reference
+    wvec(size_type i) {
+        return cyme::wvec<value_type, cyme::__GETSIMD__()>
+                (&pointer_[i*cyme::stride<T,cyme::AoSoA>::helper_stride()]);
+    }
+
+    cyme_const_reference
+    rvec(size_type i) const {
+        return cyme::rvec<value_type, cyme::__GETSIMD__()>
+                (&pointer_[i*cyme::stride<T,cyme::AoSoA>::helper_stride()]);
+    }
+#endif
 
 protected :
     template <typename RR, typename U, typename C>

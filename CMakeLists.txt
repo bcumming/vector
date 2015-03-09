@@ -14,6 +14,12 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # so that std=c++11 won't cause strange warnings when passed via -Xcompiler
 
+set( USE_CYME "OFF" CACHE BOOL "Use CYME" )
+if( USE_CYME )
+    add_definitions(-DWITH_CYME)
+    include_directories($ENV{CYME_ROOT}/cyme)
+endif()
+
 # CUDA
 set( CUDA_BACKEND "OFF" CACHE BOOL "Compile CUDA version" )
 if( CUDA_BACKEND )

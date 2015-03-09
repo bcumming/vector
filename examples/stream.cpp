@@ -3,6 +3,8 @@
 
 #include <Vector.hpp>
 
+#include <cyme/cyme.h>
+
 using value_type = double;
 using size_type  = std::size_t;
 
@@ -23,10 +25,14 @@ void triad(vector<T>      & a,
            vector<T> const& b,
            vector<T> const& c)
 {
-    auto const N = a.size();
-    #pragma omp parallel for
+    //auto const N = a.size()/4;
+    //#pragma omp parallel for
+    //for(auto i=size_type{0}; i<N; ++i) {
+        //a[i] += b[i] * c[i];
+    //}
+    auto const N = a.size()/4;
     for(auto i=size_type{0}; i<N; ++i) {
-        a[i] += b[i] * c[i];
+        a.wvec(i) += b.rvec(i) * c.rvec(i);
     }
 }
 
@@ -42,6 +48,15 @@ void init(vector<T> & a,
         b[i] = T{2};
         c[i] = T{3};
     }
+
+    /*
+    #pragma omp parallel for
+    for(auto i=size_type{0}; i<N/4; ++i) {
+        a.wvec(i) = T{1};
+        b.wvec(i) = T{2};
+        c.wvec(i) = T{3};
+    }
+    */
 }
 
 int main(void) {
