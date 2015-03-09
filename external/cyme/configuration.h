@@ -29,7 +29,7 @@
    compile with -msse4.1 (sse) or -mavx (avx)
 */
 #if !defined(__CYME_SIMD_VALUE__)
-#define  __CYME_SIMD_VALUE__ avx 
+#define  __CYME_SIMD_VALUE__ avx
 #endif
 
 /*
@@ -45,7 +45,8 @@
 /*
    compile with -mfma on x86, if #define __FMA__  else nothing
 */
-#if !defined(__FMA__)
-#define  __FMA__
-#endif
+//#if !defined(__FMA__)
+//#define  __FMA__
+//#endif
+
 #endif

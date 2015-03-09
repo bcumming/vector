@@ -1,18 +1,23 @@
 CXX=g++
-#CXX=g++-4.8
 #CXX=clang++
+
 FLAGS+=-std=c++11 -O3
-FLAGS+=-mavx -D__CYME_SIMD_VALUE__=avx
-#FLAGS+=-msse4.2
 FLAGS+=-DWITH_CYME
-#FLAGS+=-march=core-avx2
-#FLAGS+=-fopenemp
-FLAGS+=-I../external
+FLAGS+=-fopenmp
+
+#FLAGS+=-msse4.1 -D__CYME_SIMD_VALUE__=sse
+FLAGS+=-mavx -D__CYME_SIMD_VALUE__=avx
+#FLAGS+=-march=core-avx2  -D__CYME_SIMD_VALUE__=avx -D__FMA__
+
+FLAGS+=-I../external -I../include
+
+### pick your boost path
 #FLAGS+=-isystem /Users/bcumming/software/boost/1_55_0/
-FLAGS+=-isystem /apps/santis/boost/1.54/gcc_481/include/
+#FLAGS+=-isystem /apps/santis/boost/1.54/gcc_481/include/
+FLAGS+=-isystem /users/bcumming/repos/boost_1_55_0
 
 stream.exe : stream.cpp
-	${CXX} ${FLAGS} -I ../include stream.cpp -o stream.exe
+	${CXX} ${FLAGS} stream.cpp -o stream.exe
 
 clean :
 	rm -f *.exe
