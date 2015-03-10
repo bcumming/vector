@@ -92,6 +92,12 @@ serial{ };
             return *this;
         }
 
+        /** assign a scalar value to all elments in the vector */
+        inline serial& operator=(value_type value){
+            a = base_type{value};
+            return *this;
+        }
+
         /** implicit conversion operator */
         inline operator base_type (){
             return a;
@@ -100,6 +106,14 @@ serial{ };
         /** bracket operator return the vector */
         inline const base_type& operator ()() const{
             return a;
+        }
+
+        inline value_type& operator[] (int i) {
+            return reinterpret_cast<value_type*>(&a)[i];
+        }
+
+        inline value_type const& operator[] (int i) const {
+            return reinterpret_cast<value_type*>(&a)[i];
         }
 
         base_type a;

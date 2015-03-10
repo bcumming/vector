@@ -95,9 +95,12 @@ public:
     }
 
     // copy memory from one range into another
-    void copy(const view_type &from, view_type &to) {
+    // needs more template checks to ensure that Other is a compatable range
+    template < typename Other >
+    void copy(Other const& from, view_type& to) {
+    //void copy(const view_type &from, view_type &to) {
         assert(from.size()==to.size());
-        assert(!from.overlaps(to));
+        //assert(!from.overlaps(to));
 
         #ifdef VERBOSE
         std::cerr << util::type_printer<HostCoordinator>::print()
