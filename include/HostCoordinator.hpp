@@ -7,14 +7,12 @@
 #include "Array.hpp"
 #include "Allocator.hpp"
 
-////////////////////////////////////////////////////////////////////////////////
 namespace memory {
 
 // forward declare for type printers
 template <typename T, class Allocator>
 class HostCoordinator;
 
-////////////////////////////////////////////////////////////////////////////////
 namespace util {
     template <typename T, typename Allocator>
     struct type_printer<HostCoordinator<T,Allocator>>{
@@ -40,7 +38,6 @@ namespace util {
         }
     };
 } // namespace util
-////////////////////////////////////////////////////////////////////////////////
 
 template <typename T, class Allocator=AlignedAllocator<T> >
 class HostCoordinator {

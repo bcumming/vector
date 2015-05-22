@@ -11,18 +11,15 @@
 #include "CudaEvent.hpp"
 #include "gpu.hpp"
 
-////////////////////////////////////////////////////////////////////////////////
 namespace memory {
 
 // forward declare
 template <typename T, class Allocator>
 class DeviceCoordinator;
 
-//template <typename T, class Allocator=AlignedAllocator<T> >
 template <typename T, class Allocator>
 class HostCoordinator;
 
-////////////////////////////////////////////////////////////////////////////////
 namespace util {
     template <typename T, typename Allocator>
     struct type_printer<DeviceCoordinator<T,Allocator>>{
@@ -49,7 +46,6 @@ namespace util {
         }
     };
 } // namespace util
-////////////////////////////////////////////////////////////////////////////////
 
 namespace gpu {
     // brief:
@@ -114,7 +110,6 @@ public:
     }
 
 protected:
-    // hide assignment operator
     template <typename Other>
     void operator =(Other&&) {}
 
@@ -171,15 +166,12 @@ public:
     using size_type       = types::size_type;
     using difference_type = types::difference_type;
 
-    // metafunction for rebinding host_coordinator with another type
     template <typename Tother>
     using rebind = DeviceCoordinator<Tother, Allocator>;
 
-    // allocate memory on the device
     view_type allocate(size_type n) {
         Allocator allocator;
 
-        // only allocate memory if nonzero memory allocation has been requested
         pointer ptr = n>0 ? allocator.allocate(n) : nullptr;
 
         #ifdef VERBOSE
@@ -192,7 +184,6 @@ public:
         return view_type(ptr, n);
     }
 
-    // free memory on the device
     void free(view_type& rng) {
         Allocator allocator;
 
@@ -224,7 +215,8 @@ public:
         }
     }
 
-    // copy memory from host memory to device
+    // generates compile time error if there is an attempt to copy from memory
+    // that is managed by a coordinator for which there is no specialization
     template <class CoordOther>
     void copy( const ArrayView<value_type, CoordOther> &from,
                view_type &to) {
@@ -301,10 +293,7 @@ public:
         gpu::fill<value_type>(rng.data(), value, rng.size());
     }
 
-    // Generate reference objects for a raw pointer.
-    // These helpers allow the ArrayView types to return a reference object
-    // that can be used by host code to directly manipulate a memory location
-    // on the device.
+    // generate reference objects for a raw pointer.
     reference make_reference(value_type* p) {
         return reference(p);
     }
@@ -313,12 +302,11 @@ public:
         return const_reference(p);
     }
 
-    static constexpr auto
-    alignment() -> decltype(Allocator_::alignment()) {
+    static constexpr
+    auto alignment() -> decltype(Allocator_::alignment()) {
         return Allocator_::alignment();
     }
 };
 
 } // namespace memory
-////////////////////////////////////////////////////////////////////////////////
 
