@@ -21,12 +21,48 @@ using vector
 template <typename T>
 void triad(vector<T>      & a,
            vector<T> const& b,
+           vector<T> const& c,
+           T scalar)
+{
+    auto const N = a.size();
+    #pragma omp parallel for
+    for(auto i=size_type{0}; i<N; ++i) {
+        a[i] = b[i] + scalar * c[i];
+    }
+}
+
+template <typename T>
+void scale(vector<T>      & a,
+           vector<T> const& b,
+           T scalar)
+{
+    auto const N = a.size();
+    #pragma omp parallel for
+    for(auto i=size_type{0}; i<N; ++i) {
+        a[i] = scalar * b[i];
+    }
+}
+
+template <typename T>
+void copy(vector<T>      & a,
+          vector<T> const& b)
+{
+    auto const N = a.size();
+    #pragma omp parallel for
+    for(auto i=size_type{0}; i<N; ++i) {
+        a[i] = b[i];
+    }
+}
+
+template <typename T>
+void   add(vector<T>      & a,
+           vector<T> const& b,
            vector<T> const& c)
 {
     auto const N = a.size();
     #pragma omp parallel for
     for(auto i=size_type{0}; i<N; ++i) {
-        a[i] += b[i] * c[i];
+        a[i] = b[i] + c[i];
     }
 }
 
@@ -44,8 +80,12 @@ void init(vector<T> & a,
     }
 }
 
-int main(void) {
-    auto const N = size_type{1} << 30;
+int main(int argc, char **argv) {
+    size_type pow = 24;
+    if(argc>1) {
+        pow = std::stod(argv[1]);
+    }
+    auto const N = size_type{1} << pow;
     auto num_trials = 4;
 
     std::cout << "arrays of length " << N << std::endl;
@@ -55,23 +95,56 @@ int main(void) {
     vector<value_type> b(N);
     vector<value_type> c(N);
 
-    // initialize values in arrays
-    init(a, b, c);
+    auto scalar = value_type{2};
 
     // do a dry run
-    triad(a, b, c);
+    init(a, b, c);
+    triad(a, b, c, scalar);
+    copy(a, b);
 
     // do timed runs
-    auto start = clock_type::now();
+    auto triad_time = 0.;
+    auto copy_time  = 0.;
+    auto add_time  = 0.;
+    auto scale_time  = 0.;
     for(auto i=0; i<num_trials; ++i) {
-        triad(a, b, c);
+        {
+            auto start = clock_type::now();
+            triad(a, b, c, scalar);
+            triad_time += duration_type(clock_type::now()-start).count();
+        }
+        {
+            auto start = clock_type::now();
+            copy(a, b);
+            copy_time += duration_type(clock_type::now()-start).count();
+        }
+        {
+            auto start = clock_type::now();
+            add(a, b, c);
+            add_time += duration_type(clock_type::now()-start).count();
+        }
+        {
+            auto start = clock_type::now();
+            scale(a, b, scalar);
+            scale_time += duration_type(clock_type::now()-start).count();
+        }
     }
-    auto total_time  = duration_type(clock_type::now() - start).count();
-    auto total_bytes = sizeof(value_type)*4*N*num_trials;
-    auto BW          = total_bytes / total_time;
 
-    std::cout << "that took " << total_time << " seconds" << std::endl;
-    std::cout << "bandwidth " << BW/1.e9 << " GB/s" << std::endl;
+    auto bytes_per_array = sizeof(value_type)*N*num_trials;
+    auto copy_bytes  = 2*bytes_per_array;
+    auto scale_bytes = 2*bytes_per_array;
+    auto triad_bytes = 3*bytes_per_array;
+    auto add_bytes   = 3*bytes_per_array;
+
+    auto triad_BW  = triad_bytes / triad_time;
+    auto copy_BW   = copy_bytes  / copy_time;
+    auto add_BW    = add_bytes   / add_time;
+    auto scale_BW  = scale_bytes / scale_time;
+
+    std::cout << "triad " << triad_BW/1.e9 << " GB/s" << std::endl;
+    std::cout << "copy  " << copy_BW/1.e9  << " GB/s" << std::endl;
+    std::cout << "add   " << add_BW/1.e9   << " GB/s" << std::endl;
+    std::cout << "scale " << scale_BW/1.e9 << " GB/s" << std::endl;
 
     return 0;
 }
