@@ -10,32 +10,30 @@
 #include "definitions.hpp"
 #include "util.hpp"
 
-////////////////////////////////////////////////////////////////////////////////
 namespace memory {
-////////////////////////////////////////////////////////////////////////////////
+
 namespace impl {
     using size_type = std::size_t;
 
-    /// true if x is a power of two (including 1==2^0)
     constexpr bool
     is_power_of_two(size_type x) {
         return !(x&(x-1));
     }
 
-    /// returns the smallest power of two that is strictly greater than x
+    // returns the smallest power of two that is strictly greater than x
     constexpr size_type
     next_power_of_two(size_type x, size_type p) {
         return x==0 ? p : next_power_of_two(x-(x&p), p<<1);
     }
 
-    /// returns the smallest power of two that is greater than or equal to x
+    // returns the smallest power of two that is greater than or equal to x
     constexpr size_type
     round_up_power_of_two(size_type x) {
         return is_power_of_two(x) ? x : next_power_of_two(x, 1);
     }
 
-    /// returns the smallest power of two that is greater than
-    /// or equal to sizeof(T), and greater than or equal to sizeof(void*)
+    // returns the smallest power of two that is greater than
+    // or equal to sizeof(T), and greater than or equal to sizeof(void*)
     template <typename T>
     constexpr size_type
     minimum_possible_alignment() {
@@ -44,28 +42,21 @@ namespace impl {
                     :   round_up_power_of_two(sizeof(T));
     }
 
-    /// calculate the padding that has to be added to an array of length n to
-    /// ensure that the length of an array is a multiple of alignment
-    /// allignment : in bytes
-    /// n          : length of array of items with type T
-    /// returns    : items of type T require for alignment
+    // Calculate the padding that has to be added to an array of T of length n
+    // so that the size of the array in bytes is a multiple of sizeof(T).
+    // The returned value is in terms of T, not bytes.
     template<typename T>
     size_type
     get_padding(const size_type alignment, size_type n) {
         // calculate the remaninder in bytes for n items of size sizeof(T)
         auto remainder = (n*sizeof(T)) % alignment;
-        // calculate padding in bytes
-        return remainder ? (alignment - remainder)/sizeof(T)
-                         : 0;
 
-        // this is the c++11 constexpr version, which is more difficult to understand
-        // turn this on if we need to use this information at compile time
-        //return (n*sizeof(T))%alignment
-        //    ? (alignment - ((n*sizeof(T))%alignment)) / sizeof(T)
-        //    : 0;
+        // calculate padding in bytes
+        return remainder ? (alignment - remainder)/sizeof(T) : 0;
     }
 
-    /// function that allocates memory with alignment specified as a template parameter
+    // allocate memory with alignment specified as a template parameter
+    // returns nullptr on failure
     template <typename T, size_type alignment=minimum_possible_alignment<T>()>
     T* aligned_malloc(size_type size) {
         // double check that alignment is a multiple of sizeof(void*),
@@ -76,8 +67,9 @@ namespace impl {
                 "alignment is not a power of two");
         void *ptr;
         int result = posix_memalign(&ptr, alignment, size*sizeof(T));
-        if(result)
-            ptr=nullptr;
+        if(result) {
+            return nullptr;
+        }
         return reinterpret_cast<T*>(ptr);
     }
 
@@ -105,41 +97,41 @@ namespace impl {
                 void* ptr = reinterpret_cast<void *>
                                 (aligned_malloc<char, Alignment>(size));
 
-                if(ptr == nullptr)
+                if(ptr == nullptr) {
                     return nullptr;
+                }
 
-                // now register the memory with CUDA
+                // register the memory with CUDA
                 auto status
                     = cudaHostRegister(ptr, size, cudaHostRegisterPortable);
 
-                // check that there were no CUDA errors
                 if(status != cudaSuccess) {
                     std::cerr << util::red("error") << " memory:: unable to "
                               << "register host memory with with cudaHostRegister"
                               << std::endl;
-                    // free the memory before returning nullptr
                     free(ptr);
                     return nullptr;
                 }
 
-                // return our allocated memory
                 return ptr;
             }
 
             void free_policy(void *ptr) {
-                if(ptr == nullptr)
+                if(ptr == nullptr) {
                     return;
+                }
                 cudaHostUnregister(ptr);
                 free(ptr);
             }
 
-            static constexpr size_type alignment() { return Alignment; }
+            static constexpr size_type alignment() {
+                return Alignment;
+            }
         };
 
         class DevicePolicy {
         public:
             void *allocate_policy(size_type size) {
-                // first allocate memory with the desired alignment
                 void* ptr = nullptr;
                 auto status = cudaMalloc(&ptr, size);
                 if(status != cudaSuccess) {
@@ -149,7 +141,6 @@ namespace impl {
                     exit(-1);
                 }
 
-                // return our allocated memory
                 return ptr;
             }
 
@@ -165,13 +156,14 @@ namespace impl {
                 }
             }
 
-            // CUDA default alignment is 256 bytes
-            static constexpr size_type alignment() { return 256; }
+            // memory allocated using cudaMalloc has alignment of 256 bytes
+            static constexpr size_type alignment() {
+                return 256;
+            }
         };
     } // namespace cuda
-#endif
+#endif // #ifdef WITH_CUDA
 } // namespace impl
-////////////////////////////////////////////////////////////////////////////////
 
 template<typename T, typename Policy >
 class Allocator : public Policy {
@@ -179,47 +171,44 @@ class Allocator : public Policy {
     using Policy::free_policy;
 public:
     using Policy::alignment;
-    //    typedefs
-    typedef T value_type;
-    typedef value_type* pointer;
-    typedef const value_type* const_pointer;
-    typedef value_type& reference;
-    typedef const value_type& const_reference;
-    typedef std::size_t size_type;
-    typedef std::ptrdiff_t difference_type;
+
+    using value_type    = T;
+    using pointer       = value_type*;
+    using const_pointer = const value_type*;
+    using reference     = value_type&;
+    using const_reference = const value_type& ;
+    using size_type       = std::size_t;
+    using difference_type = std::ptrdiff_t;
 
 public:
-    //    convert an allocator<T> to allocator<U>
-    template<typename U>
-    struct rebind {
-        typedef Allocator<U, Policy> other;
-    };
+    template <typename U>
+    using rebind = Allocator<U, Policy>;
 
 public:
     inline explicit Allocator() {}
     inline ~Allocator() {}
     inline explicit Allocator(Allocator const&) {}
 
-    //    address
-    inline pointer address(reference r) { return &r; }
-    inline const_pointer address(const_reference r) { return &r; }
+    inline pointer address(reference r) {
+        return &r;
+    }
+    inline const_pointer address(const_reference r) {
+        return &r;
+    }
 
-    //    memory allocation
     inline pointer allocate(size_type cnt, typename std::allocator<void>::const_pointer = 0) {
         return reinterpret_cast<T*>(allocate_policy(cnt*sizeof(T)));
     }
 
     inline void deallocate(pointer p, size_type) {
-        if( p!=nullptr ) // only free for non-null pointers
+        if( p!=nullptr )
             free_policy(p);
     }
 
-    //    size
     inline size_type max_size() const {
         return std::numeric_limits<size_type>::max() / sizeof(T);
     }
 
-    //    construction/destruction
     inline void construct(pointer p, const T& t) {
         new(p) T(t);
     }
@@ -228,8 +217,12 @@ public:
         p->~T();
     }
 
-    inline bool operator==(Allocator const&) { return true; }
-    inline bool operator!=(Allocator const& a) { return !operator==(a); }
+    inline bool operator==(Allocator const&) {
+        return true;
+    }
+    inline bool operator!=(Allocator const& a) {
+        return !operator==(a);
+    }
 };
 
 // pretty printers
@@ -277,13 +270,14 @@ template <class T, size_t alignment=impl::minimum_possible_alignment<T>()>
 using AlignedAllocator = Allocator<T, impl::AlignedPolicy<alignment>>;
 
 #ifdef WITH_CUDA
-// for pinned allocation we set the default alignment to correspond to the
+// for pinned allocation set the default alignment to correspond to the
 // alignment of a page (4096 bytes), because pinned memory is allocated at page
 // boundaries.
 template <class T, size_t alignment=4096>
 using PinnedAllocator = Allocator<T, impl::cuda::PinnedPolicy<alignment>>;
 
-template <class T, size_t alignment=impl::minimum_possible_alignment<T>()>
+// use 256 as default allignment, because that is the default for cudaMalloc
+template <class T, size_t alignment=256>
 using CudaAllocator = Allocator<T, impl::cuda::DevicePolicy>;
 #endif
 

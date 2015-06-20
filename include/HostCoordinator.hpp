@@ -7,14 +7,12 @@
 #include "Array.hpp"
 #include "Allocator.hpp"
 
-////////////////////////////////////////////////////////////////////////////////
 namespace memory {
 
-// forward declare
+// forward declare for type printers
 template <typename T, class Allocator>
 class HostCoordinator;
 
-////////////////////////////////////////////////////////////////////////////////
 namespace util {
     template <typename T, typename Allocator>
     struct type_printer<HostCoordinator<T,Allocator>>{
@@ -40,7 +38,6 @@ namespace util {
         }
     };
 } // namespace util
-////////////////////////////////////////////////////////////////////////////////
 
 template <typename T, class Allocator=AlignedAllocator<T> >
 class HostCoordinator {
@@ -51,7 +48,7 @@ public:
     using const_pointer   = const pointer;
     using reference       = value_type&;
     using const_reference = value_type const&;
-    using view_type      = ArrayView<value_type, HostCoordinator>;
+    using view_type       = ArrayView<value_type, HostCoordinator>;
     using size_type       = types::size_type;
     using difference_type = types::difference_type;
 
@@ -60,9 +57,8 @@ public:
     using rebind = HostCoordinator<Tother, Allocator>;
 
     view_type allocate(size_type n) {
-        typename Allocator::template rebind<value_type>::other allocator;
+        typename Allocator::template rebind<value_type> allocator;
 
-        // only allocate memory if nonzero memory allocation has been requested
         pointer ptr = n>0 ? allocator.allocate(n) : nullptr;
 
         #ifdef VERBOSE
@@ -76,7 +72,7 @@ public:
     }
 
     void free(view_type& rng) {
-        typename Allocator::template rebind<value_type>::other allocator;
+        typename Allocator::template rebind<value_type> allocator;
 
         if(rng.data()) {
         #ifdef VERBOSE
@@ -137,4 +133,3 @@ public:
 };
 
 } //namespace memory
-////////////////////////////////////////////////////////////////////////////////
