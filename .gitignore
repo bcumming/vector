@@ -48,3 +48,4 @@ install_manifest.txt
 
 stream.intel
 stream.gnu
+*.optrpt

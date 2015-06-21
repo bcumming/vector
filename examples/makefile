@@ -8,7 +8,7 @@ stream.gnu : stream.cpp
 	g++ ${FLAGS} -I ../include stream.cpp -fopenmp -o stream.gnu
 
 stream.intel : stream.cpp
-	icpc ${FLAGS} -I ../include stream.cpp -openmp -o stream.intel
+	icpc ${FLAGS} -I ../include stream.cpp -openmp -o stream.intel -opt-report=3
 
 clean :
 	rm -rf stream.gnu
