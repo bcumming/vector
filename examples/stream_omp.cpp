@@ -28,6 +28,7 @@ void triad(vector<T>      & a,
 {
     auto const n = a.size();
     #pragma ivdep
+    #pragma vector nontemporal
     for(auto i=size_type{0}; i<n; ++i) {
         a[i] = b[i] + scalar * c[i];
     }
@@ -40,6 +41,7 @@ void scale(vector<T>      & a,
 {
     auto const n = a.size();
     #pragma ivdep
+    #pragma vector nontemporal
     for(auto i=size_type{0}; i<n; ++i) {
         a[i] = scalar * b[i];
     }
@@ -51,6 +53,7 @@ void copy(vector<T>      & a,
 {
     auto const n = a.size();
     #pragma ivdep
+    #pragma vector nontemporal
     for(auto i=size_type{0}; i<n; ++i) {
         a[i] = b[i];
     }
@@ -63,6 +66,7 @@ void   add(vector<T>      & a,
 {
     auto const n = a.size();
     #pragma ivdep
+    #pragma vector nontemporal
     for(auto i=size_type{0}; i<n; ++i) {
         a[i] = b[i] + c[i];
     }
@@ -75,6 +79,7 @@ void init(vector<T> & a,
 {
     auto const n = a.size();
     #pragma ivdep
+    #pragma vector nontemporal
     for(auto i=size_type{0}; i<n; ++i) {
         a[i] = T{1};
         b[i] = T{2};
@@ -146,15 +151,10 @@ int main(int argc, char **argv) {
         }
 
         auto bytes_per_array = sizeof(value_type)*N*num_trials;
-        auto copy_bytes  = 2*bytes_per_array;
-        auto scale_bytes = 2*bytes_per_array;
-        auto triad_bytes = 3*bytes_per_array;
-        auto add_bytes   = 3*bytes_per_array;
-
-        auto triad_BW  = triad_bytes / triad_time;
-        auto copy_BW   = copy_bytes  / copy_time;
-        auto add_BW    = add_bytes   / add_time;
-        auto scale_BW  = scale_bytes / scale_time;
+        auto copy_BW   = 2 * bytes_per_array / copy_time;
+        auto scale_BW  = 2 * bytes_per_array / scale_time;
+        auto add_BW    = 3 * bytes_per_array / add_time;
+        auto triad_BW  = 3 * bytes_per_array / triad_time;
 
         #pragma omp master
         {

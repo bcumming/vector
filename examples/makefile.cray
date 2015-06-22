@@ -9,9 +9,6 @@ ifeq ($(PE_ENV),INTEL)
 	CC=icpc
 endif
 
-FLAGS+=-march=core-avx2
-#FLAGS+=-mavx
-
 all : stream.omp stream.mpi
 
 stream.omp : stream_omp.cpp
