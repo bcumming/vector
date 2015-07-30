@@ -154,7 +154,7 @@ template <typename T, class Allocator_=CudaAllocator<T> >
 class DeviceCoordinator {
 public:
     using value_type = T;
-    using Allocator = typename Allocator_::template rebind<value_type>::other;
+    using Allocator = typename Allocator_::template rebind<value_type>;
 
     using pointer       = value_type*;
     using const_pointer = const value_type*;
