@@ -13,6 +13,11 @@ namespace memory {
 template <typename T, class Allocator>
 class HostCoordinator;
 
+#ifdef WITH_CUDA
+template <typename T, class Allocator>
+class DeviceCoordinator;
+#endif
+
 namespace util {
     template <typename T, typename Allocator>
     struct type_printer<HostCoordinator<T,Allocator>>{
@@ -90,7 +95,7 @@ public:
         impl::reset(rng);
     }
 
-    // copy memory from one range into another
+    // copy memory between host memory ranges
     void copy(const view_type &from, view_type &to) {
         assert(from.size()==to.size());
         assert(!from.overlaps(to));
@@ -106,7 +111,35 @@ public:
         std::copy(from.begin(), from.end(), to.begin());
     }
 
-    // copy memory from one range into another
+#ifdef WITH_CUDA
+    // copy memory from device to host
+    template <class Alloc>
+    void copy(const ArrayView<value_type, DeviceCoordinator<value_type, Alloc>> &from,
+              view_type &to) {
+        assert(from.size()==to.size());
+
+        #ifdef VERBOSE
+        std::cerr << util::type_printer<HostCoordinator>::print()
+                  << "::" + util::blue("copy") << "(device2host, " << from.size()
+                  << " [" << from.size()*sizeof(value_type) << " bytes])"
+                  << " " << from.data() << util::yellow(" -> ") << to.data()
+                  << std::endl;
+        #endif
+
+        auto status = cudaMemcpy(
+                reinterpret_cast<void*>(to.begin()),
+                reinterpret_cast<const void*>(from.begin()),
+                from.size()*sizeof(value_type),
+                cudaMemcpyDeviceToHost
+        );
+        if(status != cudaSuccess) {
+            std::cerr << util::red("error") << " bad CUDA memcopy, unable to copy " << sizeof(T)*from.size() << " bytes from host to device";
+            exit(-1);
+        }
+    }
+#endif
+
+    // set all values in a range to val
     void set(view_type &rng, value_type val) {
         #ifdef VERBOSE
         std::cerr << util::type_printer<HostCoordinator>::print()

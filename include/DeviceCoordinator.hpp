@@ -103,7 +103,9 @@ public:
         auto success
             = cudaMemcpy(&tmp, pointer_, sizeof(T), cudaMemcpyDeviceToHost);
         if(success != cudaSuccess) {
-            std::cerr << util::red("error") << " bad CUDA memcopy, unable to copy " << sizeof(T) << " bytes from host to device";
+            std::cerr << util::red("error")
+                      << " bad CUDA memcopy, unable to copy " << sizeof(T)
+                      << " bytes from host to device";
             exit(-1);
         }
         return T(tmp);
@@ -128,7 +130,9 @@ public:
         auto success =
             cudaMemcpy(pointer_, &value, sizeof(T), cudaMemcpyHostToDevice);
         if(success != cudaSuccess) {
-            std::cerr << util::red("error") << " bad CUDA memcopy, unable to copy " << sizeof(T) << " bytes from host to device";
+            std::cerr << util::red("error")
+                      << " bad CUDA memcopy, unable to copy " << sizeof(T)
+                      << " bytes from host to device";
             exit(-1);
         }
         return *this;
@@ -139,7 +143,9 @@ public:
         auto success =
             cudaMemcpy(&tmp, pointer_, sizeof(T), cudaMemcpyDeviceToHost);
         if(success != cudaSuccess) {
-            std::cerr << util::red("error") << " bad CUDA memcopy, unable to copy " << sizeof(T) << " bytes from device to host";
+            std::cerr << util::red("error")
+                      << " bad CUDA memcopy, unable to copy " << sizeof(T)
+                      << " bytes from device to host";
             exit(-1);
         }
         return T(tmp);
