@@ -272,6 +272,11 @@ public:
         return memory::Range(0, size());
     }
 
+    static constexpr auto
+    alignment() -> decltype(coordinator_type::alignment()) {
+        return coordinator_type::alignment();
+    }
+
 protected :
     template <typename RR, typename U, typename C>
     friend void impl::reset(ArrayViewImpl<RR, U, C>&, U*, std::size_t);

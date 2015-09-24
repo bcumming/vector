@@ -193,6 +193,13 @@ public:
 
     using base::size;
 
+    //static constexpr auto
+    //alignment() -> decltype(view_type::alignment()) {
+        //return view_type::alignment();
+    //}
+    using base::alignment;
+
+
 private:
     coordinator_type coordinator_;
 };
