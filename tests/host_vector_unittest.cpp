@@ -65,6 +65,23 @@ TEST(HostVector, copy_constructor) {
         EXPECT_EQ(v1[i], v2[i]);
 }
 
+template <typename T, size_t N>
+using vecN =
+    memory::Array<T, memory::HostCoordinator<T, memory::AlignedAllocator<T, N>>>;
+
+// test that copy works between vectors with different alignments
+TEST(HostVector, copy) {
+    using namespace memory;
+
+    vecN<float, 16> v16(100);
+    v16(memory::all) = 3.14f;
+    vecN<float, 32> v32 = v16;
+
+    for(auto v: v32) {
+        EXPECT_EQ(v, 3.14f);
+    }
+}
+
 // test that move constructors work
 TEST(HostVector, move_constructor) {
     using namespace memory;
@@ -76,7 +93,6 @@ TEST(HostVector, move_constructor) {
         v1[i] = i;
 }
 
-/*
 // test that iterators and ranges work
 TEST(HostVector, iterators_and_ranges) {
     using namespace memory;
@@ -107,4 +123,4 @@ TEST(HostVector, iterators_and_ranges) {
             sum+=val;
         EXPECT_EQ(float(4*100), sum);
     }
-}*/
+}

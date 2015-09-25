@@ -123,6 +123,9 @@ template <typename R, typename T, typename Coord>
 class ArrayViewImpl {
 public:
     using array_reference_type = R;
+    template <typename TT, typename CC>
+    using make_impl = ArrayViewImpl<ArrayReference<TT, CC>, TT, CC>;
+
     using value_type = T;
     using coordinator_type = typename Coord::template rebind<value_type>;
 
@@ -264,7 +267,8 @@ public:
     ~ArrayViewImpl() {}
 
     // test whether memory overlaps that referenced by other
-    bool overlaps(const ArrayViewImpl& other) const {
+    template <typename OtherCoord>
+    bool overlaps(const make_impl<value_type, OtherCoord>& other) const {
         return( !((this->begin()>=other.end()) || (other.begin()>=this->end())) );
     }
 
