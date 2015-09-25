@@ -35,4 +35,12 @@ template <typename T>
 using DeviceView = ArrayView<T, DeviceCoordinator<T, CudaAllocator<T>>>;
 #endif
 
+#ifdef WITH_KNL
+// specialization for HBW memory on KNL
+template <typename T>
+using HBWVector = Array<T, HostCoordinator<T, HBWAllocator<T>>>;
+template <typename T>
+using HBWView = ArrayView<T, HostCoordinator<T, HBWAllocator<T>>>;
+#endif
+
 } // namespace memory
