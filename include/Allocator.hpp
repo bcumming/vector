@@ -118,7 +118,7 @@ namespace impl {
             }
 
             void free_policy(void *ptr) {
-                free(ptr);
+                hbw_free(ptr);
             }
 
             static constexpr size_type alignment() { return Alignment; }

@@ -12,6 +12,12 @@ set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
+# KNL
+set( KNL_BACKEND "OFF" CACHE BOOL "Support KNL HBM memory" )
+if( KNL_BACKEND )
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWITH_KNL")
+endif()
+
 # so that std=c++11 won't cause strange warnings when passed via -Xcompiler
 
 # CUDA
