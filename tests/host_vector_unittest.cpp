@@ -89,8 +89,19 @@ TEST(HostVector, move_constructor) {
     // move constructor
     HostVector<float> v1 = HostVector<float>(100);
 
-    for(auto i : v1.range())
-        v1[i] = i;
+    EXPECT_EQ(v1.size(), 100);
+}
+
+// test that constructors with default value works
+TEST(HostVector, value_constructor) {
+    using namespace memory;
+
+    HostVector<int> v1(10, -5);
+
+    EXPECT_EQ(v1.size(), 10);
+    for(auto i : v1.range()) {
+        EXPECT_EQ(v1[i], -5);
+    }
 }
 
 // test that iterators and ranges work

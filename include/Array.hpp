@@ -103,10 +103,25 @@ public:
     Array(I n)
         : base(coordinator_type().allocate(n))
     {
-#ifdef VERBOSE
+        #ifdef VERBOSE
         std::cerr << util::green("Array(integral_type) ")
                   << util::pretty_printer<Array>::print(*this) << std::endl;
-#endif
+        #endif
+    }
+
+    // constructor by size with default value
+    template < typename II,
+               typename TT,
+               typename = typename std::enable_if<std::is_integral<II>::value>::type,
+               typename = typename std::enable_if<std::is_convertible<TT,value_type>::value>::type >
+    Array(II n, TT value)
+        : base(coordinator_type().allocate(n))
+    {
+        #ifdef VERBOSE
+        std::cerr << util::green("Array(integral_type, value=" + std::to_string(value) + ") ")
+                  << util::pretty_printer<Array>::print(*this) << std::endl;
+        #endif
+        coordinator_type().set(*this, value_type(value));
     }
 
     template <typename Other,

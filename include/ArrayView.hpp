@@ -256,10 +256,16 @@ public:
     // per element accessors
     // return a reference type provided by Coordinator
     reference operator[] (size_type i) {
+        #ifndef NDEBUG
+        assert(i<size_);
+        #endif
         return coordinator_.make_reference(pointer_+i);
     }
 
     const_reference operator[] (size_type i) const {
+        #ifndef NDEBUG
+        assert(i<size_);
+        #endif
         return coordinator_.make_reference(pointer_+i);
     }
 
