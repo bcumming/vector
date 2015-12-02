@@ -176,6 +176,7 @@ public:
     // overload operator() to provide range based access
     ////////////////////////////////////////////////////////////////////////////
 
+    /// access half open sub-range using two indexes [left, right)
     array_reference_type operator()(size_type const& left, size_type const& right) {
 #ifndef NDEBUG
         assert(right<=size_ && left<=right);
@@ -183,6 +184,14 @@ public:
         return array_reference_type(pointer_+left, right-left);
     }
 
+    const array_reference_type operator()(size_type const& left, size_type const& right) const {
+#ifndef NDEBUG
+        assert(right<=size_ && left<=right);
+#endif
+        return array_reference_type(pointer_+left, right-left);
+    }
+
+    /// access half open sub-range using one index and one-past-the-end [left, end)
     array_reference_type operator()(size_type const& left, end_type) {
 #ifndef NDEBUG
         assert(left<=size_);
@@ -190,12 +199,33 @@ public:
         return array_reference_type(pointer_+left, size_-left);
     }
 
-    array_reference_type operator() (all_type) const {
+    const array_reference_type operator()(size_type const& left, end_type) const {
+#ifndef NDEBUG
+        assert(left<=size_);
+#endif
+        return array_reference_type(pointer_+left, size_-left);
+    }
+
+    /// access entire range using all
+    array_reference_type operator() (all_type) {
+        return array_reference_type(pointer_, size_);
+    }
+
+    const array_reference_type operator() (all_type) const {
         return array_reference_type(pointer_, size_);
     }
 
     // access using a Range
     array_reference_type operator()(Range const& range) {
+        size_type left = range.left();
+        size_type right = range.right();
+#ifndef NDEBUG
+        assert(right<=size_ && left<=right);
+#endif
+        return array_reference_type(pointer_+left, right-left);
+    }
+
+    const array_reference_type operator()(Range const& range) const {
         size_type left = range.left();
         size_type right = range.right();
 #ifndef NDEBUG
