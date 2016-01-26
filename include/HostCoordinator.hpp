@@ -1,7 +1,8 @@
 #pragma once
 
-#include <memory>
 #include <algorithm>
+#include <memory>
+#include <string>
 
 #include "definitions.hpp"
 #include "Array.hpp"
@@ -22,24 +23,19 @@ namespace util {
     template <typename T, typename Allocator>
     struct type_printer<HostCoordinator<T,Allocator>>{
         static std::string print() {
-            std::stringstream str;
             #if VERBOSE>1
-            str << util::white("HostCoordinator") << "<" << type_printer<T>::print()
-                << ", " << type_printer<Allocator>::print() << ">";
+            return util::white("HostCoordinator") + "<" + type_printer<T>::print()
+                   + ", " + type_printer<Allocator>::print() + ">";
             #else
-            str << util::white("HostCoordinator")
-                << "<" << type_printer<T>::print() << ">";
+            return util::white("HostCoordinator") + "<" + type_printer<T>::print() + ">";
             #endif
-            return str.str();
         }
     };
 
     template <typename T, typename Allocator>
     struct pretty_printer<HostCoordinator<T,Allocator>>{
         static std::string print(const HostCoordinator<T,Allocator>& val) {
-            std::stringstream str;
-            str << type_printer<HostCoordinator<T,Allocator>>::print();
-            return str.str();
+            return type_printer<HostCoordinator<T,Allocator>>::print();;
         }
     };
 } // namespace util

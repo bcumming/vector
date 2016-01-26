@@ -24,25 +24,21 @@ namespace util {
     template <typename T, typename Allocator>
     struct type_printer<DeviceCoordinator<T,Allocator>>{
         static std::string print() {
-            std::stringstream str;
             #if VERBOSE > 1
-            str << util::white("DeviceCoordinator") << "<"
-                << type_printer<T>::print()
-                << ", " << type_printer<Allocator>::print() << ">";
+            return util::white("DeviceCoordinator") + "<"
+                + type_printer<T>::print()
+                + ", " + type_printer<Allocator>::print() + ">";
             #else
-            str << util::white("DeviceCoordinator")
-                << "<" << type_printer<T>::print() << ">";
+            return + util::white("DeviceCoordinator")
+                + "<" + type_printer<T>::print() + ">";
             #endif
-            return str.str();
         }
     };
 
     template <typename T, typename Allocator>
     struct pretty_printer<DeviceCoordinator<T,Allocator>>{
         static std::string print(const DeviceCoordinator<T,Allocator>& val) {
-            std::stringstream str;
-            str << type_printer<DeviceCoordinator<T,Allocator>>::print();
-            return str.str();
+            return type_printer<DeviceCoordinator<T,Allocator>>::print();
         }
     };
 } // namespace util
