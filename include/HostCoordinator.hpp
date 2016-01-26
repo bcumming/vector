@@ -98,9 +98,6 @@ public:
     void copy(const ArrayView<value_type, HostCoordinator<value_type, Allocator1>>& from,
                     ArrayView<value_type, HostCoordinator<value_type, Allocator2>>& to)
     {
-        using c1 = HostCoordinator<value_type, Allocator1>;
-        using c2 = HostCoordinator<value_type, Allocator2>;
-
         assert(from.size()==to.size());
         assert(!from.overlaps(to));
 
