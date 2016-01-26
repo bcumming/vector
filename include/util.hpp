@@ -5,7 +5,7 @@
 
 namespace memory {
 namespace util {
-static std::string pprintf(const char *s) {
+static inline std::string pprintf(const char *s) {
     std::string errstring;
     while(*s) {
         if(*s == '%' && s[1]!='%') {
@@ -86,25 +86,25 @@ static std::string colorize(std::string const& s, stringColor c) {
 #endif
 
 // helpers for inline printing
-static std::string red(std::string const& s) {
+static inline std::string red(std::string const& s) {
     return colorize(s, kRed);
 }
-static std::string green(std::string const& s) {
+static inline std::string green(std::string const& s) {
     return colorize(s, kGreen);
 }
-static std::string yellow(std::string const& s) {
+static inline std::string yellow(std::string const& s) {
     return colorize(s, kYellow);
 }
-static std::string blue(std::string const& s) {
+static inline std::string blue(std::string const& s) {
     return colorize(s, kBlue);
 }
-static std::string purple(std::string const& s) {
+static inline std::string purple(std::string const& s) {
     return colorize(s, kPurple);
 }
-static std::string cyan(std::string const& s) {
+static inline std::string cyan(std::string const& s) {
     return colorize(s, kCyan);
 }
-static std::string white(std::string const& s) {
+static inline std::string white(std::string const& s) {
     return colorize(s, kWhite);
 }
 } // namespace util

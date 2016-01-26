@@ -143,7 +143,7 @@ private:
     size_type right_;
 };
 
-static std::ostream& operator << (std::ostream& os, const Range& rng) {
+static inline std::ostream& operator << (std::ostream& os, const Range& rng) {
     os << "[" << rng.left() << ":" << rng.right() << "]";
     return os;
 }
