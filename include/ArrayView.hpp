@@ -84,8 +84,14 @@ namespace impl {
     template <typename T>
     struct is_array_view : std::false_type {};
 
+    // two specializations for is_array_view
+    //      1. for ArrayViewImpl (i.e. ArrayView)
+    //      2. for ArrayReference
     template <typename R, typename T, typename Coord>
     struct is_array_view<ArrayViewImpl<R, T, Coord> > : std::true_type {};
+
+    template <typename T, typename Coord>
+    struct is_array_view<ArrayReference<T, Coord> > : std::true_type {};
 
     template <typename T>
     struct is_array_reference : std::false_type {};
@@ -430,6 +436,10 @@ private:
 
 template <typename T, typename Coord>
 using ArrayView = ArrayViewImpl<ArrayReference<T, Coord>, T, Coord>;
+
+// export is_array_view helper
+using impl::is_array_view;
+
 
 } // namespace memory
 ////////////////////////////////////////////////////////////////////////////////

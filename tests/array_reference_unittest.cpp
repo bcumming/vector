@@ -54,13 +54,30 @@ TEST(ArrayReference, metafunctions) {
     EXPECT_EQ(v1.size(), 10);
 
     by_reference vr1 = v1(0,5);
-    by_reference vr2 = v1(5,end);
+    by_view      vv1 = v1(0,5);
 
+    // test that array_reference correctly detects an arary_reference
     static_assert(impl::is_array_reference<decltype(vr1)>::value,
-                  "incorrectly identified array reference");
+                  "is_array_reference did not correctly classify array reference");
     static_assert(impl::is_array_reference<decltype(v1(all))>::value,
-                  "incorrectly identified array reference");
+                  "is_array_reference did not correctly classify array reference");
     static_assert(impl::is_array_reference<decltype(v1(0,1))>::value,
-                  "incorrectly identified array reference");
+                  "is_array_reference did not correctly classify array reference");
+
+    // check that is_array_reference is false for an array_view
+    static_assert(impl::is_array_reference<decltype(vv1)>::value==false,
+                  "is_array_reference identified an array_view as an array_reference");
+
+    // check that is_array_view returns true for ArrayReferences
+    // this is desireable because is_array_view is designed for use in template
+    // specializations, for which it is required that the argument foo(v(0,1))
+    // should be treated as an ArrayView
+    static_assert(impl::is_array_view<decltype(vr1)>::value,
+                  "is_array_view did not correctly classify array reference");
+    static_assert(impl::is_array_view<decltype(v1(all))>::value,
+                  "is_array_view did not correctly classify array reference");
+    static_assert(impl::is_array_view<decltype(v1(0,1))>::value,
+                  "is_array_view did not correctly classify array reference");
+
 }
 
