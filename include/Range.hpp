@@ -45,7 +45,7 @@ public:
         auto m = (other.left() + other.right())/2;
         left_ = m;
         right_ = other.right();
-        other.set(left_, m);
+        other.set(other.left(), m);
     }
 
     Range(Range& other, tbb::proportional_split p) {
@@ -59,7 +59,7 @@ public:
 
         left_ = m;
         right_ = other.right();
-        other.set(left_, m);
+        other.set(other.left(), m);
     }
 
     static constexpr bool is_splittable_in_proportion = true;
