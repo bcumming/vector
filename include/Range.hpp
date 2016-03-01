@@ -6,7 +6,7 @@
 
 #include "RangeLimits.hpp"
 
-#ifdef USING_TBB
+#ifdef WITH_TBB
 #include <tbb/tbb.h>
 #endif
 
@@ -32,13 +32,13 @@ public:
     //
     // make Range compatible with TBB Range concept
     //
-#ifdef USING_TBB
+#ifdef WITH_TBB
     bool empty() const {
         return right_==left_;
     }
 
     bool is_divisible() const {
-        return size()>1;
+        return size()>16;
     }
 
     Range(Range& other, tbb::split) {
@@ -63,7 +63,7 @@ public:
     }
 
     static constexpr bool is_splittable_in_proportion = true;
-#endif // USING_TBB
+#endif // WITH_TBB
 
     Range(Range const& other) = default;
 

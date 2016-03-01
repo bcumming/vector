@@ -86,6 +86,7 @@ public:
 
     using size_type       = typename base::size_type;
     using difference_type = typename base::difference_type;
+    using array_reference_type = typename base::array_reference_type;
 
     using pointer       = value_type*;
     using const_pointer = const pointer;
@@ -186,6 +187,14 @@ public:
 #endif
         base::swap(other);
         return *this;
+    }
+
+    array_reference_type as_view() {
+        return this->operator()(all);
+    }
+
+    const array_reference_type as_view() const {
+        return this->operator()(all);
     }
 
     // have to free the memory in a "by value" range

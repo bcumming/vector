@@ -13,15 +13,31 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # KNL
-set( KNL_BACKEND "OFF" CACHE BOOL "Support KNL HBM memory" )
+#set( KNL_BACKEND "OFF" CACHE BOOL "Support KNL HBM memory" )
+option( KNL_BACKEND "Support KNL HBM memory" off )
 if( KNL_BACKEND )
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWITH_KNL")
+endif()
+
+# KNL
+option( TBB_SUPPORT "Support for Intel Thread Building Blocks (TBB)" off )
+if( TBB_SUPPORT )
+    #set(TBB_ROOT_PATH cache string "" )
+
+    #set(TBB_INCLUDE_PATH cache string "${TBB_ROOT_PATH}/include")
+    #include_directories("${TBBROOT}/include")
+
+    #set(TBB_LIBRARY_PATH cache string "${TBB_ROOT_PATH}/lib")
+    #link_directories(${TBB_INCLUDE_PATH})
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWITH_TBB")
+    set(CMAKE_CXX_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -ltbb -ltbbmalloc" )
 endif()
 
 # so that std=c++11 won't cause strange warnings when passed via -Xcompiler
 
 # CUDA
-set( CUDA_BACKEND "OFF" CACHE BOOL "Compile CUDA version" )
+option( CUDA_BACKEND "Compile CUDA version" off )
 if( CUDA_BACKEND )
     # so that std=c++11 won't cause strange warnings when passed via -Xcompiler
     set(CUDA_PROPOGATE_HOST_FLAGS OFF)

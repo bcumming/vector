@@ -160,3 +160,16 @@ TEST(Array, assignment) {
     for(auto value: v)
         EXPECT_EQ(value, 3.14);
 }
+
+// test that the as_view works
+TEST(Array, as_view) {
+    using namespace memory;
+
+    using by_value = Array<double, HostCoordinator<double> >;
+    using by_view  = by_value::view_type;
+
+    by_value v(10);
+    by_view vv = v;
+
+    EXPECT_EQ(vv, v.as_view());
+}

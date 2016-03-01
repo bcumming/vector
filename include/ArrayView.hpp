@@ -8,6 +8,10 @@
 #include "Range.hpp"
 #include "RangeLimits.hpp"
 
+#ifdef WITH_TBB
+#include <tbb/tbb.h>
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 namespace memory{
 
@@ -150,7 +154,12 @@ public:
     ////////////////////////////////////////////////////////////////////////////
     template <
         typename Other,
-        typename = typename std::enable_if< impl::is_array<Other>::value >::type
+        typename = typename
+            std::enable_if<
+                impl::is_array<
+                    typename std::decay<Other>::type
+                >::value
+            >::type
     >
     explicit ArrayViewImpl(Other&& other)
         : pointer_ (other.data()) , size_(other.size())
@@ -172,6 +181,56 @@ public:
                   << std::endl;
 #endif
     }
+
+#ifdef WITH_TBB
+    bool empty() const {
+        return range().empty();
+    }
+
+    bool is_divisible() const {
+        return range().is_divisible();
+    }
+
+    // this only works for views and references because it doesn't make sense
+    // for an array that owns memory to split itself into views
+    template <
+        typename Other,
+        typename = typename
+            std::enable_if<
+                impl::is_array_view<
+                    typename std::decay<Other>::type
+                >::value
+            >::type
+    >
+    ArrayViewImpl(Other&& other, tbb::split)
+    {
+        // find new ranges for data
+        auto other_range = other.range();
+        Range new_range(other_range, tbb::split());
+
+        *this = other(new_range);
+        other = other(other_range);
+    }
+
+    /*
+    Range(Range& other, tbb::proportional_split p) {
+        auto m = ((other.left()+other.right())*p.right())/(p.left()+p.right());
+        if(m == 0) {
+            m = 1;
+        }
+        else if(m == other.right()) {
+            m = other.right() - 1;
+        }
+
+        left_ = m;
+        right_ = other.right();
+        other.set(other.left(), m);
+    }
+
+    static constexpr bool is_splittable_in_proportion = true;
+    */
+#endif
+
 
     explicit ArrayViewImpl() {
         reset();
@@ -240,6 +299,7 @@ public:
         return array_reference_type(pointer_+left, right-left);
     }
 
+    // assignment operator
     template <
         typename Other,
         typename = typename std::enable_if< impl::is_array<Other>::value >::type
@@ -303,6 +363,15 @@ public:
         assert(i<size_);
         #endif
         return coordinator_.make_reference(pointer_+i);
+    }
+
+    // compare for equality by testing pointer and range size
+    friend bool operator == (ArrayViewImpl const& lhs, ArrayViewImpl const& rhs) {
+        return (lhs.size() == rhs.size()) && (lhs.data() == rhs.data());
+    }
+
+    friend bool operator != (ArrayViewImpl const& lhs, ArrayViewImpl const& rhs) {
+        return !(lhs == rhs);
     }
 
     // do nothing for destructor: we don't own the memory in range
@@ -374,6 +443,7 @@ public:
     using base::pointer_;
     using base::size_;
     using base::size;
+    using base::range;
 
     // Make only one valid constructor, for maintenance reasons.
     // The only place where ArrayReference types are created is in the
@@ -409,6 +479,55 @@ public:
 
         return *this;
     }
+
+#ifdef WITH_TBB
+    bool empty() const {
+        return range().empty();
+    }
+
+    bool is_divisible() const {
+        return range().is_divisible();
+    }
+
+    // this only works for views and references because it doesn't make sense
+    // for an array that owns memory to split itself into views
+    template <
+        typename Other,
+        typename = typename
+            std::enable_if<
+                impl::is_array_view<
+                    typename std::decay<Other>::type
+                >::value
+            >::type
+    >
+    ArrayReference(Other&& other, tbb::split)
+    {
+        // find new ranges for data
+        auto other_range = other.range();
+        Range new_range(other_range, tbb::split());
+
+        *this = (other)(new_range);
+        other = other(other_range);
+    }
+
+    /*
+    Range(Range& other, tbb::proportional_split p) {
+        auto m = ((other.left()+other.right())*p.right())/(p.left()+p.right());
+        if(m == 0) {
+            m = 1;
+        }
+        else if(m == other.right()) {
+            m = other.right() - 1;
+        }
+
+        left_ = m;
+        right_ = other.right();
+        other.set(other.left(), m);
+    }
+
+    static constexpr bool is_splittable_in_proportion = true;
+    */
+#endif
 
     ArrayReference& operator = (value_type value) {
 #ifdef VERBOSE
