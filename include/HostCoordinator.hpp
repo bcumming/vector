@@ -102,6 +102,7 @@ public:
         assert(!from.overlaps(to));
 
         #ifdef VERBOSE
+        using c1 = HostCoordinator<value_type, Allocator1>;
         std::cerr << util::type_printer<c1>::print()
                   << "::" + util::blue("copy") << "(" << from.size()
                   << " [" << from.size()*sizeof(value_type) << " bytes])"

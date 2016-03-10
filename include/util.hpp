@@ -59,6 +59,7 @@ enum stringColor {kWhite, kRed, kGreen, kBlue, kYellow, kPurple, kCyan};
 
 #define COLOR_PRINTING
 #ifdef COLOR_PRINTING
+__attribute__((unused))
 static std::string colorize(std::string const& s, stringColor c) {
     switch(c) {
         case kWhite :
@@ -80,31 +81,39 @@ static std::string colorize(std::string const& s, stringColor c) {
     return s;
 }
 #else
+__attribute__((unused))
 static std::string colorize(std::string const& s, stringColor c) {
     return s;
 }
 #endif
 
 // helpers for inline printing
-static inline std::string red(std::string const& s) {
+__attribute__((unused))
+static std::string red(std::string const& s) {
     return colorize(s, kRed);
 }
-static inline std::string green(std::string const& s) {
+__attribute__((unused))
+static std::string green(std::string const& s) {
     return colorize(s, kGreen);
 }
-static inline std::string yellow(std::string const& s) {
+__attribute__((unused))
+static std::string yellow(std::string const& s) {
     return colorize(s, kYellow);
 }
-static inline std::string blue(std::string const& s) {
+__attribute__((unused))
+static std::string blue(std::string const& s) {
     return colorize(s, kBlue);
 }
-static inline std::string purple(std::string const& s) {
+__attribute__((unused))
+static std::string purple(std::string const& s) {
     return colorize(s, kPurple);
 }
-static inline std::string cyan(std::string const& s) {
+__attribute__((unused))
+static std::string cyan(std::string const& s) {
     return colorize(s, kCyan);
 }
-static inline std::string white(std::string const& s) {
+__attribute__((unused))
+static std::string white(std::string const& s) {
     return colorize(s, kWhite);
 }
 } // namespace util
