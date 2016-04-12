@@ -135,3 +135,20 @@ TEST(HostVector, iterators_and_ranges) {
         EXPECT_EQ(float(4*100), sum);
     }
 }
+
+TEST(HostVector, from_std_vector) {
+    using namespace memory;
+
+    /*
+    const std::vector<int> svec{0,1,2,3,4,5,6,7};
+    const HostVector<int>::view_type v(const_cast<int*>(svec.data()), 5);
+    */
+
+    std::vector<int> v{0,1,2,3,4,5,6,7};
+    HostVector<int> hv(v);
+
+    EXPECT_EQ(v.size(), hv.size());
+    for(auto i : hv.range()) {
+        EXPECT_EQ(v[i], hv[i]);
+    }
+}

@@ -163,8 +163,8 @@ public:
     }
 
     explicit ArrayViewImpl(pointer ptr, size_type n)
-    : pointer_ (ptr)
-    , size_(n)
+    :   pointer_(ptr)
+    ,   size_(n)
     {
 #if VERBOSE>1
         std::cout << util::green("ArrayView(pointer, size_type)")

@@ -81,6 +81,7 @@ public:
     using value_type = T;
     using base       = ArrayView<value_type, Coord>;
     using view_type  = ArrayView<value_type, Coord>;
+    using const_view_type  = const view_type;
 
     using coordinator_type = typename Coord::template rebind<value_type>;
 
@@ -165,8 +166,23 @@ public:
         base::swap(other);
     }
 
-    // TODO : template this to catch array references etc
-    Array& operator = (const Array& other) {
+    /// copy from a std::vector
+    /// the value_type of the vector must be the same, because the coordinator
+    /// used to copy from the vector into the Array does not convert between types
+    template < typename Allocator >
+    Array(std::vector<value_type, Allocator> const& other)
+    : base(coordinator_type().allocate(other.size()))
+    {
+            // TODO : this is so dirty, please forgive me.
+            // unfortunately this isn't a quick fix :
+            // https://github.com/bcumming/vector/issues/4
+        coordinator_.copy(
+            view_type(const_cast<value_type*>(other.data()), other.size()),
+            *this
+        );
+    }
+
+    Array& operator = (Array const& other) {
 #ifdef VERBOSE
         std::cerr << util::green("Array operator=(other&)") + " other = "
                   << util::pretty_printer<Array>::print(other) << std::endl;
