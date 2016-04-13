@@ -71,6 +71,8 @@ namespace impl {
     using is_array_t = typename is_array<T>::type;
 }
 
+using impl::is_array;
+
 // array by value
 // this wrapper owns the memory in the array
 // and is responsible for allocating and freeing memory
