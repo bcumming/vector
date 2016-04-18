@@ -83,7 +83,7 @@ public:
     using value_type = T;
     using base       = ArrayView<value_type, Coord>;
     using view_type  = ArrayView<value_type, Coord>;
-    using const_view_type  = const view_type;
+    using const_view_type  = ConstArrayView<value_type, Coord>;
 
     using coordinator_type = typename Coord::template rebind<value_type>;
 
@@ -179,7 +179,7 @@ public:
             // unfortunately this isn't a quick fix :
             // https://github.com/bcumming/vector/issues/4
         coordinator_.copy(
-            view_type(const_cast<value_type*>(other.data()), other.size()),
+            const_view_type(other.data(), other.size()),
             *this
         );
     }
@@ -226,12 +226,7 @@ public:
 
     using base::size;
 
-    //static constexpr auto
-    //alignment() -> decltype(view_type::alignment()) {
-        //return view_type::alignment();
-    //}
     using base::alignment;
-
 
 private:
     coordinator_type coordinator_;

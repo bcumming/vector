@@ -46,7 +46,7 @@ public:
     using value_type = T;
 
     using pointer         = value_type*;
-    using const_pointer   = const pointer;
+    using const_pointer   = const value_type*;
     using reference       = value_type&;
     using const_reference = value_type const&;
     using view_type       = ArrayView<value_type, HostCoordinator>;
@@ -113,6 +113,29 @@ public:
         std::copy(from.begin(), from.end(), to.begin());
     }
 
+    // copy memory between host memory ranges
+    template <typename Allocator1, typename Allocator2>
+    // requires Allocator1 = Allocator
+    // requires Allocator2 = Allocator
+    void copy(const ConstArrayView<value_type, HostCoordinator<value_type, Allocator1>>& from,
+                    ArrayView<value_type, HostCoordinator<value_type, Allocator2>>& to)
+    {
+        assert(from.size()==to.size());
+        assert(!from.overlaps(to));
+
+        #ifdef VERBOSE
+        using c1 = HostCoordinator<value_type, Allocator1>;
+        std::cerr << util::type_printer<c1>::print()
+                  << "::" + util::blue("copy") << "(" << from.size()
+                  << " [" << from.size()*sizeof(value_type) << " bytes])"
+                  << " " << from.data() << util::yellow(" -> ") << to.data()
+                  << std::endl;
+        #endif
+
+        std::copy(from.begin(), from.end(), to.begin());
+    }
+
+    /*
     void copy(const view_type &from, view_type &to) {
         assert(from.size()==to.size());
         assert(!from.overlaps(to));
@@ -127,6 +150,7 @@ public:
 
         std::copy(from.begin(), from.end(), to.begin());
     }
+    */
 
 #ifdef WITH_CUDA
     // copy memory from device to host
