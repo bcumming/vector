@@ -440,7 +440,6 @@ using ArrayView = ArrayViewImpl<ArrayReference<T, Coord>, T, Coord>;
 // export is_array_view helper
 using impl::is_array_view;
 
-
 } // namespace memory
 ////////////////////////////////////////////////////////////////////////////////
 
