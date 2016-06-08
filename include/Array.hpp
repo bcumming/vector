@@ -175,9 +175,6 @@ public:
     Array(std::vector<value_type, Allocator> const& other)
     : base(coordinator_type().allocate(other.size()))
     {
-            // TODO : this is so dirty, please forgive me.
-            // unfortunately this isn't a quick fix :
-            // https://github.com/bcumming/vector/issues/4
         coordinator_.copy(
             const_view_type(other.data(), other.size()),
             *this
