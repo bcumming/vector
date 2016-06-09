@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <type_traits>
+#include <vector>
 
 #include "definitions.hpp"
 #include "Range.hpp"
@@ -168,6 +169,23 @@ public:
     {
 #if VERBOSE>1
         std::cout << util::green("ArrayView(pointer, size_type)")
+                  << util::pretty_printer<ArrayViewImpl>::print(*this)
+                  << std::endl;
+#endif
+    }
+
+    // only works with non const vector until we have a const_view type available
+    template <
+        typename Allocator,
+        typename = typename
+            std::enable_if<coordinator_type::is_malloc_compatible()>::type
+     >
+    explicit ArrayViewImpl(std::vector<value_type, Allocator>& vec)
+    :   pointer_(vec.data())
+    ,   size_(vec.size())
+    {
+#if VERBOSE>1
+        std::cout << util::green("ArrayView(std::vector)")
                   << util::pretty_printer<ArrayViewImpl>::print(*this)
                   << std::endl;
 #endif
@@ -348,7 +366,7 @@ protected :
     }
 
     // disallow constructors that imply allocation of memory
-    ArrayViewImpl(const std::size_t &n) {};
+    ArrayViewImpl(const std::size_t &n) = delete;
 
     coordinator_type coordinator_;
     pointer          pointer_;

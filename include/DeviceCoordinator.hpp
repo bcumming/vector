@@ -308,6 +308,11 @@ public:
     auto alignment() -> decltype(Allocator_::alignment()) {
         return Allocator_::alignment();
     }
+
+    static constexpr
+    bool is_malloc_compatible() {
+        return Allocator_::is_malloc_compatible();
+    }
 };
 
 } // namespace memory

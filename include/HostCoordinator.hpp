@@ -180,6 +180,11 @@ public:
     alignment() -> decltype(Allocator::alignment()) {
         return Allocator::alignment();
     }
+
+    static constexpr bool
+    is_malloc_compatible() {
+        return Allocator::is_malloc_compatible();
+    }
 };
 
 } //namespace memory

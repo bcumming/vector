@@ -87,7 +87,12 @@ namespace impl {
             free(ptr);
         }
 
-        static constexpr size_type alignment() { return Alignment; }
+        static constexpr size_type alignment() {
+            return Alignment;
+        }
+        static constexpr bool is_malloc_compatible() {
+            return true;
+        }
     };
 
 #ifdef WITH_KNL
@@ -121,7 +126,12 @@ namespace impl {
                 hbw_free(ptr);
             }
 
-            static constexpr size_type alignment() { return Alignment; }
+            static constexpr size_type alignment() {
+                return Alignment;
+            }
+            static constexpr bool is_malloc_compatible() {
+                return true;
+            }
         };
     }
 #endif
@@ -166,6 +176,9 @@ namespace impl {
             static constexpr size_type alignment() {
                 return Alignment;
             }
+            static constexpr bool is_malloc_compatible() {
+                return true;
+            }
         };
 
         class DevicePolicy {
@@ -198,6 +211,9 @@ namespace impl {
             // memory allocated using cudaMalloc has alignment of 256 bytes
             static constexpr size_type alignment() {
                 return 256;
+            }
+            static constexpr bool is_malloc_compatible() {
+                return true;
             }
         };
     } // namespace cuda
