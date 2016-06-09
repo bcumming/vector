@@ -1,6 +1,7 @@
 #include "gtest.h"
 
 #include <algorithm>
+#include <vector>
 
 #include <Vector.hpp>
 #include <HostCoordinator.hpp>
@@ -39,6 +40,20 @@ TEST(HostVector, constructor) {
 
     for(int i=90; i<100; i++)
         EXPECT_EQ(float(-1), v1[i]);
+}
+
+// test that constructors work
+TEST(HostVector, std_vector_constructor) {
+    using namespace memory;
+
+    std::vector<int> v(10);
+    std::iota(v.begin(), v.end(), 0);
+
+    HostVector<int> hv(v);
+
+    for(auto i=0; i<hv.size(); ++i) {
+        EXPECT_EQ(v[i], hv[i]);
+    }
 }
 
 // test that copy constructors work
