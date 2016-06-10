@@ -5,6 +5,7 @@
 
 #include <Vector.hpp>
 #include <HostCoordinator.hpp>
+#include <numeric>
 
 template <typename VEC>
 void print(VEC const& v) {

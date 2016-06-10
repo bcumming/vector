@@ -1,6 +1,7 @@
 #include "gtest.h"
 
 #include <Vector.hpp>
+#include <numeric>
 
 // check that const views work
 TEST(array_view, const_view) {

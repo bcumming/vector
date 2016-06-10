@@ -58,7 +58,6 @@ std::string to_string(T val) {
 enum stringColor {kWhite, kRed, kGreen, kBlue, kYellow, kPurple, kCyan};
 
 #ifdef COLOR_PRINTING
-__attribute__((unused))
 static std::string colorize(std::string const& s, stringColor c) {
     switch(c) {
         case kWhite :
@@ -80,38 +79,37 @@ static std::string colorize(std::string const& s, stringColor c) {
     return s;
 }
 #else
-__attribute__((unused))
 static std::string colorize(std::string const& s, stringColor c) {
     return s;
 }
 #endif
 
 // helpers for inline printing
-__attribute__((unused))
+ 
 static std::string red(std::string const& s) {
     return colorize(s, kRed);
 }
-__attribute__((unused))
+ 
 static std::string green(std::string const& s) {
     return colorize(s, kGreen);
 }
-__attribute__((unused))
+ 
 static std::string yellow(std::string const& s) {
     return colorize(s, kYellow);
 }
-__attribute__((unused))
+ 
 static std::string blue(std::string const& s) {
     return colorize(s, kBlue);
 }
-__attribute__((unused))
+ 
 static std::string purple(std::string const& s) {
     return colorize(s, kPurple);
 }
-__attribute__((unused))
+ 
 static std::string cyan(std::string const& s) {
     return colorize(s, kCyan);
 }
-__attribute__((unused))
+ 
 static std::string white(std::string const& s) {
     return colorize(s, kWhite);
 }
