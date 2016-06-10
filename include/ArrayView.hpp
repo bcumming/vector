@@ -660,13 +660,13 @@ public:
         typename Other,
         typename = typename std::enable_if< impl::is_array<Other>::value >::type
     >
-    ArrayReference operator = (Other&& other) {
+    ArrayReference& operator = (Other&& other) {
 #ifndef NDEBUG
         assert(other.size() == this->size());
 #endif
 #ifdef VERBOSE
         std::cerr << util::type_printer<ArrayReference>::print()
-                  << "::" << util::blue("operator=") << "(&&"
+                  << "::" << util::blue("operator=") << "(generic &&"
                   << util::type_printer<typename std::decay<Other>::type>::print()
                   << ")" << std::endl;
 #endif
