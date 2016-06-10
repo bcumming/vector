@@ -675,6 +675,22 @@ public:
         return *this;
     }
 
+
+    ArrayReference& operator = (const ArrayReference& other) {
+#ifndef ndebug
+        assert(other.size() == this->size());
+#endif
+#ifdef verbose
+        std::cerr << util::type_printer<arrayreference>::print()
+            << "::" << util::blue("operator=") << "(&&"
+            << util::type_printer<typename std::decay<other>::type>::print()
+            << ")" << std::endl;
+#endif
+        base::coordinator_.copy(other, *this);
+
+        return *this;
+    }
+
     ArrayReference& operator = (value_type value) {
 #ifdef VERBOSE
         std::cerr << util::pretty_printer<ArrayReference>::print(*this)
