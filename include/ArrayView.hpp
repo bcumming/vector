@@ -39,13 +39,8 @@ namespace util {
     struct type_printer<ArrayReference<T,Coord>> {
         static std::string print() {
             std::stringstream str;
-            #if VERBOSE>1
             str << util::white("ArrayReference") << "<" << type_printer<T>::print()
                 << ", " << type_printer<Coord>::print() << ">";
-            #else
-            str << util::white("ArrayReference")
-                << "<" << type_printer<Coord>::print() << ">";
-            #endif
             return str.str();
         }
     };
@@ -54,13 +49,8 @@ namespace util {
     struct type_printer<ConstArrayReference<T,Coord>> {
         static std::string print() {
             std::stringstream str;
-            #if VERBOSE>1
             str << util::white("ConstArrayReference") << "<" << type_printer<T>::print()
                 << ", " << type_printer<Coord>::print() << ">";
-            #else
-            str << util::white("ConstArrayReference")
-                << "<" << type_printer<Coord>::print() << ">";
-            #endif
             return str.str();
         }
     };
@@ -91,13 +81,8 @@ namespace util {
     struct type_printer<ArrayViewImpl<R, T,Coord>> {
         static std::string print() {
             std::stringstream str;
-            #if VERBOSE>1
             str << util::white("ArrayView") << "<" << type_printer<T>::print()
                 << ", " << type_printer<Coord>::print() << ">";
-            #else
-            str << util::white("ArrayView")
-                << "<" << type_printer<Coord>::print() << ">";
-            #endif
             return str.str();
         }
     };
@@ -106,13 +91,8 @@ namespace util {
     struct type_printer<ConstArrayViewImpl<R, T,Coord>> {
         static std::string print() {
             std::stringstream str;
-            #if VERBOSE>1
             str << util::white("ConstArrayView") << "<" << type_printer<T>::print()
                 << ", " << type_printer<Coord>::print() << ">";
-            #else
-            str << util::white("ConstArrayView")
-                << "<" << type_printer<Coord>::print() << ">";
-            #endif
             return str.str();
         }
     };
@@ -345,7 +325,7 @@ public:
         typename = typename std::enable_if< impl::is_array<Other>::value >::type
     >
     ArrayViewImpl operator=(Other&& other) {
-#if VERBOSE>1
+#if VERBOSE
         std::cerr << util::pretty_printer<ArrayViewImpl>::print(*this)
                   << "::" << util::blue("operator=") << "("
                   << util::pretty_printer<ArrayViewImpl>::print(other)
@@ -482,9 +462,12 @@ public:
     ConstArrayViewImpl(Other&& other)
         : pointer_ (other.data()) , size_(other.size())
     {
-#if VERBOSE>1
+#if VERBOSE
         std::cout << util::green("ConstArrayView(&&Other)")
-                  << util::pretty_printer<typename std::decay<Other>::type>::print(*this)
+                  << " this = "
+                  << util::pretty_printer<ConstArrayViewImpl>::print(*this)
+                  << " other = "
+                  << util::pretty_printer<typename std::decay<Other>::type>::print(other)
                   << std::endl;
 #endif
     }
@@ -493,7 +476,7 @@ public:
     :   pointer_(ptr)
     ,   size_(n)
     {
-#if VERBOSE>1
+#if VERBOSE
         std::cout << util::green("ConstArrayView(pointer, size_type)")
                   << util::pretty_printer<ConstArrayViewImpl>::print(*this)
                   << std::endl;
@@ -545,7 +528,7 @@ public:
         typename = typename std::enable_if< impl::is_array<Other>::value >::type
     >
     ConstArrayViewImpl operator=(Other&& other) {
-#if VERBOSE>1
+#if VERBOSE
         std::cerr << util::pretty_printer<ConstArrayViewImpl>::print(*this)
                   << "::" << util::blue("operator=") << "("
                   << util::pretty_printer<ConstArrayViewImpl>::print(other)
@@ -738,7 +721,7 @@ public:
     explicit ConstArrayReference(const_pointer ptr, size_type n)
     : base(ptr, n)
     {
-#if VERBOSE>1
+#if VERBOSE
         std::cout << util::green("ConstArrayReference(pointer, size_type)")
                   << util::pretty_printer<base>::print(*this)
                   << std::endl;

@@ -18,6 +18,17 @@ if( KNL_BACKEND )
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWITH_KNL")
 endif()
 
+# verbose build
+set( VERBOSE "OFF" CACHE BOOL "Verbose tracing for debuggin" )
+if( VERBOSE )
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVERBOSE")
+endif()
+
+set( COLOR_PRINTING "OFF" CACHE BOOL "Use color text output" )
+if( COLOR_PRINTING )
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCOLOR_PRINTING")
+endif()
+
 # so that std=c++11 won't cause strange warnings when passed via -Xcompiler
 
 # CUDA
