@@ -69,7 +69,20 @@ namespace impl {
         static_assert( is_power_of_two(alignment),
                 "alignment is not a power of two");
         void *ptr;
-        int result = posix_memalign(&ptr, alignment, size*sizeof(T));
+        int result;
+
+#ifdef  _MSC_VER 
+            ptr = _aligned_malloc(size * sizeof(T), alignment);
+            if (ptr == NULL) {
+                result = 1;
+            }
+            else {
+                result = 0;
+            }
+#else 
+            result = posix_memalign(&ptr, alignment, size*sizeof(T));
+#endif
+
         if(result) {
             return nullptr;
         }
@@ -84,7 +97,12 @@ namespace impl {
         }
 
         void free_policy(void *ptr) {
+#ifdef      _MSC_VER 
+                _aligned_free(ptr);
+#else
             free(ptr);
+#endif
+
         }
 
         static constexpr size_type alignment() {
