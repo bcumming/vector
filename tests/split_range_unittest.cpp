@@ -3,15 +3,15 @@
 #include <algorithm>
 #include <vector>
 
-#include <HostCoordinator.hpp>
-#include <SplitRange.hpp>
-#include <Vector.hpp>
+#include "../include/HostCoordinator.hpp"
+#include "../include/SplitRange.hpp"
+#include "../include/Vector.hpp"
 
 TEST(SplitRange, split) {
     using namespace memory;
 
-    typedef HostVector<float> vector_type;
-    typedef vector_type::view_type view_type;
+    using vector_type = HostVector<float>;
+    using view_type = vector_type::view_type;
 
     const size_t num_splits=13;
     const size_t range_length=100;
