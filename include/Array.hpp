@@ -71,6 +71,8 @@ namespace impl {
     using is_array_t = typename is_array<T>::type;
 }
 
+using impl::is_array;
+
 // array by value
 // this wrapper owns the memory in the array
 // and is responsible for allocating and freeing memory
@@ -81,6 +83,7 @@ public:
     using value_type = T;
     using base       = ArrayView<value_type, Coord>;
     using view_type  = ArrayView<value_type, Coord>;
+    using const_view_type  = ConstArrayView<value_type, Coord>;
 
     using coordinator_type = typename Coord::template rebind<value_type>;
 
@@ -103,10 +106,25 @@ public:
     Array(I n)
         : base(coordinator_type().allocate(n))
     {
-#ifdef VERBOSE
+        #ifdef VERBOSE
         std::cerr << util::green("Array(integral_type) ")
                   << util::pretty_printer<Array>::print(*this) << std::endl;
-#endif
+        #endif
+    }
+
+    // constructor by size with default value
+    template < typename II,
+               typename TT,
+               typename = typename std::enable_if<std::is_integral<II>::value>::type,
+               typename = typename std::enable_if<std::is_convertible<TT,value_type>::value>::type >
+    Array(II n, TT value)
+        : base(coordinator_type().allocate(n))
+    {
+        #ifdef VERBOSE
+        std::cerr << util::green("Array(integral_type, value=" + std::to_string(value) + ") ")
+                  << util::pretty_printer<Array>::print(*this) << std::endl;
+        #endif
+        coordinator_type().set(*this, value_type(value));
     }
 
     template <typename Other,
@@ -150,8 +168,20 @@ public:
         base::swap(other);
     }
 
-    // TODO : template this to catch array references etc
-    Array& operator = (const Array& other) {
+    /// copy from a std::vector
+    /// the value_type of the vector must be the same, because the coordinator
+    /// used to copy from the vector into the Array does not convert between types
+    template < typename Allocator >
+    Array(std::vector<value_type, Allocator> const& other)
+    : base(coordinator_type().allocate(other.size()))
+    {
+        coordinator_.copy(
+            const_view_type(other.data(), other.size()),
+            *this
+        );
+    }
+
+    Array& operator = (Array const& other) {
 #ifdef VERBOSE
         std::cerr << util::green("Array operator=(other&)") + " other = "
                   << util::pretty_printer<Array>::print(other) << std::endl;
@@ -192,6 +222,8 @@ public:
     }
 
     using base::size;
+
+    using base::alignment;
 
 private:
     coordinator_type coordinator_;

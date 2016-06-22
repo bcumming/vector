@@ -33,18 +33,20 @@ class SplitRange {
     // incremented via ++ operator
     ///////////////////////////////////////////////////////////////////////////
     class iterator
-      : public std::iterator<std::input_iterator_tag, Range>
+      : public std::iterator<std::random_access_iterator_tag, Range>
     {
       public:
           iterator(size_type first, size_type end, size_type step)
               : range_(first, first+step),
                 step_(step),
+                begin_(first),
                 end_(end)
           {
               assert(first<=end);
 
-              if(range_.right()>end)
+              if(range_.right()>end) {
                   range_.set(first, end);
+              }
           }
 
           Range const& operator*() const {
@@ -61,17 +63,13 @@ class SplitRange {
               return previous;
           }
 
+          iterator operator--(int) {
+              iterator next(*this);
+              --(*this);
+              return next;
+          }
+
           const iterator* operator++() {
-              // shifting the range
-              // we can't just use range_+=step_ in case the original range
-              // can't be split into equally-sized sub-ranges
-              //
-              // this is why we don't have reverse or random access, which would
-              // require additional state. It might be nice to create such an
-              // iterator, if we are using this method to split up work that is
-              // to be passed off to a team of worker threads, so that sub-range
-              // lookup can be performed in constant time, not linear time as is
-              // the case with a forward iterator.
               size_type first = range_.left()+step_;
               if(first>end_)
                   first=end_;
@@ -86,6 +84,63 @@ class SplitRange {
               return this;
           }
 
+          const iterator* operator--() {
+              size_type first = range_.left()-step_;
+              if(first<begin_)
+                  first=begin_;
+
+              size_type last = first+step_;
+              if(last>end_)
+                  last=end_;
+
+              // update range
+              range_.set(first, last);
+
+              return this;
+          }
+
+          const iterator* operator+=(int n) {
+              size_type first = range_.left()+step_*n;
+              if(first>end_)
+                  first=end_;
+
+              size_type last = first+step_;
+              if(last>end_)
+                  last=end_;
+
+              // update range
+              range_.set(first, last);
+
+              return this;
+          }
+
+          iterator operator+(int n) {
+              iterator i(*this);
+              i+=n;
+              return i;
+          }
+
+          const iterator* operator-=(int n) {
+              size_type first = range_.left()+step_*n;
+              if(first<begin_)
+                  first=begin_;
+
+              size_type last = first+step_;
+              if(last>end_)
+                  last=end_;
+
+              // update range
+              range_.set(first, last);
+
+              return this;
+          }
+
+          iterator operator-(int n) {
+              iterator i(*this);
+              i-=n;
+              return i;
+          }
+
           bool operator == (const iterator& other) const {
               return range_ == other.range_;
           }
@@ -96,6 +151,7 @@ class SplitRange {
 
       private:
         Range range_;
+        size_type begin_;  // first value for begin_
         size_type end_;    // final value for end
         size_type step_;   // step by which range limits get increased
     };
@@ -107,6 +163,10 @@ class SplitRange {
 
     iterator end() const {
         return iterator(range_.right(), range_.right(), step_);
+    }
+
+    Range operator [] (int i) const {
+        return *(begin()+i);
     }
 
     size_type step_size() const {

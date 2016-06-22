@@ -6,6 +6,9 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 #endif
+#ifdef WITH_KNL
+#include <hbwmalloc.h>
+#endif
 
 #include "definitions.hpp"
 #include "util.hpp"
@@ -84,8 +87,54 @@ namespace impl {
             free(ptr);
         }
 
-        static constexpr size_type alignment() { return Alignment; }
+        static constexpr size_type alignment() {
+            return Alignment;
+        }
+        static constexpr bool is_malloc_compatible() {
+            return true;
+        }
     };
+
+#ifdef WITH_KNL
+    namespace knl {
+        // allocate memory with alignment specified as a template parameter
+        // returns nullptr on failure
+        template <typename T, size_type alignment=minimum_possible_alignment<T>()>
+        T* hbw_malloc(size_type size) {
+            // double check that alignment is a multiple of sizeof(void*),
+            // which is a prerequisite for posix_memalign()
+            static_assert( !(alignment%sizeof(void*)),
+                    "alignment is not a multiple of sizeof(void*)");
+            static_assert( is_power_of_two(alignment),
+                    "alignment is not a power of two");
+            void *ptr;
+            int result = hbw_posix_memalign(&ptr, alignment, size*sizeof(T));
+            if(result) {
+                return nullptr;
+            }
+            return reinterpret_cast<T*>(ptr);
+        }
+
+        template <size_type Alignment>
+        class HBWPolicy {
+        public:
+            void *allocate_policy(size_type size) {
+                return reinterpret_cast<void *>(hbw_malloc<char, Alignment>(size));
+            }
+
+            void free_policy(void *ptr) {
+                hbw_free(ptr);
+            }
+
+            static constexpr size_type alignment() {
+                return Alignment;
+            }
+            static constexpr bool is_malloc_compatible() {
+                return true;
+            }
+        };
+    }
+#endif
 
 #ifdef WITH_CUDA
     namespace cuda {
@@ -127,6 +176,9 @@ namespace impl {
             static constexpr size_type alignment() {
                 return Alignment;
             }
+            static constexpr bool is_malloc_compatible() {
+                return true;
+            }
         };
 
         class DevicePolicy {
@@ -159,6 +211,9 @@ namespace impl {
             // memory allocated using cudaMalloc has alignment of 256 bytes
             static constexpr size_type alignment() {
                 return 256;
+            }
+            static constexpr bool is_malloc_compatible() {
+                return true;
             }
         };
     } // namespace cuda
@@ -268,6 +323,12 @@ namespace util {
 // helper for generating an aligned allocator
 template <class T, size_t alignment=impl::minimum_possible_alignment<T>()>
 using AlignedAllocator = Allocator<T, impl::AlignedPolicy<alignment>>;
+
+#ifdef WITH_KNL
+// align with 512 bit vector register size
+template <class T, size_t alignment=(512/8)>
+using HBWAllocator = Allocator<T, impl::knl::HBWPolicy<alignment>>;
+#endif
 
 #ifdef WITH_CUDA
 // for pinned allocation set the default alignment to correspond to the

@@ -35,6 +35,7 @@ compile_commands.json
 *.lib
 
 # Executables
+*.knl
 *.exe
 *.out
 *.app
@@ -45,3 +46,9 @@ CMakeFiles
 Makefile
 cmake_install.cmake
 install_manifest.txt
+
+stream.intel
+stream.gnu
+stream.mpi
+stream.omp
+*.optrpt

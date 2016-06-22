@@ -6,6 +6,10 @@
 
 #include "RangeLimits.hpp"
 
+#ifdef USING_TBB
+#include <tbb/tbb.h>
+#endif
+
 namespace memory {
 
 class Range {
@@ -24,6 +28,42 @@ public:
     Range(size_type b, size_type e)
     : left_(b), right_(e)
     {}
+
+    //
+    // make Range compatible with TBB Range concept
+    //
+#ifdef USING_TBB
+    bool empty() const {
+        return right_==left_;
+    }
+
+    bool is_divisible() const {
+        return size()>1;
+    }
+
+    Range(Range& other, tbb::split) {
+        auto m = (other.left() + other.right())/2;
+        left_ = m;
+        right_ = other.right();
+        other.set(other.left(), m);
+    }
+
+    Range(Range& other, tbb::proportional_split p) {
+        auto m = ((other.left()+other.right())*p.right())/(p.left()+p.right());
+        if(m == 0) {
+            m = 1;
+        }
+        else if(m == other.right()) {
+            m = other.right() - 1;
+        }
+
+        left_ = m;
+        right_ = other.right();
+        other.set(other.left(), m);
+    }
+
+    static constexpr bool is_splittable_in_proportion = true;
+#endif // USING_TBB
 
     Range(Range const& other) = default;
 
@@ -143,7 +183,7 @@ private:
     size_type right_;
 };
 
-static std::ostream& operator << (std::ostream& os, const Range& rng) {
+static inline std::ostream& operator << (std::ostream& os, const Range& rng) {
     os << "[" << rng.left() << ":" << rng.right() << "]";
     return os;
 }
