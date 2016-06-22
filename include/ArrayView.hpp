@@ -197,6 +197,8 @@ public:
     using array_reference_type       = ArrayReference<T, Coord>;
     using const_array_reference_type = ConstArrayReference<T, Coord>;
 
+    using const_impl = ConstArrayViewImpl<R, T, Coord>;
+
     using value_type = T;
     using coordinator_type = typename Coord::template rebind<value_type>;
 
@@ -629,11 +631,14 @@ class ArrayReference
     : public ArrayViewImpl<ArrayReference<T, Coord>, T, Coord> {
 public:
     using base = ArrayViewImpl<ArrayReference<T, Coord>, T, Coord>;
+    using const_base = typename base::const_impl;
     using value_type = typename base::value_type;
     using size_type  = typename base::size_type;
 
     using pointer         = typename base::pointer;
     using reference       = typename base::reference;
+
+    using coordinator_type = typename base::coordinator_type;
 
     using base::coordinator_;
     using base::pointer_;
@@ -685,6 +690,27 @@ public:
             base::coordinator_.set(*this, value);
         }
 
+        return *this;
+    }
+
+    // only works with non const vector until we have a const_view type available
+    template <
+        typename Allocator,
+        typename = typename
+            std::enable_if<coordinator_type::is_malloc_compatible()>::type
+     >
+    ArrayReference& operator=(const std::vector<value_type, Allocator>& other)
+    {
+        assert(other.size()==size());
+#if VERBOSE>1
+        std::cerr << util::pretty_printer<ArrayReference>::print(*this)
+                  << "::" << util::blue("operator=") << "(std::vector(" << other.size() << "))"
+                  << std::endl;
+#endif
+        // there is a kink in the coordinator, so use std::copy directly, because we know
+        // that coordinator_type is_malloc_compatible
+        //base::coordinator_.copy(base(other.data(), other.size(), this);
+        std::copy(other.begin(), other.end(), base::data());
         return *this;
     }
 

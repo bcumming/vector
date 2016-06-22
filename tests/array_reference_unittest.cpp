@@ -41,6 +41,24 @@ TEST(ArrayReference, basics) {
         EXPECT_EQ(v1[i], v2[i]);
 }
 
+TEST(ArrayReference, from_std_vector) {
+    using namespace memory;
+
+    using by_value = Array<int, HostCoordinator<int>>;
+
+    using stdvec = std::vector<int>;
+
+    stdvec svec = {5,6,7,8,9};
+
+    // create range by value of length 10
+    by_value v1(10, 0);
+
+    v1(5, 10) = svec;
+
+    for(auto i=5; i<10; ++i)
+        EXPECT_EQ(v1[i], i);
+}
+
 TEST(ArrayReference, metafunctions) {
     using namespace memory;
 

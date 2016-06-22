@@ -135,23 +135,6 @@ public:
         std::copy(from.begin(), from.end(), to.begin());
     }
 
-    /*
-    void copy(const view_type &from, view_type &to) {
-        assert(from.size()==to.size());
-        assert(!from.overlaps(to));
-
-        #ifdef VERBOSE
-        std::cerr << util::type_printer<HostCoordinator>::print()
-                  << "::" + util::blue("copy") << "(" << from.size()
-                  << " [" << from.size()*sizeof(value_type) << " bytes])"
-                  << " " << from.data() << util::yellow(" -> ") << to.data()
-                  << std::endl;
-        #endif
-
-        std::copy(from.begin(), from.end(), to.begin());
-    }
-    */
-
 #ifdef WITH_CUDA
     // copy memory from device to host
     template <class Alloc>
