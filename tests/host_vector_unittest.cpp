@@ -1,6 +1,7 @@
 #include "gtest.h"
 
 #include <algorithm>
+#include <numeric>
 #include <vector>
 
 #include <Vector.hpp>

@@ -1,3 +1,5 @@
+#include <numeric>
+
 #include "gtest.h"
 
 #include <Vector.hpp>
