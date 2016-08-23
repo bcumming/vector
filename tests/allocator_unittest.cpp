@@ -12,14 +12,24 @@ struct packer {
 TEST(Allocator, minimum_possible_alignment) {
     using namespace memory::impl;
     size_t tmp;
+
+    //Smallest allignment in visual studio is 4 (using _aligned_malloc)
+    int smallest_allignment;
+#ifdef  _MSC_VER 
+    smallest_allignment = 4;
+#else 
+    smallest_allignment = 8;
+#endif
+
+
     tmp = minimum_possible_alignment< packer<1> >();
-    EXPECT_EQ(tmp,8);
+    EXPECT_EQ(tmp, smallest_allignment);
     tmp = minimum_possible_alignment< packer<2> >();
-    EXPECT_EQ(tmp,8);
+    EXPECT_EQ(tmp, smallest_allignment);
     tmp = minimum_possible_alignment< packer<3> >();
-    EXPECT_EQ(tmp,8);
+    EXPECT_EQ(tmp, smallest_allignment);
     tmp = minimum_possible_alignment< packer<4> >();
-    EXPECT_EQ(tmp,8);
+    EXPECT_EQ(tmp, smallest_allignment);
     tmp = minimum_possible_alignment< packer<5> >();
     EXPECT_EQ(tmp,8);
     tmp = minimum_possible_alignment< packer<6> >();

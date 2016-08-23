@@ -665,15 +665,31 @@ public:
         typename Other,
         typename = typename std::enable_if< impl::is_array<Other>::value >::type
     >
-    ArrayReference operator = (Other&& other) {
+    ArrayReference& operator = (Other&& other) {
 #ifndef NDEBUG
         assert(other.size() == this->size());
 #endif
 #ifdef VERBOSE
         std::cerr << util::type_printer<ArrayReference>::print()
-                  << "::" << util::blue("operator=") << "(&&"
+                  << "::" << util::blue("operator=") << "(generic &&"
                   << util::type_printer<typename std::decay<Other>::type>::print()
                   << ")" << std::endl;
+#endif
+        base::coordinator_.copy(other, *this);
+
+        return *this;
+    }
+
+
+    ArrayReference& operator = (const ArrayReference& other) {
+#ifndef ndebug
+        assert(other.size() == this->size());
+#endif
+#ifdef verbose
+        std::cerr << util::type_printer<arrayreference>::print()
+            << "::" << util::blue("operator=") << "(&&"
+            << util::type_printer<typename std::decay<other>::type>::print()
+            << ")" << std::endl;
 #endif
         base::coordinator_.copy(other, *this);
 
