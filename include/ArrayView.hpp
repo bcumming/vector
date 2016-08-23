@@ -238,6 +238,18 @@ public:
 #endif
     }
 
+    explicit ArrayViewImpl(ArrayViewImpl& other, size_type n)
+    :   pointer_(other.data())
+    ,   size_(n)
+    {
+        assert(n<=other.size());
+#if VERBOSE>1
+        std::cout << util::green("ArrayView(ArrayViewImpl, size_type)")
+                  << util::pretty_printer<ArrayViewImpl>::print(*this)
+                  << std::endl;
+#endif
+    }
+
     // only works with non const vector until we have a const_view type available
     template <
         typename Allocator,
@@ -444,6 +456,7 @@ template <typename R, typename T, typename Coord>
 class ConstArrayViewImpl {
 public:
     using const_array_reference_type = ConstArrayView<T, Coord>;
+    using array_view_impl_type = ArrayViewImpl<R, T, Coord>;
 
     using value_type = T;
     using coordinator_type = typename Coord::template rebind<value_type>;
@@ -484,6 +497,21 @@ public:
                   << std::endl;
 #endif
     }
+
+    explicit ConstArrayViewImpl(array_view_impl_type& other, size_type n)
+    :   pointer_(other.data())
+    ,   size_(n)
+    {
+        assert(n<=other.size());
+    }
+
+    explicit ConstArrayViewImpl(ConstArrayViewImpl& other, size_type n)
+    :   pointer_(other.data())
+    ,   size_(n)
+    {
+        assert(n<=other.size());
+    }
+
 
     explicit ConstArrayViewImpl() {
         reset();
