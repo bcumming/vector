@@ -7,6 +7,7 @@ set(DRIVER_SOURCES
     allocator_unittest.cpp
     array_view_unittest.cpp
     split_range_unittest.cpp
+    view_alignment_unittest.cpp
     gtest-all.cc
 )
 set(DRIVER_CUDA_SOURCES
