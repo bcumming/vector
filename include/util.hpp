@@ -3,8 +3,11 @@
 #include <sstream>
 #include <vector>
 
+#include <cstdint>
+
 namespace memory {
 namespace util {
+
 static inline std::string pprintf(const char *s) {
     std::string errstring;
     while(*s) {

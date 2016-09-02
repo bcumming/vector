@@ -1,32 +1,39 @@
-#include <cstdint>
-
 #include "gtest.h"
 
 #include <Vector.hpp>
+#include "util.hpp"
 
 using namespace memory;
 
-/// returns
-///     true if ptr is aligned on n byte boundary
-///     false otherwise
-/// notes
-///     - use convert to void* because the standard only guarentees
-///       conversion to uintptr_t for void*
-template <typename T>
-bool test_alignment(const T* ptr, std::size_t n) {
-    return std::uintptr_t( (const void*)(ptr) )%n == 0;
-}
-
-// check that const views work
-TEST(view_alignment, indexed) {
+TEST(view_alignment, from_view) {
     using coordinator = HostCoordinator<int, AlignedAllocator<int, 32>>;
     using array_type = Array<int, coordinator>;
     using view_type = typename array_type::view_type;
 
     array_type v(10);
 
-    // take a view, which will have alignment of sizeof(int) -> 4
-    // this should fail
-    auto view = v(1, 10);
-    EXPECT_TRUE(test_alignment(view.data(), coordinator::alignment()));
+    // take a view that should have the correct alignment
+    auto view = v(8, 10);
+    EXPECT_TRUE(
+        util::is_aligned(view.data(), coordinator::alignment())
+    );
+
+    // take views that have incorrect alignment
+    EXPECT_THROW(auto _ = v(1,10), util::alignment_error); //  4 byte boundary
+    EXPECT_THROW(auto _ = v(2,10), util::alignment_error); //  8 byte boundary
+    EXPECT_THROW(auto _ = v(4,10), util::alignment_error); // 16 byte boundary
+}
+
+TEST(view_alignment, to_view) {
+    using coordinator = HostCoordinator<int, AlignedAllocator<int, 16>>;
+    using array_type = Array<int, coordinator>;
+    using view_type = typename array_type::view_type;
+
+    array_type source(10);
+    array_type target(10);
+
+    // copying the contents from one view to another should not have alignment issues
+    for(auto i=0u; i<target.size()-2; ++i) {
+        EXPECT_NO_THROW(target(i, i+2) = source(i, i+2));
+    }
 }

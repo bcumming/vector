@@ -3,14 +3,31 @@
 #include <iostream>
 #include <string>
 #include <type_traits>
+#include <stdexcept>
 #include <vector>
 
+#include "alignment.hpp"
 #include "definitions.hpp"
 #include "Range.hpp"
 #include "RangeLimits.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace memory{
+#define CHECK_ALIGNMENT_PTR(a, b) \
+    if(!util::is_aligned(a, b)) { \
+        throw ::memory::util::alignment_error( \
+            "can't align pointer " + std::to_string(std::ptrdiff_t(a)) + \
+            " on " + std::to_string(b) + " byte boundary" \
+        ); \
+    }
+
+#define CHECK_ALIGNMENT_OFFSET(T, a, b) \
+    if(!util::is_aligned<T>(a, b)) { \
+        throw ::memory::util::alignment_error( \
+            "can't align offset " + std::to_string(std::ptrdiff_t(a)*sizeof(T)) + \
+            " on " + std::to_string(b) + " byte boundary" \
+        ); \
+    }
 
 // forward declarations
 template<typename T, typename Coord>
@@ -197,6 +214,10 @@ public:
     using array_reference_type       = ArrayReference<T, Coord>;
     using const_array_reference_type = ConstArrayReference<T, Coord>;
 
+    template <size_t A>
+    using aligned_array_reference_type =
+        ArrayReference<R, T, typename Coord::template rebind_alignment<A>>;
+
     using const_impl = ConstArrayViewImpl<R, T, Coord>;
 
     using value_type = T;
@@ -217,6 +238,18 @@ public:
         typename Other,
         typename = typename std::enable_if< impl::is_array<Other>::value >::type
     >
+        /*
+    template <
+        typename Other,
+        typename = typename
+            std::enable_if<
+                impl::is_array<Other>::value &&
+                util::is_aligned<value_type>(
+                        Other::alignment(),
+                        coordinator_type::alignment())
+            >::type
+    >
+        */
     explicit ArrayViewImpl(Other&& other)
         : pointer_ (other.data()) , size_(other.size())
     {
@@ -227,10 +260,11 @@ public:
 #endif
     }
 
-    explicit ArrayViewImpl(pointer ptr, size_type n)
-    :   pointer_(ptr)
-    ,   size_(n)
+    explicit ArrayViewImpl(pointer ptr, size_type n) :
+        pointer_(ptr),
+        size_(n)
     {
+        CHECK_ALIGNMENT_PTR(ptr, alignment());
 #if VERBOSE>1
         std::cout << util::green("ArrayView(pointer, size_type)")
                   << util::pretty_printer<ArrayViewImpl>::print(*this)
@@ -238,9 +272,9 @@ public:
 #endif
     }
 
-    explicit ArrayViewImpl(ArrayViewImpl& other, size_type n)
-    :   pointer_(other.data())
-    ,   size_(n)
+    explicit ArrayViewImpl(ArrayViewImpl& other, size_type n) :
+        pointer_(other.data()),
+        size_(n)
     {
         assert(n<=other.size());
 #if VERBOSE>1
@@ -256,10 +290,11 @@ public:
         typename = typename
             std::enable_if<coordinator_type::is_malloc_compatible()>::type
      >
-    explicit ArrayViewImpl(std::vector<value_type, Allocator>& vec)
-    :   pointer_(vec.data())
-    ,   size_(vec.size())
+    explicit ArrayViewImpl(std::vector<value_type, Allocator>& vec) :
+        pointer_(vec.data()),
+        size_(vec.size())
     {
+        CHECK_ALIGNMENT_PTR(vec.data(), alignment());
 #if VERBOSE>1
         std::cout << util::green("ArrayView(std::vector)")
                   << util::pretty_printer<ArrayViewImpl>::print(*this)
@@ -277,32 +312,38 @@ public:
     ////////////////////////////////////////////////////////////////////////////
 
     /// access half open sub-range using two indexes [left, right)
-    array_reference_type operator()(size_type const& left, size_type const& right) {
+    //template <size_t Alignment=coordinator_type::alignment()>
+    template <size_t A=sizeof(value_type)>
+    aligned_array_reference_type<A> operator()(size_type left, size_type right) {
 #ifndef NDEBUG
         assert(right<=size_ && left<=right);
 #endif
-        return array_reference_type(pointer_+left, right-left);
+        CHECK_ALIGNMENT_OFFSET(value_type, left, A);
+        return aligned_array_reference_type<A>(pointer_+left, right-left);
     }
 
-    const_array_reference_type operator()(size_type const& left, size_type const& right) const {
+    const_array_reference_type operator()(size_type left, size_type right) const {
 #ifndef NDEBUG
         assert(right<=size_ && left<=right);
 #endif
+        CHECK_ALIGNMENT_OFFSET(value_type, left, alignment());
         return array_reference_type(pointer_+left, right-left);
     }
 
     /// access half open sub-range using one index and one-past-the-end [left, end)
-    array_reference_type operator()(size_type const& left, end_type) {
+    array_reference_type operator()(size_type left, end_type) {
 #ifndef NDEBUG
         assert(left<=size_);
 #endif
+        CHECK_ALIGNMENT_OFFSET(value_type, left, alignment());
         return array_reference_type(pointer_+left, size_-left);
     }
 
-    const_array_reference_type operator()(size_type const& left, end_type) const {
+    const_array_reference_type operator()(size_type left, end_type) const {
 #ifndef NDEBUG
         assert(left<=size_);
 #endif
+        CHECK_ALIGNMENT_OFFSET(value_type, left, alignment());
         return array_reference_type(pointer_+left, size_-left);
     }
 
@@ -319,6 +360,8 @@ public:
     array_reference_type operator()(Range const& range) {
         size_type left = range.left();
         size_type right = range.right();
+
+        CHECK_ALIGNMENT_OFFSET(value_type, left, alignment());
 #ifndef NDEBUG
         assert(right<=size_ && left<=right);
 #endif
@@ -328,6 +371,9 @@ public:
     const_array_reference_type operator()(Range const& range) const {
         size_type left = range.left();
         size_type right = range.right();
+
+        CHECK_ALIGNMENT_OFFSET(value_type, left, alignment());
+
 #ifndef NDEBUG
         assert(right<=size_ && left<=right);
 #endif
@@ -338,6 +384,8 @@ public:
         typename Other,
         typename = typename std::enable_if< impl::is_array<Other>::value >::type
     >
+    // TODO
+    // make a unit test first!
     ArrayViewImpl operator=(Other&& other) {
 #if VERBOSE
         std::cerr << util::pretty_printer<ArrayViewImpl>::print(*this)
@@ -474,6 +522,7 @@ public:
         typename Other,
         typename = typename std::enable_if< impl::is_array<Other>::value >::type
     >
+    // TODO
     ConstArrayViewImpl(Other&& other)
         : pointer_ (other.data()) , size_(other.size())
     {
@@ -491,6 +540,7 @@ public:
     :   pointer_(ptr)
     ,   size_(n)
     {
+        CHECK_ALIGNMENT_PTR(ptr, alignment());
 #if VERBOSE
         std::cout << util::green("ConstArrayView(pointer, size_type)")
                   << util::pretty_printer<ConstArrayViewImpl>::print(*this)
@@ -523,18 +573,20 @@ public:
     ////////////////////////////////////////////////////////////////////////////
 
     /// access half open sub-range using two indexes [left, right)
-    const_array_reference_type operator()(size_type const& left, size_type const& right) const {
+    const_array_reference_type operator()(size_type left, size_type right) const {
 #ifndef NDEBUG
         assert(right<=size_ && left<=right);
 #endif
+        CHECK_ALIGNMENT_OFFSET(value_type, left, alignment());
         return const_array_reference_type(pointer_+left, right-left);
     }
 
     /// access half open sub-range using one index and one-past-the-end [left, end)
-    const_array_reference_type operator()(size_type const& left, end_type) const {
+    const_array_reference_type operator()(size_type left, end_type) const {
 #ifndef NDEBUG
         assert(left<=size_);
 #endif
+        CHECK_ALIGNMENT_OFFSET(value_type, left, alignment());
         return const_array_reference_type(pointer_+left, size_-left);
     }
 
@@ -547,6 +599,7 @@ public:
     const_array_reference_type operator()(Range const& range) const {
         size_type left = range.left();
         size_type right = range.right();
+        CHECK_ALIGNMENT_OFFSET(value_type, left, alignment());
 #ifndef NDEBUG
         assert(right<=size_ && left<=right);
 #endif
@@ -557,6 +610,7 @@ public:
         typename Other,
         typename = typename std::enable_if< impl::is_array<Other>::value >::type
     >
+    // TODO
     ConstArrayViewImpl operator=(Other&& other) {
 #if VERBOSE
         std::cerr << util::pretty_printer<ConstArrayViewImpl>::print(*this)
@@ -605,7 +659,7 @@ public:
     // test whether memory overlaps that referenced by other
     template <
         typename Other,
-        typename = typename std::enable_if<impl::is_array<Other>::value>
+        typename = typename std::enable_if< impl::is_array<Other>::value >::type
     >
     bool overlaps(Other&& other) const {
         return( !((this->begin()>=other.end()) || (other.begin()>=this->end())) );
@@ -673,10 +727,15 @@ public:
     using base::size_;
     using base::size;
 
+    using base::alignment;
+
     // Make only one valid constructor, for maintenance reasons.
     // The only place where ArrayReference types are created is in the
     // operator() calls in the ArrayViewImpl, so it is not an issue to have
     // one method for creating References
+    //
+    // note that the checks for correct alignment of ptr are performed in
+    // the constructor for base
     explicit ArrayReference(pointer ptr, size_type n)
         : base(ptr, n)
     {
@@ -691,8 +750,10 @@ public:
     // you can make these return an event type, for synchronization
     template <
         typename Other,
-        typename = typename std::enable_if< impl::is_array<Other>::value >::type
-    >
+        typename = typename
+            std::enable_if< impl::is_array<Other>::value >::type
+            // don't need to check alignment because we are copying
+     >
     ArrayReference operator = (Other&& other) {
 #ifndef NDEBUG
         assert(other.size() == this->size());
@@ -768,13 +829,16 @@ public:
     using base::size_;
     using base::size;
 
+    using base::alignment;
+
     // Make only one valid constructor, for maintenance reasons.
     // The only place where ArrayReference types are created is in the
     // operator() calls in the ArrayViewImpl, so it is not an issue to have
     // one method for creating References
-    explicit ConstArrayReference(const_pointer ptr, size_type n)
-    : base(ptr, n)
+    explicit ConstArrayReference(const_pointer ptr, size_type n) :
+        base(ptr, n)
     {
+        CHECK_ALIGNMENT_PTR(ptr, alignment());
 #if VERBOSE
         std::cout << util::green("ConstArrayReference(pointer, size_type)")
                   << util::pretty_printer<base>::print(*this)

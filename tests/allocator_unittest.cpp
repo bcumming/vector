@@ -96,3 +96,38 @@ TEST(Allocator, padding) {
     EXPECT_EQ( get_padding<double>(64, 7), 1 );
     EXPECT_EQ( get_padding<double>(64, 8), 0 );
 }
+
+TEST(Allocator, rebind_alignment) {
+    {
+        using A = memory::Allocator<char, memory::impl::AlignedPolicy<8>>;
+        EXPECT_EQ(A::alignment(), 8);
+
+        using A2 = A::rebind_alignment<4>;
+        EXPECT_EQ(A2::alignment(), 4);
+
+        using A3 = A::rebind_alignment<1>;
+        EXPECT_EQ(A3::alignment(), 1);
+
+        // this throws a compile time error because we can only allocate memory
+        // that satisifies
+        //    (1) min alignment of sizeof(void*) ... or 8 bytes on 64 bit systems
+        //    (2) alignment is power of 2
+        // of these conditions, it is (1) that is violated here
+
+        //auto ptr = A3().allocate(200);
+    }
+
+    {
+        using A = memory::Allocator<int, memory::impl::AlignedPolicy<8>>;
+        EXPECT_EQ(A::alignment(), 8);
+
+        using A2 = A::rebind_alignment<4>;
+        EXPECT_EQ(A2::alignment(), 4);
+
+        // this would throw a compile time exception because the allocator
+        // must have alignment of at least sizeof(int)
+
+        //using A3 = A::rebind_alignment<1>;
+        //EXPECT_EQ(A3::alignment(), 1);
+    }
+}

@@ -50,7 +50,7 @@ namespace impl {
     // The returned value is in terms of T, not bytes.
     template<typename T>
     size_type
-    get_padding(const size_type alignment, size_type n) {
+    get_padding(size_type alignment, size_type n) {
         // calculate the remaninder in bytes for n items of size sizeof(T)
         auto remainder = (n*sizeof(T)) % alignment;
 
@@ -79,6 +79,9 @@ namespace impl {
     template <size_type Alignment>
     class AlignedPolicy {
     public:
+        template <size_type NewAlignment>
+        using rebind_alignment = AlignedPolicy<NewAlignment>;
+
         void *allocate_policy(size_type size) {
             return reinterpret_cast<void *>(aligned_malloc<char, Alignment>(size));
         }
@@ -118,6 +121,9 @@ namespace impl {
         template <size_type Alignment>
         class HBWPolicy {
         public:
+            template <size_type NewAlignment>
+            using rebind_alignment = HBWPolicy<NewAlignment>;
+
             void *allocate_policy(size_type size) {
                 return reinterpret_cast<void *>(hbw_malloc<char, Alignment>(size));
             }
@@ -141,6 +147,9 @@ namespace impl {
         template <size_type Alignment>
         class PinnedPolicy {
         public:
+            template <size_type NewAlignment>
+            using rebind_alignment = PinnedPolicy<NewAlignment>;
+
             void *allocate_policy(size_type size) {
                 // first allocate memory with the desired alignment
                 void* ptr = reinterpret_cast<void *>
@@ -217,11 +226,18 @@ namespace impl {
             }
         };
     } // namespace cuda
-#endif // #ifdef WITH_CUDA
+
+#endif
+
 } // namespace impl
 
 template<typename T, typename Policy >
 class Allocator : public Policy {
+    static_assert(
+        Policy::alignment()%sizeof(T)==0,
+        "Allocator must for type T must have alignment that is multiple of sizeof(T)"
+    );
+
     using Policy::allocate_policy;
     using Policy::free_policy;
 public:
@@ -235,11 +251,13 @@ public:
     using size_type       = std::size_t;
     using difference_type = std::ptrdiff_t;
 
-public:
     template <typename U>
     using rebind = Allocator<U, Policy>;
 
-public:
+    template <size_t NewAlignment>
+    using rebind_alignment =
+        Allocator<T, typename Policy::template rebind_alignment<NewAlignment>>;
+
     inline explicit Allocator() {}
     inline ~Allocator() {}
     inline explicit Allocator(Allocator const&) {}

@@ -57,6 +57,14 @@ public:
     template <typename Tother>
     using rebind = HostCoordinator<Tother, Allocator>;
 
+    // rebind host_coordinator with another type
+    template <size_t NewAlignment>
+    using rebind_alignment =
+        HostCoordinator<
+            value_type,
+            typename Allocator::template rebind_alignment<NewAlignment>
+        >;
+
     view_type allocate(size_type n) {
         typename Allocator::template rebind<value_type> allocator;
 

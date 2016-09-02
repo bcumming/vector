@@ -171,6 +171,11 @@ public:
     template <typename Tother>
     using rebind = DeviceCoordinator<Tother, Allocator>;
 
+    // the allocator is always aligned on 512 byte boundary
+    // TODO this might need a bit of a clean up at some point
+    template <size_t NewAlignment>
+    using rebind_alignment = DeviceCoordinator;
+
     view_type allocate(size_type n) {
         Allocator allocator;
 

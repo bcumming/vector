@@ -9,7 +9,8 @@ TEST(ArrayReference, basics) {
 
     using by_value = Array<double, HostCoordinator<double>>;
     using by_view  = ArrayView<double, HostCoordinator<double>>;
-    using by_reference = typename by_view::array_reference_type;
+
+    using by_reference = typename by_view::template aligned_array_reference_type<sizeof(double)>;
 
     // create range by value of length 10
     by_value v1(10);
@@ -48,14 +49,15 @@ TEST(ArrayReference, from_std_vector) {
 
     using stdvec = std::vector<int>;
 
-    stdvec svec = {5,6,7,8,9};
+    stdvec svec = {6,7,8,9};
+    EXPECT_TRUE(util::is_aligned(svec.data(), by_value::alignment()));
 
     // create range by value of length 10
     by_value v1(10, 0);
 
-    v1(5, 10) = svec;
+    v1(6, 10) = svec;
 
-    for(auto i=5; i<10; ++i)
+    for(auto i=6; i<10; ++i)
         EXPECT_EQ(v1[i], i);
 }
 
