@@ -512,6 +512,17 @@ public:
         assert(n<=other.size());
     }
 
+    // only works with non const vector until we have a const_view type available
+    template <
+        typename Allocator,
+        typename = typename
+            std::enable_if<coordinator_type::is_malloc_compatible()>::type
+     >
+    explicit ConstArrayViewImpl(const std::vector<value_type, Allocator>& vec) :
+        pointer_(vec.data()),
+        size_(vec.size())
+    {}
+
 
     explicit ConstArrayViewImpl() {
         reset();
