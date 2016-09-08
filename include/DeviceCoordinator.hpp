@@ -29,7 +29,7 @@ namespace util {
                 + type_printer<T>::print()
                 + ", " + type_printer<Allocator>::print() + ">";
             #else
-            return + util::white("DeviceCoordinator")
+            return util::white("DeviceCoordinator")
                 + "<" + type_printer<T>::print() + ">";
             #endif
         }
